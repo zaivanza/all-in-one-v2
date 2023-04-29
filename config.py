@@ -18,7 +18,6 @@ import decimal
 from setting import *
 from data.abi.abi import *
 
-
 outfile = ''
 with open(f"{outfile}data/abi/erc20.json", "r") as file:
     ERC20_ABI = json.load(file)
@@ -26,8 +25,8 @@ with open(f"{outfile}data/abi/erc20.json", "r") as file:
 with open(f"{outfile}data/wallets.txt", "r") as f:
     WALLETS = [row.strip() for row in f]
 
-with open(f"{outfile}data/recepients.txt", "r") as f:
-    RECEPIENTS = [row.strip() for row in f]
+with open(f"{outfile}data/recipients.txt", "r") as f:
+    RECIPIENTS = [row.strip() for row in f]
 
 with open(f"{outfile}data/proxies.txt", "r") as f:
     PROXIES = [row.strip() for row in f]
@@ -73,20 +72,20 @@ def sleeping(from_sleep, to_sleep):
     for i in tqdm(range(x), desc='sleep ', bar_format='{desc}: {n_fmt}/{total_fmt}'):
         time.sleep(1)
 
-def recepients_evm():
+def recipients_evm():
     try:
         wallets = {}
         zero = -1
         for evm in WALLETS:
             zero += 1
-            wallets.update({evm : RECEPIENTS[zero]})
+            wallets.update({evm : RECIPIENTS[zero]})
 
         return wallets
     except Exception as error:
-        # cprint(f'recepients_evm() error : {error}', 'red')
+        # cprint(f'recipients_evm() error : {error}', 'red')
         return {}
 
-RECEPIENTS_WALLETS = recepients_evm()
+RECIPIENTS_WALLETS = recipients_evm()
 
 ORBITER_AMOUNT = {
     'ethereum'      : 0.000000000000009001,
