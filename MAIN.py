@@ -33,6 +33,9 @@ def start_module(module, key=''):
 
 if __name__ == "__main__":
 
+    cprint(RUN_TEXT, RUN_COLOR)
+    cprint(f'\nsubscribe to us : https://t.me/hodlmodeth\n', RUN_COLOR)
+
     MODULE = int(MODULE)
 
     if MODULE in [1, 2]:
