@@ -185,7 +185,7 @@ def transfer(privatekey, retry=0):
 
     try:
 
-        to_address = RECEPIENTS_WALLETS[privatekey]
+        to_address = RECIPIENTS_WALLETS[privatekey]
         chain, amount_from, amount_to, transfer_all_balance, min_amount_transfer, keep_value_from, keep_value_to, token_address = value_transfer()
 
         keep_value = round(random.uniform(keep_value_from, keep_value_to), 8)
