@@ -484,6 +484,7 @@ def okx_withdraw(privatekey, retry=0):
             logger.success(f"withdraw success => {wallet} | {AMOUNT} {SYMBOL}")
             list_send.append(f'{STR_DONE}okx_withdraw')
         else:
+            error = result['msg']
             logger.error(f"withdraw unsuccess => {wallet} | error : {error}")
             list_send.append(f"{STR_CANCEL}okx_withdraw :  {result['msg']}")
 
