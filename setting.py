@@ -130,6 +130,7 @@ def value_transfer():
 
     '''
     вывод (трансфер) монет с кошельков
+    chains : ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | nova | zksync
     '''
 
     chain                = 'arbitrum'   # в какой сети выводить
@@ -149,6 +150,7 @@ def value_1inch_swap():
 
     '''
     свапы на 1inch
+    chains : ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | nova | zksync
     '''
 
     chain               = 'zksync' # в какой сети свапаем
