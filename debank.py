@@ -203,7 +203,7 @@ def round_to(num, digits=3):
 def send_result(get_json, file_name, check_chain, check_coin):
 
 
-    file = open(f'{outfile}results/{file_name}.txt', 'w')
+    file = open(f'{outfile}results/{file_name}.txt', 'w', encoding='utf-8')
 
     with open(f'{outfile}results/{file_name}.csv', 'w', newline='') as csvfile:
         spamwriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
