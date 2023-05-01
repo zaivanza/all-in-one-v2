@@ -617,6 +617,8 @@ def woofi_get_min_amount(chain, from_token, to_token, amount):
 
         if from_token.upper() != to_token.upper():
 
+            cprint(f'{from_token} => {to_token}', 'yellow')
+
             slippage = 0.98
 
             web3 = Web3(Web3.HTTPProvider(DATA[chain]['rpc']))
@@ -637,6 +639,10 @@ def woofi_get_min_amount(chain, from_token, to_token, amount):
         else:
 
             return int(amount)
+    
+    except Exception as error:
+        logger.error(f'error : {error}. return 0')
+        return 0
 
 def woofi_bridge(privatekey, from_chain, to_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, retry=0):
 
