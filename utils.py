@@ -615,26 +615,28 @@ def woofi_get_min_amount(chain, from_token, to_token, amount):
 
     try:
 
-        slippage = 0.98
+        if from_token.upper() != to_token.upper():
 
-        web3 = Web3(Web3.HTTPProvider(DATA[chain]['rpc']))
-        address_contract = web3.to_checksum_address(WOOFI_SWAP_CONTRACTS[chain])
-        contract = web3.eth.contract(address=address_contract, abi=ABI_WOOFI_SWAP)
+            slippage = 0.98
 
-        from_token  = Web3.to_checksum_address(from_token)
-        to_token    = Web3.to_checksum_address(to_token)
+            web3 = Web3(Web3.HTTPProvider(DATA[chain]['rpc']))
+            address_contract = web3.to_checksum_address(WOOFI_SWAP_CONTRACTS[chain])
+            contract = web3.eth.contract(address=address_contract, abi=ABI_WOOFI_SWAP)
 
-        minToAmount = contract.functions.tryQuerySwap(
-            from_token,
-            to_token,
-            amount
-            ).call()
+            from_token  = Web3.to_checksum_address(from_token)
+            to_token    = Web3.to_checksum_address(to_token)
 
-        return int(minToAmount * slippage)
-    
-    except Exception as error:
-        logger.error(f'error : {error}. return 0')
-        return 0
+            minToAmount = contract.functions.tryQuerySwap(
+                from_token,
+                to_token,
+                amount
+                ).call()
+
+            return int(minToAmount * slippage)
+        
+        else:
+
+            return int(amount)
 
 def woofi_bridge(privatekey, from_chain, to_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, retry=0):
 
