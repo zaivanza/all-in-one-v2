@@ -672,7 +672,7 @@ def woofi_bridge(privatekey, from_chain, to_chain, from_token, to_token, swap_al
 
             chainId     = LAYERZERO_CHAINS_ID[to_chain]
 
-            minToAmount = woofi_get_min_amount(to_chain, WOOFI_PATH[to_chain], to_token, amount)
+            minToAmount = int(woofi_get_min_amount(to_chain, WOOFI_PATH[to_chain], to_token, amount) * 0.99)
             bridgeToken = WOOFI_PATH[to_chain]
 
             bridgeToken = Web3.to_checksum_address(bridgeToken)
