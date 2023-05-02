@@ -581,6 +581,7 @@ def orbiter_bridge(privatekey, retry=0):
                         transfer(privatekey, retry+1)
                     else:
                         logger.error(f'{module_str} | tx is failed | {tx_link}')
+                        list_send.append(f'{STR_CANCEL}{module_str} | tx is failed | {tx_link}')
 
             else:
                 logger.error(f"{module_str} : can't bridge : {amount} (amount) < {min_amount_bridge} (min_amount_bridge)")
