@@ -90,8 +90,15 @@ def value_debank():
 def value_exchange():
 
     '''
-    вывод монет с биржи
-    биржи : binance | bybit | kucoin | mexc | huobi
+    withdraw coins from exchange.
+    exchanges : binance | bybit | kucoin | mexc | huobi
+
+    chains : 
+    - binance   : ETH | BEP20 | AVAXC | MATIC | ARBITRUM | OPTIMISM | APT
+    - bybit     : ...
+    - kucoin    : ...
+    - mexc      : ...
+    - huobi     : ...
     '''
 
     exchange    = 'binance' # запиши сюда биржу
@@ -109,6 +116,17 @@ def value_okx():
 
     '''
     выводит только с funding, есть вывод с суб-аккаунтов
+
+    OKX
+    BSC
+    ERC20
+    TRC20
+    Polygon
+    Avalanche C-Chain
+    Avalanche X-Chain
+    Arbitrum one
+    Optimism
+    Fantom
     '''
 
     chain       = 'Arbitrum one' # с какой сети выводить
