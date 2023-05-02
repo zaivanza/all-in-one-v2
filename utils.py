@@ -280,13 +280,16 @@ def transfer(privatekey, retry=0):
 def get_api_call_data(url):
     try:
         try:
-            proxy = random.choice(PROXIES)
+            # proxy = random.choice(PROXIES)
+            proxy = 'http://stakes7493:b44aaf@135.125.155.143:11127'
             proxies = {
                 'http': proxy,
                 'https': proxy,
             }
             call_data = requests.get(url, proxies=proxies)
+            cprint('done', 'green')
         except:
+            cprint('error', 'red')
             call_data = requests.get(url)
 
         if call_data.status_code == 200:
@@ -510,54 +513,22 @@ def okx_withdraw(privatekey, retry=0):
         else:
             list_send.append(f'{STR_CANCEL}okx_withdraw')
 
-def get_orbiter_value(amount_to_bridge, to_chain):
-
-    min_amount_to_bridge = 0.011001
-
-    if amount_to_bridge < 0.10101:
-        decimal.getcontext().prec = 17
-    elif amount_to_bridge > 1.001:
-        decimal.getcontext().prec = 15
-    else:
-        decimal.getcontext().prec = 18
-
-    if amount_to_bridge >= min_amount_to_bridge:
-
-        amount_to_chain     = ORBITER_AMOUNT[to_chain]
-        str_amount_to_chain = ORBITER_AMOUNT_STR[to_chain]
-
-        while True:
-
-            try:
-                amount = random.uniform(0.001, 0.0015)
-                amount = round(amount_to_bridge - amount, 18)
-                amount = round(amount, 14)
-                amount = decimal.Decimal(amount) + decimal.Decimal(amount_to_chain)
-                
-                while True:
-                    # cprint(amount, 'yellow')
-                    if str(amount)[-4:] == str_amount_to_chain:
-                        break
-                    amount = random.uniform(0.0010, 0.0015)
-                    amount = round(amount_to_bridge - amount, 18)
-                    amount = round(amount, 14)
-                    amount = decimal.Decimal(amount) + decimal.Decimal(amount_to_chain)
-
-                break
-
-            except Exception as ex: 
-                logger.error(ex)
-                time.sleep(5)
-
-        return amount
-
-    else:
-        logger.error(f'amount_to_bridge < {min_amount_to_bridge}')
-        return 0
+def get_orbiter_value(base_num, chain):
+    base_num_dec = decimal.Decimal(str(base_num))
+    orbiter_amount_dec = decimal.Decimal(str(ORBITER_AMOUNT[chain]))
+    difference = base_num_dec - orbiter_amount_dec
+    random_offset = decimal.Decimal(str(random.uniform(-0.000000000000001, 0.000000000000001)))
+    result_dec = difference + random_offset
+    orbiter_str = ORBITER_AMOUNT_STR[chain][-4:]
+    result_str = '{:.18f}'.format(result_dec.quantize(decimal.Decimal('0.000000000000000001')))
+    result_str = result_str[:-4] + orbiter_str
+    return result_str
 
 def orbiter_bridge(privatekey, retry=0):
 
     try:
+
+        orbiter_min_bridge = 0.005
 
         from_chain, to_chain, bridge_all_balance, amount_from, amount_to, min_amount_bridge, keep_value_from, keep_value_to = value_orbiter()
 
@@ -571,48 +542,53 @@ def orbiter_bridge(privatekey, retry=0):
         else: amount_to_bridge = round(random.uniform(amount_from, amount_to), 8)
         amount_to_bridge = amount_to_bridge 
 
-        logger.info('getting right amount')
-        amount  = get_orbiter_value(amount_to_bridge, to_chain) # получаем нужный amount
-        value   = intToDecimal(amount, 18)
+        if amount_to_bridge > orbiter_min_bridge:
 
-        web3        = Web3(Web3.HTTPProvider(DATA[from_chain]['rpc']))
-        account     = web3.eth.account.from_key(privatekey)
-        wallet      = account.address
-        chain_id    = web3.eth.chain_id
-        nonce       = web3.eth.get_transaction_count(wallet)
+            amount  = get_orbiter_value(amount_to_bridge, to_chain) # получаем нужный amount
+            value   = intToDecimal(amount, 18)
 
-        if (amount > 0 and amount >= min_amount_bridge):
+            web3        = Web3(Web3.HTTPProvider(DATA[from_chain]['rpc']))
+            account     = web3.eth.account.from_key(privatekey)
+            wallet      = account.address
+            chain_id    = web3.eth.chain_id
+            nonce       = web3.eth.get_transaction_count(wallet)
 
-            contract_txn = {
-                'chainId': chain_id,
-                'nonce': nonce,
-                'to': '0x80C67432656d59144cEFf962E8fAF8926599bCF8',
-                'value': value,
-                'gasPrice': 0,
-            }
+            if (amount > 0 and amount >= min_amount_bridge):
 
-            contract_txn = add_gas_price(web3, contract_txn)
-            contract_txn = add_gas_limit(web3, contract_txn)
-            
-            tx_hash = sign_tx(web3, contract_txn, privatekey)
-            tx_link = f'{DATA[from_chain]["scan"]}/{tx_hash}'
+                contract_txn = {
+                    'chainId': chain_id,
+                    'nonce': nonce,
+                    'to': '0x80C67432656d59144cEFf962E8fAF8926599bCF8',
+                    'value': value,
+                    'gasPrice': 0,
+                }
 
-            status = check_status_tx(from_chain, tx_hash)
-            if status == 1:
-                logger.success(f'{module_str} | {tx_link}')
-                list_send.append(f'{STR_DONE}{module_str}')
+                contract_txn = add_gas_price(web3, contract_txn)
+                contract_txn = add_gas_limit(web3, contract_txn)
+                
+                tx_hash = sign_tx(web3, contract_txn, privatekey)
+                tx_link = f'{DATA[from_chain]["scan"]}/{tx_hash}'
+
+                status = check_status_tx(from_chain, tx_hash)
+                if status == 1:
+                    logger.success(f'{module_str} | {tx_link}')
+                    list_send.append(f'{STR_DONE}{module_str}')
+
+                else:
+                    if retry < RETRY:
+                        logger.info(f'{module_str} | tx is failed, try again in 10 sec | {tx_link}')
+                        sleeping(10, 10)
+                        transfer(privatekey, retry+1)
+                    else:
+                        logger.error(f'{module_str} | tx is failed | {tx_link}')
 
             else:
-                if retry < RETRY:
-                    logger.info(f'{module_str} | tx is failed, try again in 10 sec | {tx_link}')
-                    sleeping(10, 10)
-                    transfer(privatekey, retry+1)
-                else:
-                    logger.error(f'{module_str} | tx is failed | {tx_link}')
+                logger.error(f"{module_str} : can't bridge : {amount} (amount) < {min_amount_bridge} (min_amount_bridge)")
+                list_send.append(f'{STR_CANCEL}{module_str} : {amount} < {min_amount_bridge}')
 
         else:
-            logger.error(f"{module_str} : can't bridge : {amount} (amount) < {min_amount_bridge} (min_amount_bridge)")
-            list_send.append(f'{STR_CANCEL}{module_str} : {amount} < {min_amount_bridge}')
+            logger.error(f"{module_str} : can't bridge : {amount} (amount) < {orbiter_min_bridge} (orbiter_min_bridge)")
+            list_send.append(f'{STR_CANCEL}{module_str} : {amount} < {orbiter_min_bridge}')
 
     except Exception as error:
 
@@ -968,3 +944,4 @@ def exchange_withdraw(privatekey, retry=0):
     except Exception as error:
         logger.error(f"{cex}_withdraw unsuccess => {wallet} | error : {error}")
         list_send.append(f'{STR_CANCEL}{cex}_withdraw')
+
