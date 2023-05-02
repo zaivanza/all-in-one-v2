@@ -588,8 +588,8 @@ def orbiter_bridge(privatekey, retry=0):
                 list_send.append(f'{STR_CANCEL}{module_str} : {amount} < {min_amount_bridge}')
 
         else:
-            logger.error(f"{module_str} : can't bridge : {amount} (amount) < {orbiter_min_bridge} (orbiter_min_bridge)")
-            list_send.append(f'{STR_CANCEL}{module_str} : {amount} < {orbiter_min_bridge}')
+            logger.error(f"{module_str} : can't bridge : {amount_to_bridge} (amount_to_bridge) < {orbiter_min_bridge} (orbiter_min_bridge)")
+            list_send.append(f'{STR_CANCEL}{module_str} : {amount_to_bridge} < {orbiter_min_bridge}')
 
     except Exception as error:
 
@@ -609,7 +609,7 @@ def woofi_get_min_amount(chain, from_token, to_token, amount):
 
             # cprint(f'{chain} : {from_token} => {to_token} | {amount}', 'blue')
 
-            slippage = 0.98
+            slippage = 0.95
 
             web3 = Web3(Web3.HTTPProvider(DATA[chain]['rpc']))
             address_contract = web3.to_checksum_address(WOOFI_SWAP_CONTRACTS[chain])
