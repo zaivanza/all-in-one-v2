@@ -208,7 +208,7 @@ def send_result(get_json, file_name, check_chain, check_coin):
     with open(f'{outfile}results/{file_name}.csv', 'w', newline='') as csvfile:
         spamwriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
 
-        spamwriter.writerow(['№', 'wallet', 'balance $', 'protocols $', 'tokens $', 'nft amount'])
+        spamwriter.writerow(['number', 'wallet', 'balance $', 'protocols $', 'tokens $', 'nft amount'])
 
         all_wallets_value = []
         all_finder_token = []
@@ -275,6 +275,7 @@ def send_result(get_json, file_name, check_chain, check_coin):
             head_table  = ['chain', 'name', 'amount']
             nfts_       = tabulate(nfts, head_table, tablefmt=table_type)
 
+
             cprint(f'\n{zero}. {wallet}\n', 'yellow')
 
             if len(tokens) > 0:
@@ -298,6 +299,7 @@ def send_result(get_json, file_name, check_chain, check_coin):
                 cprint(f'{check_coin} : {finder}\n', 'green')
                 all_finder_token.append(finder)
                 
+
             spamwriter.writerow([zero, wallet, total_value, protocol_value, token_value, sum(nft_amounts)])
 
             all_wallets_value.append(total_value)
@@ -326,9 +328,7 @@ def start_debank():
 
     file_name, check_min_value, check_chain, check_coin, modules, nft_chains = value_debank()
 
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(checker_main(modules, nft_chains, wallets))
-
+    asyncio.run(checker_main(modules, nft_chains, wallets))
     get_json = get_json_data(check_min_value, wallets)
     send_result(get_json, file_name, check_chain, check_coin)
 
