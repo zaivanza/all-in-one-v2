@@ -278,16 +278,29 @@ def transfer(privatekey, retry=0):
             list_send.append(f'{STR_CANCEL}{module_str}')
 
 def get_api_call_data(url):
-    try: 
-        call_data = requests.get(url)
-    except Exception as e:
-        print(e)
-        return get_api_call_data(url)
     try:
-        api_data = call_data.json()
-        return api_data
-    except Exception as e: 
-        print(call_data.text) 
+        try:
+            proxy = random.choice(PROXIES)
+            proxies = {
+                'http': proxy,
+                'https': proxy,
+            }
+            call_data = requests.get(url, proxies=proxies)
+        except:
+            call_data = requests.get(url)
+
+        if call_data.status_code == 200:
+            api_data = call_data.json()
+            return api_data
+        else:
+            logger.info('1inch get_api_call_data() try again')
+            time.sleep(1)
+            return get_api_call_data(url)
+
+    except Exception as error:
+        logger.info(error)
+        time.sleep(3)
+        return get_api_call_data(url)
 
 def inch_swap(privatekey, retry=0):
         
@@ -617,7 +630,7 @@ def woofi_get_min_amount(chain, from_token, to_token, amount):
 
         if from_token.upper() != to_token.upper():
 
-            cprint(f'{from_token} => {to_token}', 'yellow')
+            # cprint(f'{chain} : {from_token} => {to_token} | {amount}', 'blue')
 
             slippage = 0.98
 
@@ -719,7 +732,14 @@ def woofi_bridge(privatekey, from_chain, to_chain, from_token, to_token, swap_al
 
         amount      = intToDecimal(amount_, decimals)
         srcInfos    = get_srcInfos(amount_, from_chain, from_token)
-        dstInfos    = get_dstInfos(srcInfos[3], to_chain, to_token)
+
+        if from_chain == 'bsc':
+            amount_src = decimalToInt(srcInfos[3], 18)
+            amount_src = intToDecimal(amount_src, 6)
+        else:
+            amount_src = srcInfos[3]
+
+        dstInfos    = get_dstInfos(amount_src, to_chain, to_token)
 
         # cprint(f'\nsrcInfos : {srcInfos}\ndstInfos : {dstInfos}', 'blue')
 
@@ -783,7 +803,7 @@ def woofi_bridge(privatekey, from_chain, to_chain, from_token, to_token, swap_al
                 if retry < RETRY:
                     logger.info(f'try again | {wallet}')
                     time.sleep(3)
-                    # woofi_bridge(privatekey, from_chain, to_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, retry+1)
+                    woofi_bridge(privatekey, from_chain, to_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, retry+1)
                 else:
                     list_send.append(f'{STR_CANCEL}{module_str}')
 
@@ -796,7 +816,7 @@ def woofi_bridge(privatekey, from_chain, to_chain, from_token, to_token, swap_al
         if retry < RETRY:
             logger.info(f'try again in 10 sec.')
             sleeping(10, 10)
-            woofi_bridge(privatekey, retry+1)
+            woofi_bridge(privatekey, from_chain, to_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, retry+1)
         else:
             list_send.append(f'{STR_CANCEL}{module_str}')
 
@@ -815,6 +835,9 @@ def woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, a
         address_contract = web3.to_checksum_address(
             WOOFI_SWAP_CONTRACTS[from_chain]
         )
+
+        from_token = Web3.to_checksum_address(from_token)
+        to_token    = Web3.to_checksum_address(to_token)
 
         if from_token != '':
             token_contract, decimals, symbol = check_data_token(web3, from_token)
@@ -878,7 +901,7 @@ def woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, a
                 if retry < RETRY:
                     logger.info(f'try again | {wallet}')
                     time.sleep(3)
-                    # woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, retry+1)
+                    woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, retry+1)
                 else:
                     list_send.append(f'{STR_CANCEL}{module_str}')
 
@@ -891,7 +914,7 @@ def woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, a
         if retry < RETRY:
             logger.info(f'try again in 10 sec.')
             sleeping(10, 10)
-            woofi_bridge(privatekey, retry+1)
+            woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, retry+1)
         else:
             list_send.append(f'{STR_CANCEL}{module_str}')
 
@@ -945,4 +968,3 @@ def exchange_withdraw(privatekey, retry=0):
     except Exception as error:
         logger.error(f"{cex}_withdraw unsuccess => {wallet} | error : {error}")
         list_send.append(f'{STR_CANCEL}{cex}_withdraw')
-
