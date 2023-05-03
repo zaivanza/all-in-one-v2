@@ -522,7 +522,7 @@ def get_orbiter_value(base_num, chain):
     orbiter_str = ORBITER_AMOUNT_STR[chain][-4:]
     result_str = '{:.18f}'.format(result_dec.quantize(decimal.Decimal('0.000000000000000001')))
     result_str = result_str[:-4] + orbiter_str
-    return result_str
+    return decimal.Decimal(result_str)
 
 def orbiter_bridge(privatekey, retry=0):
 
