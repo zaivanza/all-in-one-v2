@@ -289,7 +289,7 @@ def get_api_call_data(url):
             call_data = requests.get(url, proxies=proxies)
             # cprint('done', 'green')
         except:
-            cprint('error', 'red')
+            # cprint('error', 'red')
             call_data = requests.get(url)
 
         if call_data.status_code == 200:
@@ -545,6 +545,7 @@ def orbiter_bridge(privatekey, retry=0):
         if amount_to_bridge > orbiter_min_bridge:
 
             amount  = get_orbiter_value(amount_to_bridge, to_chain) # получаем нужный amount
+            # cprint(amount, 'yellow')
             value   = intToDecimal(amount, 18)
 
             web3        = Web3(Web3.HTTPProvider(DATA[from_chain]['rpc']))
