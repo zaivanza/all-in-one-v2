@@ -287,7 +287,7 @@ def get_api_call_data(url):
                 'https': proxy,
             }
             call_data = requests.get(url, proxies=proxies)
-            cprint('done', 'green')
+            # cprint('done', 'green')
         except:
             cprint('error', 'red')
             call_data = requests.get(url)
