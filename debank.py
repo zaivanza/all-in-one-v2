@@ -36,7 +36,7 @@ async def get_debank(session, address, type_, chain=''):
                 'protocol'  : f'https://api.debank.com/portfolio/project_list?user_addr={address}',
             }
 
-            proxy = PROXIES[random.randint(0,len(PROXIES)-1)]
+            proxy = random.choice(PROXIES)
 
             async with session.get(urls[type_], proxy=proxy, timeout=10) as resp:
 
