@@ -64,6 +64,8 @@ def check_status_tx(chain, tx_hash):
 def add_gas_limit(web3, contract_txn):
 
     try:
+        value = contract_txn['value']
+        contract_txn['value'] = 0
         pluser = [1.3, 1.7]
         gasLimit = web3.eth.estimate_gas(contract_txn)
         contract_txn['gas'] = int(gasLimit * random.uniform(pluser[0], pluser[1]))
@@ -72,6 +74,7 @@ def add_gas_limit(web3, contract_txn):
         contract_txn['gas'] = random.randint(2000000, 3000000)
         logger.info(f"estimate_gas error : {error}. random gasLimit : {contract_txn['gas']}")
 
+    contract_txn['value'] = value
     return contract_txn
 
 def add_gas_price(web3, contract_txn):
@@ -532,10 +535,9 @@ def orbiter_bridge(privatekey, retry=0):
 
         from_chain, to_chain, bridge_all_balance, amount_from, amount_to, min_amount_bridge, keep_value_from, keep_value_to = value_orbiter()
 
-        keep_value = round(random.uniform(keep_value_from, keep_value_to), 8)
-
         module_str = f'orbiter_bridge : {from_chain} => {to_chain}'
 
+        keep_value = round(random.uniform(keep_value_from, keep_value_to), 8)
         if bridge_all_balance == True: amount = check_balance(privatekey, from_chain, '') - keep_value
         else: amount = round(random.uniform(amount_from, amount_to), 8)
         amount_to_bridge = amount 
@@ -564,6 +566,9 @@ def orbiter_bridge(privatekey, retry=0):
 
                 contract_txn = add_gas_price(web3, contract_txn)
                 contract_txn = add_gas_limit(web3, contract_txn)
+
+                gas_gas = int(contract_txn['gas'] * contract_txn['gasPrice'])
+                contract_txn['value'] = contract_txn['value'] - gas_gas
                 
                 tx_hash = sign_tx(web3, contract_txn, privatekey)
                 tx_link = f'{DATA[from_chain]["scan"]}/{tx_hash}'
@@ -763,6 +768,11 @@ def woofi_bridge(privatekey, from_chain, to_chain, from_token, to_token, swap_al
             contract_txn = add_gas_price(web3, contract_txn)
             contract_txn = add_gas_limit(web3, contract_txn)
 
+            if swap_all_balance == True:
+                if from_token == '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE':
+                    gas_gas = int(contract_txn['gas'] * contract_txn['gasPrice'])
+                    contract_txn['value'] = contract_txn['value'] - gas_gas
+
             tx_hash = sign_tx(web3, contract_txn, privatekey)
             tx_link = f'{DATA[from_chain]["scan"]}/{tx_hash}'
 
@@ -861,6 +871,11 @@ def woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, a
 
             contract_txn = add_gas_price(web3, contract_txn)
             contract_txn = add_gas_limit(web3, contract_txn)
+
+            if swap_all_balance == True:
+                if from_token == '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE':
+                    gas_gas = int(contract_txn['gas'] * contract_txn['gasPrice'])
+                    contract_txn['value'] = contract_txn['value'] - gas_gas
 
             tx_hash = sign_tx(web3, contract_txn, privatekey)
             tx_link = f'{DATA[from_chain]["scan"]}/{tx_hash}'
