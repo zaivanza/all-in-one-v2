@@ -536,11 +536,9 @@ def orbiter_bridge(privatekey, retry=0):
 
         module_str = f'orbiter_bridge : {from_chain} => {to_chain}'
 
-        if bridge_all_balance == True: 
-            amount_to_bridge = check_balance(privatekey, from_chain, '')
-            amount_to_bridge = amount_to_bridge - random.uniform(0.002, 0.003) - keep_value
-        else: amount_to_bridge = round(random.uniform(amount_from, amount_to), 8)
-        amount_to_bridge = amount_to_bridge 
+        if bridge_all_balance == True: amount = check_balance(privatekey, from_chain, '') - keep_value
+        else: amount = round(random.uniform(amount_from, amount_to), 8)
+        amount_to_bridge = amount 
 
         if amount_to_bridge > orbiter_min_bridge:
 
