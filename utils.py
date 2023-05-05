@@ -77,6 +77,19 @@ def add_gas_limit(web3, contract_txn):
     contract_txn['value'] = value
     return contract_txn
 
+def add_gas_limit_layerzero(web3, contract_txn):
+
+    try:
+        pluser = [1.3, 1.7]
+        gasLimit = web3.eth.estimate_gas(contract_txn)
+        contract_txn['gas'] = int(gasLimit * random.uniform(pluser[0], pluser[1]))
+        # logger.info(f"gasLimit : {contract_txn['gas']}")
+    except Exception as error: 
+        contract_txn['gas'] = random.randint(2000000, 3000000)
+        logger.info(f"estimate_gas error : {error}. random gasLimit : {contract_txn['gas']}")
+
+    return contract_txn
+
 def add_gas_price(web3, contract_txn):
 
     try:
@@ -723,7 +736,7 @@ def woofi_bridge(privatekey, from_chain, to_chain, from_token, to_token, swap_al
 
         dstInfos    = get_dstInfos(amount_src, to_chain, to_token)
 
-        # cprint(f'\nsrcInfos : {srcInfos}\ndstInfos : {dstInfos}', 'blue')
+        cprint(f'\nsrcInfos : {srcInfos}\ndstInfos : {dstInfos}', 'blue')
 
         # если токен не нативный, тогда проверяем апрув и если он меньше нужного, делаем апруваем
         if from_token != '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE':
@@ -767,7 +780,7 @@ def woofi_bridge(privatekey, from_chain, to_chain, from_token, to_token, swap_al
             )
 
             contract_txn = add_gas_price(web3, contract_txn)
-            contract_txn = add_gas_limit(web3, contract_txn)
+            contract_txn = add_gas_limit_layerzero(web3, contract_txn)
 
             if swap_all_balance == True:
                 if from_token == '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE':
