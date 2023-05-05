@@ -736,7 +736,7 @@ def woofi_bridge(privatekey, from_chain, to_chain, from_token, to_token, swap_al
 
         dstInfos    = get_dstInfos(amount_src, to_chain, to_token)
 
-        cprint(f'\nsrcInfos : {srcInfos}\ndstInfos : {dstInfos}', 'blue')
+        # cprint(f'\nsrcInfos : {srcInfos}\ndstInfos : {dstInfos}', 'blue')
 
         # если токен не нативный, тогда проверяем апрув и если он меньше нужного, делаем апруваем
         if from_token != '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE':
