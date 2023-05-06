@@ -147,48 +147,54 @@ def check_allowance(chain, token_address, wallet, spender):
 
 # ============== modules ==============
 
-def approve_(privatekey, chain, token_address, spender, retry=0):
+def approve_(amount, privatekey, chain, token_address, spender, retry=0):
 
     try:
 
         web3 = Web3(Web3.HTTPProvider(DATA[chain]['rpc']))
         # web3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
+        spender = Web3.to_checksum_address(spender)
+
         wallet = web3.eth.account.from_key(privatekey).address
         contract, decimals, symbol = check_data_token(web3, token_address)
 
         module_str = f'approve : {symbol}'
 
-        contract_txn = contract.functions.approve(
-            spender,
-            115792089237316195423570985008687907853269984665640564039457584007913129639935
-            ).build_transaction(
-            {
-                "chainId": web3.eth.chain_id,
-                "from": wallet,
-                "nonce": web3.eth.get_transaction_count(wallet),
-                'gasPrice': 0,
-                'gas': 0,
-                "value": 0
-            }
-        )
+        allowance_amount = check_allowance(chain, token_address, wallet, spender)
+        
+        if amount > allowance_amount:
 
-        contract_txn = add_gas_price(web3, contract_txn)
-        contract_txn = add_gas_limit(web3, contract_txn)
+            contract_txn = contract.functions.approve(
+                spender,
+                115792089237316195423570985008687907853269984665640564039457584007913129639935
+                ).build_transaction(
+                {
+                    "chainId": web3.eth.chain_id,
+                    "from": wallet,
+                    "nonce": web3.eth.get_transaction_count(wallet),
+                    'gasPrice': 0,
+                    'gas': 0,
+                    "value": 0
+                }
+            )
 
-        tx_hash = sign_tx(web3, contract_txn, privatekey)
-        tx_link = f'{DATA[chain]["scan"]}/{tx_hash}'
+            contract_txn = add_gas_price(web3, contract_txn)
+            contract_txn = add_gas_limit(web3, contract_txn)
 
-        status = check_status_tx(chain, tx_hash)
+            tx_hash = sign_tx(web3, contract_txn, privatekey)
+            tx_link = f'{DATA[chain]["scan"]}/{tx_hash}'
 
-        if status == 1:
-            logger.success(f"{module_str} | {tx_link}")
-        else:
-            logger.error(f"{module_str} | tx is failed | {tx_link}")
-            if retry < RETRY:
-                logger.info(f"try again in 10 sec.")
-                sleeping(10, 10)
-                approve_(privatekey, chain, token_address, spender, retry+1)
+            status = check_status_tx(chain, tx_hash)
+
+            if status == 1:
+                logger.success(f"{module_str} | {tx_link}")
+            else:
+                logger.error(f"{module_str} | tx is failed | {tx_link}")
+                if retry < RETRY:
+                    logger.info(f"try again in 10 sec.")
+                    sleeping(10, 10)
+                    approve_(privatekey, chain, token_address, spender, retry+1)
 
     except Exception as error:
         logger.error(f'{error}')
@@ -364,10 +370,8 @@ def inch_swap(privatekey, retry=0):
 
         # если токен не нативный, тогда проверяем апрув и если он меньше нужного, делаем апруваем
         if from_token_address != '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE':
-            allowance_amount = check_allowance(chain, from_token_address, wallet, spender)
-            if amount_to_swap > allowance_amount:
-                approve_(privatekey, chain, from_token_address, spender)
-                sleeping(5, 5)
+            approve_(amount_to_swap, privatekey, chain, from_token_address, spender)
+            sleeping(5, 5)
 
         _1inchurl = f'https://api.1inch.io/v{inch_version}.0/{chain_id}/swap?fromTokenAddress={from_token_address}&toTokenAddress={to_token_address}&amount={amount_to_swap}&fromAddress={wallet}&slippage={slippage}'
         json_data = get_api_call_data(_1inchurl)
@@ -740,10 +744,8 @@ def woofi_bridge(privatekey, from_chain, to_chain, from_token, to_token, swap_al
 
         # если токен не нативный, тогда проверяем апрув и если он меньше нужного, делаем апруваем
         if from_token != '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE':
-            allowance_amount = check_allowance(from_chain, from_token, wallet, WOOFI_BRIDGE_CONTRACTS[from_chain])
-            if amount > allowance_amount:
-                approve_(privatekey, from_chain, from_token, WOOFI_BRIDGE_CONTRACTS[from_chain])
-                sleeping(5, 10)
+            approve_(amount, privatekey, from_chain, from_token, WOOFI_BRIDGE_CONTRACTS[from_chain])
+            sleeping(5, 10)
 
         while True:
             try:
@@ -851,10 +853,8 @@ def woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, a
 
         # если токен не нативный, тогда проверяем апрув и если он меньше нужного, делаем апруваем
         if from_token != '':
-            allowance_amount = check_allowance(from_chain, from_token, wallet, WOOFI_SWAP_CONTRACTS[from_chain])
-            if amount > allowance_amount:
-                approve_(privatekey, from_chain, from_token, WOOFI_SWAP_CONTRACTS[from_chain])
-                sleeping(5, 10)
+            approve_(amount, privatekey, from_chain, from_token, WOOFI_SWAP_CONTRACTS[from_chain])
+            sleeping(5, 10)
 
         if to_token     == '' : to_token = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
         if from_token   == '' : 
