@@ -193,7 +193,7 @@ def value_orbiter():
 
     '''
     бридж нативных токенов через https://www.orbiter.finance/
-    chains : zksync | polygon | ethereum | bsc | arbitrum | optimism | fantom | polygon_zkevm | nova
+    chains : zksync | polygon | ethereum | bsc | arbitrum | optimism | polygon_zkevm | nova
 
     минимальный бридж : 0.005
     '''
