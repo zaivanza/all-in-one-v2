@@ -1,6 +1,12 @@
-from utils import *
-from web3_checker import *
-from debank import *
+import random
+
+from termcolor import cprint
+
+from config import RUN_TEXT, RUN_COLOR, WALLETS
+from debank import start_debank
+from setting import RANDOM_WALLETS
+from utils import exchange_withdraw, okx_withdraw, transfer, inch_swap, orbiter_bridge, woofi, evm_wallet, list_send
+from web3_checker import web3_check
 
 
 def start_module(module, key=''):
