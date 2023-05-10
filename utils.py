@@ -302,8 +302,7 @@ def transfer(privatekey, retry=0):
 def get_api_call_data(url):
     try:
         try:
-            # proxy = random.choice(PROXIES)
-            proxy = 'http://stakes7493:b44aaf@135.125.155.143:11127'
+            proxy = random.choice(PROXIES)
             proxies = {
                 'http': proxy,
                 'https': proxy,
