@@ -300,31 +300,42 @@ def transfer(privatekey, retry=0):
             list_send.append(f'{STR_CANCEL}{module_str}')
 
 def get_api_call_data(url):
-    try:
-        try:
-            proxy = random.choice(PROXIES)
-            proxies = {
-                'http': proxy,
-                'https': proxy,
-            }
-            call_data = requests.get(url, proxies=proxies)
-            # cprint('done', 'green')
-        except:
-            # cprint('error', 'red')
-            call_data = requests.get(url)
 
+    # пробуем с прокси, если будет ошибка прокси, отправит запрос без прокси
+    try:
+        proxy = random.choice(PROXIES)
+        proxies = {
+            'http'  : proxy,
+            'https' : proxy,
+        }
+        call_data = requests.get(url, proxies=proxies)
+    except:
+        call_data = requests.get(url)
+
+
+    if call_data.status_code == 200:
+        api_data = call_data.json()
+        return api_data
+    elif call_data.status_code == 400:
+        api_data = call_data.json()
+        logger.error(api_data['description'])
+        time.sleep(1)
+        return get_api_call_data(url)
+    else:
+
+        call_data = requests.get(url)
         if call_data.status_code == 200:
             api_data = call_data.json()
             return api_data
-        else:
-            logger.info('1inch get_api_call_data() try again')
+        elif call_data.status_code == 400:
+            api_data = call_data.json()
+            logger.error(api_data['description'])
             time.sleep(1)
             return get_api_call_data(url)
-
-    except Exception as error:
-        logger.info(error)
-        time.sleep(3)
-        return get_api_call_data(url)
+        else:
+            logger.error(f'response_status : {call_data.status_code}')
+            time.sleep(1)
+            return get_api_call_data(url)
 
 def inch_swap(privatekey, retry=0):
         
