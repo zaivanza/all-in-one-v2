@@ -319,7 +319,7 @@ def send_result(get_json, file_name, check_chain, check_coin):
     cprint(f'результаты записаны в файлы : {outfile}{file_name}.csv и {outfile}{file_name}.txt\n', 'blue')
 
 
-def start_debank():
+def start_debank(*args):
 
     wallets = []
     for key in WALLETS:

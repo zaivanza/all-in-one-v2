@@ -1,22 +1,3 @@
-'''
-
-MODULE :
-
-1. web3_checker
-2. debank checker
-3. exchange withdraw : вывод с биржи
-4. okx withdraw : вывод с okx
-5. transfer : вывод монет с кошельков
-6. 1inch_swap : свапы на 1inch
-7. orbiter finance : bridge нативных токенов
-8. woofi : свапы / бриджи
-
-'''
-
-# ========================
-MODULE = 1 # выбираем модуль от 1 до 8
-# ========================
-
 IS_SLEEP        = True # True / False. True если нужно поставить sleep между кошельками
 # от скольки до скольки спим между кошельками (секунды) :
 SLEEP_FROM      = 100 

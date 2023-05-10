@@ -129,7 +129,7 @@ def send_result(min_balance, file_name, wallets_):
         cprint(f'\nРезультаты записаны в файл : {outfile}results/{file_name}.csv\n', 'blue')
 
 
-def web3_check():
+def web3_check(*args):
 
     cprint(f'\nSTART WEB3 CHECKER\n', 'green')
 
