@@ -1,1 +1,0 @@
-http://login:password@ip:port (формат, удали эту строку)

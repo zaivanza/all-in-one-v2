@@ -7,8 +7,7 @@ from termcolor import cprint
 from web3 import Web3, AsyncHTTPProvider
 from web3.eth import AsyncEth
 
-from config import *
-from setting import value_web3_checker
+from config import settings, DATA, ERC20_ABI, decimalToInt, outfile, WALLETS
 
 RESULT = {
     'wallets': [],
@@ -62,7 +61,7 @@ async def check_balance(web3, private_key, chain, address_contract):
             wallet = web3.eth.account.from_key(private_key)
             wallet = wallet.address
         except Exception as error:
-            logger.error(str(error))
+            # logger.error(str(error))
             wallet = private_key
 
         if address_contract == '':  # eth
@@ -153,7 +152,10 @@ def web3_check(*args):
         wallet = evm_wallet(key)
         wallets.append(wallet)
 
-    chain, address_contract, min_balance, file_name = value_web3_checker()
+    chain = settings['value_web3_checker']['chain']
+    address_contract = settings['value_web3_checker']['address_contract']
+    min_balance = settings['value_web3_checker']['min_balance']
+    file_name = settings['value_web3_checker']['file_name']
 
     asyncio.run(main(chain, address_contract, wallets))
 

@@ -1,12 +1,18 @@
 import random
-
 from termcolor import cprint
 
-from config import RUN_TEXT, RUN_COLOR, WALLETS
+from config import RUN_TEXT, RUN_COLOR, WALLETS, settings, sleeping
 from debank import start_debank
-from setting import RANDOM_WALLETS
-from utils import exchange_withdraw, okx_withdraw, transfer, inch_swap, orbiter_bridge, woofi, evm_wallet, list_send
 from web3_checker import web3_check
+from utils import (exchange_withdraw,
+                   okx_withdraw,
+                   transfer,
+                   inch_swap,
+                   orbiter_bridge,
+                   woofi,
+                   evm_wallet,
+                   list_send,
+                   send_msg)
 
 
 def start_module(module, key=''):
@@ -47,22 +53,21 @@ MODULE:
         except ValueError:
             pass
 
-    if RANDOM_WALLETS:
+    if settings['RANDOM_WALLETS']:
         random.shuffle(WALLETS)
 
     total_wallets_len = len(WALLETS)
-    for index, key in enumerate(WALLETS):
-        index += 1
-
+    for index, key in enumerate(WALLETS, start=1):
         wallet = evm_wallet(key)
         list_send.append(f'{index}/{total_wallets_len} : {wallet}\n')
         cprint(f'\n{index}/{total_wallets_len} : {wallet}\n', 'white')
 
         start_module(MODULE, key)
 
-        if TG_BOT_SEND:
+        if settings['TELEGRAM']['tg_bot_send']:
             send_msg()  # отправляем результат в телеграм
         list_send.clear()
 
-        if IS_SLEEP:
-            sleeping(SLEEP_FROM, SLEEP_TO)
+        if settings['IS_SLEEP']:
+            sleeping(settings['SLEEP_FROM'],
+                     settings['SLEEP_TO'])

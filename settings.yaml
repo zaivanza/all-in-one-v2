@@ -1,0 +1,162 @@
+# Флаг, указывающий, нужно ли использовать задержку между кошельками.
+IS_SLEEP: true  # Если True, то будет использоваться задержка. Если False, то нет.
+
+# Время задержки между кошельками, указанное в секундах.
+SLEEP_FROM: 100  # Минимальное время задержки.
+SLEEP_TO: 300  # Максимальное время задержки.
+
+# Флаг, указывающий, нужно ли перемешивать кошельки.
+RANDOM_WALLETS: false  # Если True, то кошельки будут перемешиваться. Если False, то нет.
+RETRY: 0  # Количество попыток в случае ошибки или сбоя.
+
+# Флаг, указывающий, нужно ли отправлять результаты в телеграмм-бота.
+TELEGRAM:
+  tg_bot_send: false  # Если true, то результаты будут отправляться. Если false, то нет.
+  tg_token: ""  # Токен телеграмм-бота.
+  tg_id: 0  # Идентификатор твоего телеграмма.
+
+
+# Словарь, содержащий API-ключи для разных бирж.
+# Если вы не используете определенную биржу, вы можете оставить ее поля пустыми.
+CEX_KEYS:
+  binance:
+    api_key: ""
+    api_secret: ""
+  mexc:
+    api_key: ""
+    api_secret: ""
+  kucoin:
+    api_key: ""
+    api_secret: ""
+    passphras: ""
+  huobi:
+    api_key: ""
+    api_secret: ""
+  bybit:
+    api_key: ""
+    api_secret: ""
+  okx:
+    api_key: ""
+    api_secret: ""
+    passphras: ""
+
+
+# Настройки для чекера монет через Web3, который проверяет баланс 1 монеты в конкретной сети.
+value_web3_checker:
+  chain: 'arbitrum'  # Сеть, в которой смотрим баланс монеты.
+  address_contract: ''  # Адрес контракта монеты. Если монета является нативной, то поле должно быть пустым.
+  min_balance: 0  # Минимальный баланс, при котором кошелек будет помечен. По умолчанию равен 0.
+  file_name: 'web3_balances'   # Имя файла, в который будут сохраняться данные. Файл создается автоматически.
+
+
+# Чекер баланса через debank, смотрит все сети, протоколы и нфт
+debank_checker:
+# Какие модули включены. Если какой-то модуль не нужен, закомментируй (#) его.
+# Модуль nft самый долгий, по ненадобности лучше его отключать
+  modules:
+    - token  # смотрит монеты
+#    - nft  # смотрит нфт
+    - protocol  # смотрит протоколы
+
+  nft_chains:   # В каких сетях смотрим нфт. Если какая-то сеть не нужна, закомментируй (#) ее
+    - op
+    - eth
+#    - arb
+#    - matic
+#    - bsc
+
+  check_min_value: 5  # $. если баланс монеты / протокола будет меньше этого числа, монета / протокол не будут записаны в файл
+  check_chain: 'ARB'  # в какой сети ищем монету (отдельно выделит ее баланс)
+  check_coin: 'ETH'  # какую монету ищем (отдельно выделит ее баланс)
+  file_name: 'debank'  # Имя файла в который будем сохранять данные. Создается сам
+
+
+# Шаблон для вывода монет с биржи
+# exchanges: binance, bybit, kucoin, mexc, huobi
+# chains: ETH, BEP20, AVAXC, MATIC, ARBITRUM, OPTIMISM, APT
+withdraw_coins:
+  exchange: binance  # выбрать биржу
+  chain: BEP20  # в какой сети выводим монеты
+  symbol: USDT  # какую монету выводим
+  amount_from: 13  # выводить монеты от этой суммы
+  amount_to: 20  # выводить монеты до этой суммы
+
+
+# выводит только с funding, есть вывод с суб-аккаунтов
+value_okx:
+  chain: Arbitrum one  # с какой сети выводить
+  symbol: ETH  # какую монету выводить
+  amount_from: 0.1  # выводим от
+  amount_to: 0.2  # выводим до
+  fee: 0.0001 # комиссия на вывод
+  SUB_ACC: true  # True если нужно выводить с суб-аккаунтов
+
+
+# Вывод (трансфер) монет с кошельков
+# chains : ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | nova | zksync
+value_transfer:
+  chain: arbitrum  # в какой сети выводить
+  token_address: ""  # пусто если нативный токен сети
+  amount_from: 1  # от какого кол-ва монет делаем трансфер
+  amount_to: 2  # до какого кол-ва монет делаем трансфер
+  transfer_all_balance: false  # True / False. если True, тогда выводим весь баланс
+  min_amount_transfer: 0  # если баланс будет меньше этого числа, выводить не будет
+  keep_value_from: 0  # от скольки монет оставляем на кошельке (работает только при : transfer_all_balance : True)
+  keep_value_to: 0  # до скольки монет оставляем на кошельке (работает только при : transfer_all_balance : True)
+
+
+
+#  Свапы на 1inch.
+#  chains: ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | nova | zksync
+value_1inch_swap:
+  chain: "zksync"  # В какой сети свапаем.
+  from_token_address: ""  # Пусто если нативный токен сети.
+  to_token_address: "0x3355df6d4c9c3035724fd0e3914de96a5a83aaf4"  # Пусто если нативный токен сети.
+
+  amount_from: 0.0001  # От какого кол-ва монет свапаем.
+  amount_to: 0.0002  # До какого кол-ва монет свапаем.
+
+  swap_all_balance: False  # True / False. Если True, тогда свапаем весь баланс.
+  min_amount_swap: 0  # Если баланс будет меньше этого числа, свапать не будет.
+  keep_value_from: 0  # От скольки монет оставляем на кошельке (работает только при : swap_all_balance : True).
+  keep_value_to: 0  # До скольки монет оставляем на кошельке (работает только при : swap_all_balance : True).
+
+  slippage: 3  # Слиппейдж, дефолт от 1 до 3.
+
+  divider_zksync: 3  # На сколько делим gasLimit в zksync. Советую ставить 3-4. Исполняется только на zksync.
+
+
+
+#  бридж нативных токенов через https://www.orbiter.finance/
+#  chains : zksync | polygon | ethereum | bsc | arbitrum | optimism | polygon_zkevm | nova
+#  минимальный бридж : 0.005
+value_orbiter:
+  from_chain: 'arbitrum'  # с какой сети берем монеты для бриджа
+  to_chain: 'zksync'  # в какую сеть делаем бридж
+
+  amount_from: 0.015  # от какого кол-ва монет делаем бридж
+  amount_to: 0.02  # до какого кол-ва монет делаем бридж
+
+  bridge_all_balance: False  # True / False. если True, тогда бриджим весь баланс
+  min_amount_bridge: 0.01  # если баланс будет меньше этого числа, бриджить не будет
+  keep_value_from: 0  # от скольки монет оставляем на кошельке (работает только при : bridge_all_balance : True)
+  keep_value_to: 0  # до скольки монет оставляем на кошельке (работает только при : bridge_all_balance : True)
+
+
+#  свап / бридж на https://fi.woo.org/ (бриджи идут через layerzero)
+#  chains : avalanche | polygon | ethereum | bsc | arbitrum | optimism | fantom
+value_woofi:
+  from_chain: 'arbitrum'  # с какой сети
+  to_chain: 'bsc'  # в какую сеть
+  
+  from_token: ''  # пусто, если используется нативный токен сети
+  to_token: ''  # пусто, если используется нативный токен сети
+  
+  amount_from: 2  # от какого кол-ва from_token свапаем
+  amount_to: 3  # до какого кол-ва from_token свапаем
+  
+  swap_all_balance: False  # True / False. Если True, то свапаем весь баланс
+  min_amount_swap: 0  # если баланс будет меньше этого числа, свапать не будет
+  keep_value_from: 0  # от скольки монет оставляем на кошельке (работает только при : swap_all_balance : True)
+  keep_value_to: 0  # до скольки монет оставляем на кошельке (работает только при : swap_all_balance : True)
+

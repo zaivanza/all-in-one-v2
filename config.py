@@ -1,4 +1,6 @@
-import json, time
+import yaml
+import json
+import time
 import random
 from tqdm import tqdm
 
@@ -14,6 +16,10 @@ with open(f"{outfile}data/recipients.txt", "r") as f:
 
 with open(f"{outfile}data/proxies.txt", "r") as f:
     PROXIES = [row.strip() for row in f]
+
+# Load the settings from the YAML file
+with open('settings.yaml', 'r', encoding='utf-8') as f:
+    settings = yaml.safe_load(f)
 
 # меняем рпс на свои
 DATA = {
@@ -65,7 +71,7 @@ def recipients_evm():
     try:
         wallets = {}
         zero = -1
-        for evm in WALLETS:
+        for evm in wallets:
             zero += 1
             wallets.update({evm: RECIPIENTS[zero]})
 

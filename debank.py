@@ -9,8 +9,7 @@ from tabulate import tabulate
 from termcolor import cprint
 from web3 import Web3
 
-from config import DATA, PROXIES, outfile, WALLETS
-from setting import value_debank
+from config import DATA, PROXIES, outfile, settings, WALLETS
 
 get_result = {
     'token': {},
@@ -322,7 +321,12 @@ def start_debank(*args):
         wallet = evm_wallet(key)
         wallets.append(wallet)
 
-    file_name, check_min_value, check_chain, check_coin, modules, nft_chains = value_debank()
+    file_name = settings['debank_checker']['file_name']
+    check_min_value = settings['debank_checker']['check_min_value']
+    check_chain = settings['debank_checker']['check_chain']
+    check_coin = settings['debank_checker']['check_coin']
+    modules = settings['debank_checker']['modules']
+    nft_chains = settings['debank_checker']['nft_chains']
 
     asyncio.run(checker_main(modules, nft_chains, wallets))
     get_json = get_json_data(check_min_value, wallets)
