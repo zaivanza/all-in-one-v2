@@ -4,6 +4,8 @@ import math
 import random
 
 import aiohttp
+from aiohttp.client_exceptions import InvalidURL
+
 from loguru import logger
 from tabulate import tabulate
 from termcolor import cprint
@@ -70,9 +72,13 @@ async def get_debank(session, address, type_, chain=''):
                     # logger.info(f'resp.status = {resp.status}, try again in {sleep} sec.')
                     await asyncio.sleep(sleep)
 
-        except Exception as error:
-            logger.info(f'{address} | {type_} : {error}')
+        except InvalidURL as error:
+            logger.info(f'Invalid proxy URL {error}')
             await asyncio.sleep(3)
+
+        # except Exception as error:
+        #     logger.info(f'{address} | {type_} : {error}')
+        #     await asyncio.sleep(3)
 
 
 async def checker_main(modules, nft_chains, wallets):

@@ -128,7 +128,7 @@ value_1inch_swap:
 
 
 #  бридж нативных токенов через https://www.orbiter.finance/
-#  chains : zksync | polygon | ethereum | bsc | arbitrum | optimism | polygon_zkevm | nova
+#  chains : zksync | polygon | ethereum | bsc | arbitrum | optimism | polygon_zkevm | nova | starknet
 #  минимальный бридж : 0.005
 value_orbiter:
   from_chain: 'arbitrum'  # с какой сети берем монеты для бриджа

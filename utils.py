@@ -11,10 +11,11 @@ import telebot
 from loguru import logger
 from web3 import Web3
 
-from config import DATA, ERC20_ABI, decimalToInt, sleeping, RECIPIENTS_WALLETS, intToDecimal, STR_DONE, STR_CANCEL, \
+from config import DATA, ERC20_ABI, decimalToInt, sleeping, RECIPIENTS_WALLETS, intToDecimal, \
     PROXIES, ORBITER_AMOUNT, ORBITER_AMOUNT_STR, WOOFI_SWAP_CONTRACTS, WOOFI_PATH, LAYERZERO_CHAINS_ID, \
-    WOOFI_BRIDGE_CONTRACTS, settings
+    WOOFI_BRIDGE_CONTRACTS, settings, ORBITER_MAKER, STARKNET_WALLETS, CONTRACTS_ORBITER_TO_STARKNET
 from data.abi.abi import ABI_WOOFI_SWAP, ABI_WOOFI_BRIDGE
+
 list_send = []
 
 
@@ -214,14 +215,14 @@ def approve_(amount, private_key, chain, token_address, spender, retry=0):
                 logger.success(f"{module_str} | {tx_link}")
             else:
                 logger.error(f"{module_str} | tx is failed | {tx_link}")
-                if retry < RETRY:
+                if retry < settings['RETRY']:
                     logger.info(f"try again in 10 sec.")
                     sleeping(10, 10)
                     approve_(private_key, chain, token_address, spender, retry + 1)
 
     except Exception as error:
         logger.error(f'{error}')
-        if retry < RETRY:
+        if retry < settings['RETRY']:
             logger.info(f'try again in 10 sec.')
             sleeping(10, 10)
             approve_(private_key, chain, token_address, spender, retry + 1)
@@ -306,9 +307,9 @@ def transfer(private_key, retry=0):
             status = check_status_tx(chain, tx_hash)
             if status == 1:
                 logger.success(f'{module_str} | {tx_link}')
-                list_send.append(f'{STR_DONE}{module_str}')
+                list_send.append(f'{module_str}')
             else:
-                if retry < RETRY:
+                if retry < settings['RETRY']:
                     logger.info(f'{module_str} | tx is failed, try again in 10 sec | {tx_link}')
                     sleeping(10, 10)
                     transfer(private_key, retry + 1)
@@ -318,17 +319,17 @@ def transfer(private_key, retry=0):
         else:
             logger.error(
                 f"{module_str} : can't transfer : {amount} (amount) < {min_amount_transfer} (min_amount_transfer)")
-            list_send.append(f'{STR_CANCEL}{module_str} : {amount} < {min_amount_transfer}')
+            list_send.append(f'{module_str} : {amount} < {min_amount_transfer}')
 
     except Exception as error:
 
         logger.error(f'{module_str} | {error}')
-        if retry < RETRY:
+        if retry < settings['RETRY']:
             logger.info(f'try again | {wallet}')
             sleeping(10, 10)
             transfer(private_key, retry + 1)
         else:
-            list_send.append(f'{STR_CANCEL}{module_str}')
+            list_send.append(f'{module_str}')
 
 
 def get_api_call_data(url):
@@ -453,32 +454,32 @@ def inch_swap(private_key, retry=0):
 
             if status == 1:
                 logger.success(f'{module_str} | {tx_link}')
-                list_send.append(f'{STR_DONE}{module_str}')
+                list_send.append(f'{module_str}')
             else:
                 logger.error(f'{module_str} | tx is failed | {tx_link}')
-                if retry < RETRY:
+                if retry < settings['RETRY']:
                     logger.info(f'try again in 10 sec.')
                     sleeping(10, 10)
                     inch_swap(private_key, retry + 1)
 
         else:
             logger.error(f"module_str : can't swap : {amount} (amount) < {min_amount_swap} (min_amount_swap)")
-            list_send.append(f'{STR_CANCEL} module_str : {amount} < {min_amount_swap}')
+            list_send.append(f' module_str : {amount} < {min_amount_swap}')
 
     except KeyError:
         logger.error(json_data['description'])
         module_str = f'1inch_swap'
-        list_send.append(f'{STR_CANCEL}{module_str}')
+        list_send.append(f'{module_str}')
 
     except Exception as error:
         module_str = f'1inch_swap'
         logger.error(f'{module_str} | error : {error}')
-        if retry < RETRY:
+        if retry < settings['RETRY']:
             logger.info(f'try again in 10 sec.')
             sleeping(10, 10)
             inch_swap(private_key, retry + 1)
         else:
-            list_send.append(f'{STR_CANCEL}{module_str}')
+            list_send.append(f'{module_str}')
 
 
 def okx_data(api_key, secret_key, pass_phras, request_path="/api/v5/account/balance?ccy=USDT", body='', meth="GET"):
@@ -592,51 +593,50 @@ def okx_withdraw(private_key, retry=0):
 
         if result['code'] == '0':
             logger.success(f"withdraw success => {wallet} | {AMOUNT} {symbol}")
-            list_send.append(f'{STR_DONE}okx_withdraw')
+            list_send.append(f'okx_withdraw')
         else:
             error = result['msg']
             logger.error(f"withdraw unsuccess => {wallet} | error : {error}")
-            list_send.append(f"{STR_CANCEL}okx_withdraw :  {result['msg']}")
+            list_send.append(f"okx_withdraw :  {result['msg']}")
 
     except Exception as error:
         logger.error(f"withdraw unsuccess => {wallet} | error : {error}")
-        if retry < RETRY:
+        if retry < settings['RETRY']:
             logger.info(f"try again in 10 sec. => {wallet}")
             sleeping(10, 10)
             okx_withdraw(private_key, retry + 1)
         else:
-            list_send.append(f'{STR_CANCEL}okx_withdraw')
+            list_send.append(f'okx_withdraw')
+
 
 def check_orbiter_limits(from_chain, to_chain):
-
     orbiter_ids = {
-        'ethereum'      : '1',
-        'optimism'      : '7',
-        'bsc'           : '15',
-        'arbitrum'      : '2',
-        'nova'          : '16',
-        'polygon'       : '6',
-        'polygon_zkevm' : '17',
-        'zksync'        : '14',
-        'zksync_lite'   : '3',
-        'starknet'      : '4',
+        'ethereum': '1',
+        'optimism': '7',
+        'bsc': '15',
+        'arbitrum': '2',
+        'nova': '16',
+        'polygon': '6',
+        'polygon_zkevm': '17',
+        'zksync': '14',
+        'zksync_lite': '3',
+        'starknet': '4',
     }
 
-    from_maker  = orbiter_ids[from_chain]
-    to_maker    = orbiter_ids[to_chain]
+    from_maker = orbiter_ids[from_chain]
+    to_maker = orbiter_ids[to_chain]
 
     maker_x_maker = f'{from_maker}-{to_maker}'
 
     for maker in ORBITER_MAKER:
 
-
         if maker_x_maker == maker:
-
-            min_bridge  = ORBITER_MAKER[maker]['ETH-ETH']['minPrice']
-            max_bridge  = ORBITER_MAKER[maker]['ETH-ETH']['maxPrice']
-            fees        = ORBITER_MAKER[maker]['ETH-ETH']['tradingFee']
+            min_bridge = ORBITER_MAKER[maker]['ETH-ETH']['minPrice']
+            max_bridge = ORBITER_MAKER[maker]['ETH-ETH']['maxPrice']
+            fees = ORBITER_MAKER[maker]['ETH-ETH']['tradingFee']
 
             return min_bridge, max_bridge, fees
+
 
 def get_orbiter_value(base_num, chain):
     base_num_dec = decimal.Decimal(str(base_num))
@@ -676,7 +676,7 @@ def orbiter_bridge(private_key, retry=0):
             amount = round(random.uniform(amount_from, amount_to), 8)
         amount_to_bridge = amount
 
-        amount = get_orbiter_value(amount_to_bridge, to_chain) # получаем нужный amount
+        amount = get_orbiter_value(amount_to_bridge, to_chain)  # получаем нужный amount
 
         if (amount > min_bridge and amount < max_bridge):
 
@@ -693,18 +693,23 @@ def orbiter_bridge(private_key, retry=0):
 
                 if to_chain == 'starknet':
 
-                    starknet_address = STARKNET_WALLETS[privatekey]
-                    if starknet_address[:3] == '0x0': starknet_wallet = f'030{starknet_address[3:]}'
-                    else                            : starknet_wallet = f'030{starknet_address[2:]}'
+                    starknet_address = STARKNET_WALLETS[private_key]
+                    if starknet_address[:3] == '0x0':
+                        starknet_wallet = f'030{starknet_address[3:]}'
+                    else:
+                        starknet_wallet = f'030{starknet_address[2:]}'
 
                     starknet_wallet = bytes.fromhex(starknet_wallet)
 
-                    contract = web3.eth.contract(address=Web3.to_checksum_address(CONTRACTS_ORBITER_TO_STARKNET[from_chain]), abi=ABI_ORBITER_TO_STARKNET)
+                    contract = web3.eth.contract(
+                        address=Web3.to_checksum_address(CONTRACTS_ORBITER_TO_STARKNET[from_chain]),
+                        abi=ABI_ORBITER_TO_STARKNET
+                    )
 
                     contract_txn = contract.functions.transfer(
-                            '0xE4eDb277e41dc89aB076a1F049f4a3EfA700bCE8', # _to
-                            starknet_wallet
-                        ).build_transaction(
+                        '0xE4eDb277e41dc89aB076a1F049f4a3EfA700bCE8',  # _to
+                        starknet_wallet
+                    ).build_transaction(
                         {
                             'chainId': chain_id,
                             "from": wallet,
@@ -739,43 +744,43 @@ def orbiter_bridge(private_key, retry=0):
                 status = check_status_tx(from_chain, tx_hash)
                 if status == 1:
                     logger.success(f'{module_str} | {tx_link}')
-                    list_send.append(f'{STR_DONE}{module_str}')
+                    list_send.append(f'{module_str}')
 
                 else:
-                    if retry < RETRY:
+                    if retry < settings['RETRY']:
                         logger.info(f'{module_str} | tx is failed, try again in 10 sec | {tx_link}')
                         sleeping(10, 10)
                         transfer(private_key, retry + 1)
                     else:
                         logger.error(f'{module_str} | tx is failed | {tx_link}')
-                        list_send.append(f'{STR_CANCEL}{module_str} | tx is failed | {tx_link}')
+                        list_send.append(f'{module_str} | tx is failed | {tx_link}')
 
             else:
                 logger.error(
                     f"{module_str} : can't bridge : {amount} (amount) < {min_amount_bridge} (min_amount_bridge)")
-                list_send.append(f'{STR_CANCEL}{module_str} : {amount} < {min_amount_bridge}')
+                list_send.append(f'{module_str} : {amount} < {min_amount_bridge}')
 
         else:
 
             if amount < min_bridge:
 
                 logger.error(f"{module_str} : can't bridge : {amount} (amount) < {min_bridge} (min_bridge)")
-                list_send.append(f'{STR_CANCEL}{module_str} : {amount} < {min_bridge}')
+                list_send.append(f'{module_str} : {amount} < {min_bridge}')
 
             elif amount > max_bridge:
 
                 logger.error(f"{module_str} : can't bridge : {amount} (amount) > {max_bridge} (max_bridge)")
-                list_send.append(f'{STR_CANCEL}{module_str} : {amount} > {max_bridge}')
+                list_send.append(f'{module_str} : {amount} > {max_bridge}')
 
     except Exception as error:
 
         logger.error(f'{module_str} | {error}')
-        if retry < RETRY:
+        if retry < settings['RETRY']:
             logger.info(f'try again | {wallet}')
             sleeping(10, 10)
             transfer(private_key, retry + 1)
         else:
-            list_send.append(f'{STR_CANCEL}{module_str}')
+            list_send.append(f'{module_str}')
 
 
 def woofi_get_min_amount(chain, from_token, to_token, amount):
@@ -953,34 +958,34 @@ def woofi_bridge(private_key, from_chain, to_chain, from_token, to_token, swap_a
             status = check_status_tx(from_chain, tx_hash)
             if status == 1:
                 logger.success(f'{module_str} | {tx_link}')
-                list_send.append(f'{STR_DONE}{module_str}')
+                list_send.append(f'{module_str}')
                 time.sleep(3)
 
             else:
                 logger.error(f'{module_str} | tx is failed | {tx_link}')
 
                 retry += 1
-                if retry < RETRY:
+                if retry < settings['RETRY']:
                     logger.info(f'try again | {wallet}')
                     time.sleep(3)
                     woofi_bridge(private_key, from_chain, to_chain, from_token, to_token, swap_all_balance, amount_from,
                                  amount_to, min_amount_swap, keep_value_from, keep_value_to, retry + 1)
                 else:
-                    list_send.append(f'{STR_CANCEL}{module_str}')
+                    list_send.append(f'{module_str}')
 
         else:
             logger.error(f"{module_str} : can't bridge : {amount_} (amount) < {min_amount_swap} (min_amount_swap)")
-            list_send.append(f'{STR_CANCEL}{module_str} : {amount_} < {min_amount_swap}')
+            list_send.append(f'{module_str} : {amount_} < {min_amount_swap}')
 
     except Exception as error:
         logger.error(f'{module_str} | error : {error}')
-        if retry < RETRY:
+        if retry < settings['RETRY']:
             logger.info(f'try again in 10 sec.')
             sleeping(10, 10)
             woofi_bridge(private_key, from_chain, to_chain, from_token, to_token, swap_all_balance, amount_from,
                          amount_to, min_amount_swap, keep_value_from, keep_value_to, retry + 1)
         else:
-            list_send.append(f'{STR_CANCEL}{module_str}')
+            list_send.append(f'{module_str}')
 
 
 def woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap,
@@ -1060,33 +1065,33 @@ def woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, a
             status = check_status_tx(from_chain, tx_hash)
             if status == 1:
                 logger.success(f'{module_str} | {tx_link}')
-                list_send.append(f'{STR_DONE}{module_str}')
+                list_send.append(f'{module_str}')
                 time.sleep(3)
 
             else:
                 logger.error(f'{module_str} | tx is failed | {tx_link}')
                 retry += 1
-                if retry < RETRY:
+                if retry < settings['RETRY']:
                     logger.info(f'try again | {wallet}')
                     time.sleep(3)
                     woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, amount_from, amount_to,
                                min_amount_swap, keep_value_from, keep_value_to, retry + 1)
                 else:
-                    list_send.append(f'{STR_CANCEL}{module_str}')
+                    list_send.append(f'{module_str}')
 
         else:
             logger.error(f"{module_str} : can't swap : {amount_} (amount) < {min_amount_swap} (min_amount_swap)")
-            list_send.append(f'{STR_CANCEL}{module_str} : {amount_} < {min_amount_swap}')
+            list_send.append(f'{module_str} : {amount_} < {min_amount_swap}')
 
     except Exception as error:
         logger.error(f'{module_str} | error : {error}')
-        if retry < RETRY:
+        if retry < settings['RETRY']:
             logger.info(f'try again in 10 sec.')
             sleeping(10, 10)
             woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, amount_from, amount_to,
                        min_amount_swap, keep_value_from, keep_value_to, retry + 1)
         else:
-            list_send.append(f'{STR_CANCEL}{module_str}')
+            list_send.append(f'{module_str}')
 
 
 def woofi(private_key):
@@ -1134,7 +1139,7 @@ def exchange_withdraw(private_key, retry=0):
         }
 
         if cex in ['kucoin']:
-            dict_['password'] = CEX_KEYS[cex]['password']
+            dict_['password'] = settings['CEX_KEYS'][cex]['password']
 
         account = ccxt.__dict__[cex](dict_)
 
@@ -1148,9 +1153,8 @@ def exchange_withdraw(private_key, retry=0):
             }
         )
         logger.success(f"{cex}_withdraw success => {wallet} | {amount_} {symbol}")
-        list_send.append(f'{STR_DONE}{cex}_withdraw')
+        list_send.append(f'{cex}_withdraw')
 
     except Exception as error:
         logger.error(f"{cex}_withdraw unsuccess => {wallet} | error : {error}")
-        list_send.append(f'{STR_CANCEL}{cex}_withdraw')
-
+        list_send.append(f'{cex}_withdraw')
