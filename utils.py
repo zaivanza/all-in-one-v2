@@ -543,6 +543,37 @@ def okx_withdraw(privatekey, retry=0):
         else:
             list_send.append(f'{STR_CANCEL}okx_withdraw')
 
+def check_orbiter_limits(from_chain, to_chain):
+
+    orbiter_ids = {
+        'ethereum'      : '1',
+        'optimism'      : '7',
+        'bsc'           : '15',
+        'arbitrum'      : '2',
+        'nova'          : '16',
+        'polygon'       : '6',
+        'polygon_zkevm' : '17',
+        'zksync'        : '14',
+        'zksync_lite'   : '3',
+        'starknet'      : '4',
+    }
+
+    from_maker  = orbiter_ids[from_chain]
+    to_maker    = orbiter_ids[to_chain]
+
+    maker_x_maker = f'{from_maker}-{to_maker}'
+
+    for maker in ORBITER_MAKER:
+
+
+        if maker_x_maker == maker:
+            
+            min_bridge  = ORBITER_MAKER[maker]['ETH-ETH']['minPrice']
+            max_bridge  = ORBITER_MAKER[maker]['ETH-ETH']['maxPrice']
+            fees        = ORBITER_MAKER[maker]['ETH-ETH']['tradingFee']
+
+            return min_bridge, max_bridge, fees
+
 def get_orbiter_value(base_num, chain):
     base_num_dec = decimal.Decimal(str(base_num))
     orbiter_amount_dec = decimal.Decimal(str(ORBITER_AMOUNT[chain]))
@@ -558,20 +589,22 @@ def orbiter_bridge(privatekey, retry=0):
 
     try:
 
-        orbiter_min_bridge = 0.005
-
         from_chain, to_chain, bridge_all_balance, amount_from, amount_to, min_amount_bridge, keep_value_from, keep_value_to = value_orbiter()
 
         module_str = f'orbiter_bridge : {from_chain} => {to_chain}'
+
+        min_bridge, max_bridge, fees = check_orbiter_limits(from_chain, to_chain)
+        min_bridge = min_bridge + fees
 
         keep_value = round(random.uniform(keep_value_from, keep_value_to), 8)
         if bridge_all_balance == True: amount = check_balance(privatekey, from_chain, '') - keep_value
         else: amount = round(random.uniform(amount_from, amount_to), 8)
         amount_to_bridge = amount 
 
-        if amount_to_bridge > orbiter_min_bridge:
+        amount  = get_orbiter_value(amount_to_bridge, to_chain) # получаем нужный amount
 
-            amount  = get_orbiter_value(amount_to_bridge, to_chain) # получаем нужный amount
+        if (amount > min_bridge and amount < max_bridge):
+
             # cprint(amount, 'yellow')
             value   = intToDecimal(amount, 18)
 
@@ -581,15 +614,42 @@ def orbiter_bridge(privatekey, retry=0):
             chain_id    = web3.eth.chain_id
             nonce       = web3.eth.get_transaction_count(wallet)
 
-            if (amount > 0 and amount >= min_amount_bridge):
+            if amount >= min_amount_bridge:
 
-                contract_txn = {
-                    'chainId': chain_id,
-                    'nonce': nonce,
-                    'to': '0x80C67432656d59144cEFf962E8fAF8926599bCF8',
-                    'value': value,
-                    'gasPrice': 0,
-                }
+                if to_chain == 'starknet':
+
+                    starknet_address = STARKNET_WALLETS[privatekey]
+                    if starknet_address[:3] == '0x0': starknet_wallet = f'030{starknet_address[3:]}'
+                    else                            : starknet_wallet = f'030{starknet_address[2:]}'
+
+                    starknet_wallet = bytes.fromhex(starknet_wallet) 
+
+                    contract = web3.eth.contract(address=Web3.to_checksum_address(CONTRACTS_ORBITER_TO_STARKNET[from_chain]), abi=ABI_ORBITER_TO_STARKNET)
+
+                    contract_txn = contract.functions.transfer(
+                            '0xE4eDb277e41dc89aB076a1F049f4a3EfA700bCE8', # _to
+                            starknet_wallet
+                        ).build_transaction(
+                        {
+                            'chainId': chain_id,
+                            "from": wallet,
+                            "nonce": nonce,
+                            "value": value,
+                            'gas': 0,
+                            'gasPrice': 0
+                        }
+                    )
+
+                else:
+
+                    contract_txn = {
+                        'chainId': chain_id,
+                        'nonce': nonce,
+                        'to': '0x80C67432656d59144cEFf962E8fAF8926599bCF8',
+                        'value': value,
+                        'gas': 0,
+                        'gasPrice': 0
+                    }
 
                 contract_txn = add_gas_price(web3, contract_txn)
                 contract_txn = add_gas_limit(web3, contract_txn)
@@ -597,7 +657,7 @@ def orbiter_bridge(privatekey, retry=0):
                 if bridge_all_balance == True:
                     gas_gas = int(contract_txn['gas'] * contract_txn['gasPrice'])
                     contract_txn['value'] = contract_txn['value'] - gas_gas
-                
+
                 tx_hash = sign_tx(web3, contract_txn, privatekey)
                 tx_link = f'{DATA[from_chain]["scan"]}/{tx_hash}'
 
@@ -620,8 +680,16 @@ def orbiter_bridge(privatekey, retry=0):
                 list_send.append(f'{STR_CANCEL}{module_str} : {amount} < {min_amount_bridge}')
 
         else:
-            logger.error(f"{module_str} : can't bridge : {amount_to_bridge} (amount_to_bridge) < {orbiter_min_bridge} (orbiter_min_bridge)")
-            list_send.append(f'{STR_CANCEL}{module_str} : {amount_to_bridge} < {orbiter_min_bridge}')
+
+            if amount < min_bridge:
+
+                logger.error(f"{module_str} : can't bridge : {amount} (amount) < {min_bridge} (min_bridge)")
+                list_send.append(f'{STR_CANCEL}{module_str} : {amount} < {min_bridge}')
+
+            elif amount > max_bridge:
+
+                logger.error(f"{module_str} : can't bridge : {amount} (amount) > {max_bridge} (max_bridge)")
+                list_send.append(f'{STR_CANCEL}{module_str} : {amount} > {max_bridge}')
 
     except Exception as error:
 
