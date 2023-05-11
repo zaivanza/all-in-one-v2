@@ -8,7 +8,7 @@
 4. okx_withdraw : вывод с биржи okx + в подарок вывод с субов. отдельным модулем из-за функции вывода с суб-аккаунтов.
 5. transfer : вывод монет с кошельков в evm сетях (метамаск).
 6. 1inch : свапы на 1inch во всех сетях, включая zksync era.
-7. [orbiter](https://www.orbiter.finance/) : бридж eth во всех сетях, включая zksync era. во всех, кроме starknet и zksync lite.
+7. [orbiter](https://www.orbiter.finance/) : бридж eth во всех сетях, включая zksync era и starknet. чтобы бриджит на starknet, нужно добавить адреса кошельков старкнета в файл `starknet_address.txt`.
 8. [woofi](https://fi.woo.org/) : бриджи и свапы. бридж проходит через stargate (layerzero). универсален, доступны все монеты и сети, которые там есть. 
 
 Дополнительная информация :
