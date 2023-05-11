@@ -193,7 +193,7 @@ def value_orbiter():
 
     '''
     бридж нативных токенов через https://www.orbiter.finance/
-    chains : zksync | polygon | ethereum | bsc | arbitrum | optimism | polygon_zkevm | nova
+    chains : zksync | polygon | ethereum | bsc | arbitrum | optimism | polygon_zkevm | nova | starknet
 
     минимальный бридж : 0.005
     '''
@@ -205,7 +205,7 @@ def value_orbiter():
     amount_to           = 0.02 # до какого кол-ва монет делаем бридж
 
     bridge_all_balance  = False         # True / False. если True, тогда бриджим весь баланс
-    min_amount_bridge   = 0.01          # если баланс будет меньше этого числа, выводить не будет
+    min_amount_bridge   = 0             # если баланс будет меньше этого числа, выводить не будет
     keep_value_from     = 0             # от скольки монет оставляем на кошельке (работает только при : bridge_all_balance = True)
     keep_value_to       = 0             # до скольки монет оставляем на кошельке (работает только при : bridge_all_balance = True)
 
