@@ -22,11 +22,17 @@ outfile = ''
 with open(f"{outfile}data/abi/erc20.json", "r") as file:
     ERC20_ABI = json.load(file)
 
+with open(f"{outfile}data/abi/orbiter_maker.json", "r") as file:
+    ORBITER_MAKER = json.load(file)
+
 with open(f"{outfile}data/wallets.txt", "r") as f:
     WALLETS = [row.strip() for row in f]
 
 with open(f"{outfile}data/recipients.txt", "r") as f:
     RECIPIENTS = [row.strip() for row in f]
+
+with open(f"{outfile}data/starknet_address.txt", "r") as f:
+    STARKNET_ADDRESS = [row.strip() for row in f]
 
 with open(f"{outfile}data/proxies.txt", "r") as f:
     PROXIES = [row.strip() for row in f]
@@ -53,9 +59,6 @@ DATA = {
 
     'zksync'        : {'rpc': 'https://mainnet.era.zksync.io', 'scan': 'https://explorer.zksync.io/tx', 'token': 'ETH'},
 }
-
-STR_DONE    = '✅ ' 
-STR_CANCEL  = '❌ '
 
 def intToDecimal(qty, decimal):
     return int(qty * int("".join(["1"] + ["0"]*decimal)))
@@ -87,6 +90,22 @@ def recipients_evm():
 
 RECIPIENTS_WALLETS = recipients_evm()
 
+def starknet_wallets():
+    try:
+        wallets = {}
+        zero = -1
+        for evm in WALLETS:
+            zero += 1
+            wallets.update({evm : STARKNET_ADDRESS[zero]})
+
+        return wallets
+    except Exception as error:
+        # cprint(f'recipients_evm() error : {error}', 'red')
+        return {}
+    
+STARKNET_WALLETS = starknet_wallets()
+
+
 ORBITER_AMOUNT = {
     'ethereum'      : 0.000000000000009001,
     'optimism'      : 0.000000000000009007,
@@ -96,6 +115,7 @@ ORBITER_AMOUNT = {
     'polygon'       : 0.000000000000009006,
     'polygon_zkevm' : 0.000000000000009017,
     'zksync'        : 0.000000000000009014,
+    'zksync_lite'   : 0.000000000000009003,
     'starknet'      : 0.000000000000009004,
 }
 
@@ -108,8 +128,23 @@ ORBITER_AMOUNT_STR = {
     'polygon'       : '9006',
     'polygon_zkevm' : '9017',
     'zksync'        : '9014',
+    'zksync_lite'   : '9003',
     'starknet'      : '9004',
 }
+
+# контракт с X сети в starknet
+CONTRACTS_ORBITER_TO_STARKNET = {
+    'ethereum'      : '0xd9d74a29307cc6fc8bf424ee4217f1a587fbc8dc',
+    'optimism'      : '',
+    'bsc'           : '',
+    'arbitrum'      : '0xd9d74a29307cc6fc8bf424ee4217f1a587fbc8dc',
+    'nova'          : '',
+    'polygon'       : '',
+    'polygon_zkevm' : '',
+    'zksync'        : '',
+    'zksync_lite'   : '',
+}
+
 
 LAYERZERO_CHAINS_ID = {
     'avalanche' : 106,
@@ -185,3 +220,5 @@ colors = ['green', 'yellow', 'blue', 'magenta', 'cyan']
 
 RUN_TEXT = random.choice(texts)
 RUN_COLOR = random.choice(colors)
+
+
