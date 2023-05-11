@@ -37,6 +37,9 @@ with open(f"{outfile}data/starknet_address.txt", "r") as f:
 with open(f"{outfile}data/proxies.txt", "r") as f:
     PROXIES = [row.strip() for row in f]
 
+STR_DONE    = '✅ ' 
+STR_CANCEL  = '❌ '
+    
 # меняем рпс на свои
 DATA = {
     'ethereum'      : {'rpc': 'https://rpc.ankr.com/eth', 'scan': 'https://etherscan.io/tx', 'token': 'ETH'},
