@@ -94,7 +94,7 @@ def add_gas_price(web3, contract_txn):
 
     try:
         gas_price = web3.eth.gas_price
-        contract_txn['gasPrice'] = int(gas_price * random.uniform(1.2, 1.3))
+        contract_txn['gasPrice'] = int(gas_price * random.uniform(1.05, 1.08))
     except Exception as error: 
         logger.error(error)
 
@@ -179,7 +179,10 @@ def approve_(amount, privatekey, chain, token_address, spender, retry=0):
                 }
             )
 
-            contract_txn = add_gas_price(web3, contract_txn)
+            if chain == 'bsc':
+                contract_txn['gasPrice'] = random.randint(1000000000, 1050000000) # специально ставим 1 гвей, так транза будет дешевле
+            else:
+                contract_txn = add_gas_price(web3, contract_txn)
             contract_txn = add_gas_limit(web3, contract_txn)
 
             tx_hash = sign_tx(web3, contract_txn, privatekey)
@@ -414,6 +417,9 @@ def inch_swap(privatekey, retry=0):
             tx['value']     = int(tx['value'])
 
             # cprint(tx, 'blue')
+
+            if chain == 'bsc':
+                tx['gasPrice'] = random.randint(1000000000, 1050000000) # специально ставим 1 гвей, так транза будет дешевле
 
             if amount >= min_amount_swap:
                     
@@ -667,7 +673,11 @@ def orbiter_bridge(privatekey, retry=0):
                         'gasPrice': 0
                     }
 
-                contract_txn = add_gas_price(web3, contract_txn)
+                
+                if from_chain == 'bsc':
+                    contract_txn['gasPrice'] = random.randint(1000000000, 1050000000) # специально ставим 1 гвей, так транза будет дешевле
+                else:
+                    contract_txn = add_gas_price(web3, contract_txn)
                 contract_txn = add_gas_limit(web3, contract_txn)
 
                 # cprint(contract_txn['value'], 'green')
@@ -873,7 +883,10 @@ def woofi_bridge(privatekey, from_chain, to_chain, from_token, to_token, swap_al
                 }
             )
 
-            contract_txn = add_gas_price(web3, contract_txn)
+            if from_chain == 'bsc':
+                contract_txn['gasPrice'] = random.randint(1000000000, 1050000000) # специально ставим 1 гвей, так транза будет дешевле
+            else:
+                contract_txn = add_gas_price(web3, contract_txn)
             contract_txn = add_gas_limit_layerzero(web3, contract_txn)
 
             if swap_all_balance == True:
@@ -976,7 +989,10 @@ def woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, a
                 }
             )
 
-            contract_txn = add_gas_price(web3, contract_txn)
+            if from_chain == 'bsc':
+                contract_txn['gasPrice'] = random.randint(1000000000, 1050000000) # специально ставим 1 гвей, так транза будет дешевле
+            else:
+                contract_txn = add_gas_price(web3, contract_txn)
             contract_txn = add_gas_limit(web3, contract_txn)
 
             if swap_all_balance == True:
