@@ -189,6 +189,7 @@ def approve_(amount, privatekey, chain, token_address, spender, retry=0):
 
             if status == 1:
                 logger.success(f"{module_str} | {tx_link}")
+                sleeping(5, 5)
             else:
                 logger.error(f"{module_str} | tx is failed | {tx_link}")
                 if retry < RETRY:
@@ -301,41 +302,51 @@ def transfer(privatekey, retry=0):
 
 def get_api_call_data(url):
 
-    # пробуем с прокси, если будет ошибка прокси, отправит запрос без прокси
-    try:
-        proxy = random.choice(PROXIES)
-        proxies = {
-            'http'  : proxy,
-            'https' : proxy,
-        }
-        call_data = requests.get(url, proxies=proxies)
-    except:
-        call_data = requests.get(url)
+    def try_get_with_proxy():
+        try:
+            proxy = random.choice(PROXIES)
+            # cprint(proxy, 'yellow')
+            proxies = {
+                'http'  : proxy,
+                'https' : proxy,
+            }
+            call_data = requests.get(url, proxies=proxies)
+            return call_data
+        except Exception as error:
+            logger.error(error)
+            call_data = requests.get(url)
 
+    call_data = requests.get(url)
+
+    # cprint(f'call_data.status_code : {call_data.status_code}', 'blue')
 
     if call_data.status_code == 200:
         api_data = call_data.json()
         return api_data
-    elif call_data.status_code == 400:
-        api_data = call_data.json()
-        logger.error(api_data['description'])
-        time.sleep(1)
-        return get_api_call_data(url)
+    
     else:
 
-        call_data = requests.get(url)
+        call_data = try_get_with_proxy()
+
         if call_data.status_code == 200:
             api_data = call_data.json()
             return api_data
-        elif call_data.status_code == 400:
-            api_data = call_data.json()
-            logger.error(api_data['description'])
-            time.sleep(1)
-            return get_api_call_data(url)
+        
         else:
-            logger.error(f'response_status : {call_data.status_code}')
-            time.sleep(1)
-            return get_api_call_data(url)
+
+            try:
+                api_data = call_data.json()
+                logger.error(api_data['description'])
+                return False
+            
+            except ValueError as error:
+                logger.error(error)
+                time.sleep(1)
+                return get_api_call_data(url)
+            
+            except Exception as error:
+                logger.error(error)
+                return get_api_call_data(url)
 
 def inch_swap(privatekey, retry=0):
         
@@ -381,46 +392,51 @@ def inch_swap(privatekey, retry=0):
         # если токен не нативный, тогда проверяем апрув и если он меньше нужного, делаем апруваем
         if from_token_address != '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE':
             approve_(amount_to_swap, privatekey, chain, from_token_address, spender)
-            sleeping(5, 5)
 
         _1inchurl = f'https://api.1inch.io/v{inch_version}.0/{chain_id}/swap?fromTokenAddress={from_token_address}&toTokenAddress={to_token_address}&amount={amount_to_swap}&fromAddress={wallet}&slippage={slippage}'
         json_data = get_api_call_data(_1inchurl)
 
-        # cprint(json_data, 'yellow')
-
-        tx  = json_data['tx']
-
-        tx['chainId']   = chain_id
-        tx['nonce']     = web3.eth.get_transaction_count(wallet)
-        tx['to']        = Web3.to_checksum_address(tx['to'])
-        tx['gasPrice']  = int(tx['gasPrice'])
-        tx['gas']       = int(int(tx['gas']) / divider)
-        tx['value']     = int(tx['value'])
-
-        # cprint(tx, 'blue')
-
-        if amount >= min_amount_swap:
-                
-            tx_hash     = sign_tx(web3, tx, privatekey)
-            tx_link     = f'{DATA[chain]["scan"]}/{tx_hash}'
-
-            module_str = f'1inch_swap : {round_to(amount)} {from_symbol} => {to_symbol}'
-
-            status  = check_status_tx(chain, tx_hash)
-
-            if status == 1:
-                logger.success(f'{module_str} | {tx_link}')
-                list_send.append(f'{STR_DONE}{module_str}')
-            else:
-                logger.error(f'{module_str} | tx is failed | {tx_link}')
-                if retry < RETRY:
-                    logger.info(f'try again in 10 sec.')
-                    sleeping(10, 10)
-                    inch_swap(privatekey, retry+1)
+        if json_data == False: 
+            
+            logger.info('failed to swap in 1inch')
 
         else:
-            logger.error(f"{module_str} : can't swap : {amount} (amount) < {min_amount_swap} (min_amount_swap)")
-            list_send.append(f'{STR_CANCEL}{module_str} : {amount} < {min_amount_swap}')
+
+            # cprint(json_data, 'yellow')
+
+            tx  = json_data['tx']
+
+            tx['chainId']   = chain_id
+            tx['nonce']     = web3.eth.get_transaction_count(wallet)
+            tx['to']        = Web3.to_checksum_address(tx['to'])
+            tx['gasPrice']  = int(tx['gasPrice'])
+            tx['gas']       = int(int(tx['gas']) / divider)
+            tx['value']     = int(tx['value'])
+
+            # cprint(tx, 'blue')
+
+            if amount >= min_amount_swap:
+                    
+                tx_hash     = sign_tx(web3, tx, privatekey)
+                tx_link     = f'{DATA[chain]["scan"]}/{tx_hash}'
+
+                module_str = f'1inch_swap : {round_to(amount)} {from_symbol} => {to_symbol}'
+
+                status  = check_status_tx(chain, tx_hash)
+
+                if status == 1:
+                    logger.success(f'{module_str} | {tx_link}')
+                    list_send.append(f'{STR_DONE}{module_str}')
+                else:
+                    logger.error(f'{module_str} | tx is failed | {tx_link}')
+                    if retry < RETRY:
+                        logger.info(f'try again in 10 sec.')
+                        sleeping(10, 10)
+                        inch_swap(privatekey, retry+1)
+
+            else:
+                logger.error(f"{module_str} : can't swap : {amount} (amount) < {min_amount_swap} (min_amount_swap)")
+                list_send.append(f'{STR_CANCEL}{module_str} : {amount} < {min_amount_swap}')
 
     except KeyError:
         logger.error(json_data['description'])
@@ -1051,4 +1067,5 @@ def exchange_withdraw(privatekey, retry=0):
     except Exception as error:
         logger.error(f"{cex}_withdraw unsuccess => {wallet} | error : {error}")
         list_send.append(f'{STR_CANCEL}{cex}_withdraw')
+
 
