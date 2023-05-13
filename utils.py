@@ -667,6 +667,7 @@ def orbiter_bridge(privatekey, retry=0):
                     contract_txn = {
                         'chainId': chain_id,
                         'nonce': nonce,
+                        "from": wallet,
                         'to': '0x80C67432656d59144cEFf962E8fAF8926599bCF8',
                         'value': value,
                         'gas': 0,
