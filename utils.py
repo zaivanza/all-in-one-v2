@@ -916,7 +916,7 @@ def woofi_bridge(privatekey, from_chain, to_chain, from_token, to_token, swap_al
 
 def woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, retry=0):
 
-    # try:
+    try:
 
         module_str = f'woofi_swap : {from_chain}'
         logger.info(module_str)
@@ -1007,14 +1007,14 @@ def woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, a
             logger.error(f"{module_str} : can't swap : {amount_} (amount) < {min_amount_swap} (min_amount_swap)")
             list_send.append(f'{STR_CANCEL}{module_str} : {amount_} < {min_amount_swap}')
 
-    # except Exception as error:
-    #     logger.error(f'{module_str} | error : {error}')
-    #     if retry < RETRY:
-    #         logger.info(f'try again in 10 sec.')
-    #         sleeping(10, 10)
-    #         woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, retry+1)
-    #     else:
-    #         list_send.append(f'{STR_CANCEL}{module_str}')
+    except Exception as error:
+        logger.error(f'{module_str} | error : {error}')
+        if retry < RETRY:
+            logger.info(f'try again in 10 sec.')
+            sleeping(10, 10)
+            woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, retry+1)
+        else:
+            list_send.append(f'{STR_CANCEL}{module_str}')
 
 def woofi(privatekey):
 
