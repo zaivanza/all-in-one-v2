@@ -206,8 +206,8 @@ def value_orbiter():
 
     bridge_all_balance  = False         # True / False. если True, тогда бриджим весь баланс
     min_amount_bridge   = 0             # если баланс будет меньше этого числа, выводить не будет
-    keep_value_from     = 0             # от скольки монет оставляем на кошельке (работает только при : bridge_all_balance = True)
-    keep_value_to       = 0             # до скольки монет оставляем на кошельке (работает только при : bridge_all_balance = True)
+    keep_value_from     = 0.001             # от скольки монет оставляем на кошельке (работает только при : bridge_all_balance = True)
+    keep_value_to       = 0.0015             # до скольки монет оставляем на кошельке (работает только при : bridge_all_balance = True)
 
     return from_chain, to_chain, bridge_all_balance, amount_from, amount_to, min_amount_bridge, keep_value_from, keep_value_to
 
