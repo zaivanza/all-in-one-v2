@@ -670,9 +670,7 @@ def orbiter_bridge(privatekey, retry=0):
                 contract_txn = add_gas_price(web3, contract_txn)
                 contract_txn = add_gas_limit(web3, contract_txn)
 
-                if bridge_all_balance == True:
-                    gas_gas = int(contract_txn['gas'] * contract_txn['gasPrice'])
-                    contract_txn['value'] = contract_txn['value'] - gas_gas
+                # cprint(contract_txn['value'], 'green')
 
                 tx_hash = sign_tx(web3, contract_txn, privatekey)
                 tx_link = f'{DATA[from_chain]["scan"]}/{tx_hash}'
@@ -1067,5 +1065,4 @@ def exchange_withdraw(privatekey, retry=0):
     except Exception as error:
         logger.error(f"{cex}_withdraw unsuccess => {wallet} | error : {error}")
         list_send.append(f'{STR_CANCEL}{cex}_withdraw')
-
 
