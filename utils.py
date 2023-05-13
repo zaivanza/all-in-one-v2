@@ -916,7 +916,7 @@ def woofi_bridge(privatekey, from_chain, to_chain, from_token, to_token, swap_al
 
 def woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, retry=0):
 
-    try:
+    # try:
 
         module_str = f'woofi_swap : {from_chain}'
         logger.info(module_str)
@@ -930,10 +930,13 @@ def woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, a
             WOOFI_SWAP_CONTRACTS[from_chain]
         )
 
+        if to_token     == '' : to_token    = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
+        if from_token   == '' : from_token  = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
+
         from_token = Web3.to_checksum_address(from_token)
         to_token    = Web3.to_checksum_address(to_token)
 
-        if from_token != '':
+        if from_token != '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE':
             token_contract, decimals, symbol = check_data_token(web3, from_token)
         else:
             decimals = 18
@@ -944,13 +947,11 @@ def woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, a
         amount = intToDecimal(amount_, decimals)
 
         # если токен не нативный, тогда проверяем апрув и если он меньше нужного, делаем апруваем
-        if from_token != '':
+        if from_token != '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE':
             approve_(amount, privatekey, from_chain, from_token, WOOFI_SWAP_CONTRACTS[from_chain])
             sleeping(5, 10)
 
-        if to_token     == '' : to_token = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
-        if from_token   == '' : 
-            from_token  = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
+        if from_token == '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE': 
             value = amount
         else:
             value = 0
@@ -1006,14 +1007,14 @@ def woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, a
             logger.error(f"{module_str} : can't swap : {amount_} (amount) < {min_amount_swap} (min_amount_swap)")
             list_send.append(f'{STR_CANCEL}{module_str} : {amount_} < {min_amount_swap}')
 
-    except Exception as error:
-        logger.error(f'{module_str} | error : {error}')
-        if retry < RETRY:
-            logger.info(f'try again in 10 sec.')
-            sleeping(10, 10)
-            woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, retry+1)
-        else:
-            list_send.append(f'{STR_CANCEL}{module_str}')
+    # except Exception as error:
+    #     logger.error(f'{module_str} | error : {error}')
+    #     if retry < RETRY:
+    #         logger.info(f'try again in 10 sec.')
+    #         sleeping(10, 10)
+    #         woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, retry+1)
+    #     else:
+    #         list_send.append(f'{STR_CANCEL}{module_str}')
 
 def woofi(privatekey):
 
