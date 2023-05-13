@@ -694,7 +694,7 @@ def orbiter_bridge(privatekey, retry=0):
                     if retry < RETRY:
                         logger.info(f'{module_str} | tx is failed, try again in 10 sec | {tx_link}')
                         sleeping(10, 10)
-                        transfer(privatekey, retry+1)
+                        orbiter_bridge(privatekey, retry+1)
                     else:
                         logger.error(f'{module_str} | tx is failed | {tx_link}')
                         list_send.append(f'{STR_CANCEL}{module_str} | tx is failed | {tx_link}')
@@ -721,7 +721,7 @@ def orbiter_bridge(privatekey, retry=0):
         if retry < RETRY:
             logger.info(f'try again | {wallet}')
             sleeping(10, 10)
-            transfer(privatekey, retry+1)
+            orbiter_bridge(privatekey, retry+1)
         else:
             list_send.append(f'{STR_CANCEL}{module_str}')
 
