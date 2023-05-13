@@ -317,7 +317,7 @@ def transfer(private_key, retry=0):
                 if retry < settings['RETRY']:
                     logger.info(f'{module_str} | tx is failed, try again in 10 sec | {tx_link}')
                     sleeping(10, 10)
-                    transfer(private_key, retry + 1)
+                    orbiter_bridge(private_key, retry + 1)
                 else:
                     logger.error(f'{module_str} | tx is failed | {tx_link}')
 
@@ -747,6 +747,7 @@ def orbiter_bridge(private_key, retry=0):
                     contract_txn = {
                         'chainId': chain_id,
                         'nonce': nonce,
+                        'from': wallet,
                         'to': '0x80C67432656d59144cEFf962E8fAF8926599bCF8',
                         'value': value,
                         'gas': 0,
@@ -774,7 +775,7 @@ def orbiter_bridge(private_key, retry=0):
                     if retry < settings['RETRY']:
                         logger.info(f'{module_str} | tx is failed, try again in 10 sec | {tx_link}')
                         sleeping(10, 10)
-                        transfer(private_key, retry + 1)
+                        orbiter_bridge(private_key, retry + 1)
                     else:
                         logger.error(f'{module_str} | tx is failed | {tx_link}')
                         list_send.append(f'{module_str} | tx is failed | {tx_link}')
