@@ -198,14 +198,14 @@ def approve_(amount, privatekey, chain, token_address, spender, retry=0):
                 if retry < RETRY:
                     logger.info(f"try again in 10 sec.")
                     sleeping(10, 10)
-                    approve_(privatekey, chain, token_address, spender, retry+1)
+                    approve_(amount, privatekey, chain, token_address, spender, retry+1)
 
     except Exception as error:
         logger.error(f'{error}')
         if retry < RETRY:
             logger.info(f'try again in 10 sec.')
             sleeping(10, 10)
-            approve_(privatekey, chain, token_address, spender, retry+1)
+            approve_(amount, privatekey, chain, token_address, spender, retry+1)
 
 def transfer(privatekey, retry=0):
 
