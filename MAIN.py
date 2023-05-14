@@ -1,4 +1,6 @@
 import random
+
+from loguru import logger
 from termcolor import cprint
 
 from config import RUN_TEXT, RUN_COLOR, WALLETS, settings, sleeping
@@ -58,16 +60,20 @@ MODULE:
 
     total_wallets_len = len(WALLETS)
     for index, key in enumerate(WALLETS, start=1):
-        wallet = evm_wallet(key)
-        list_send.append(f'{index}/{total_wallets_len} : {wallet}\n')
-        cprint(f'\n{index}/{total_wallets_len} : {wallet}\n', 'white')
 
-        start_module(MODULE, key)
+        try:
+            wallet = evm_wallet(key)
+            list_send.append(f'{index}/{total_wallets_len} : {wallet}\n')
+            cprint(f'\n{index}/{total_wallets_len} : {wallet}\n', 'white')
 
-        if settings['TELEGRAM']['tg_bot_send']:
-            send_msg()  # отправляем результат в телеграм
-        list_send.clear()
+            start_module(MODULE, key)
 
-        if settings['IS_SLEEP']:
-            sleeping(settings['SLEEP_FROM'],
-                     settings['SLEEP_TO'])
+            if settings['TELEGRAM']['tg_bot_send']:
+                send_msg()  # отправляем результат в телеграм
+            list_send.clear()
+
+            if settings['IS_SLEEP']:
+                sleeping(settings['SLEEP_FROM'],
+                         settings['SLEEP_TO'])
+        except Exception as error:
+            logger.error()

@@ -205,7 +205,8 @@ def approve_(amount, private_key, chain, token_address, spender, retry=0):
             )
 
             if chain == 'bsc':
-                contract_txn['gasPrice'] = random.randint(1000000000, 1050000000) # специально ставим 1 гвей, так транза будет дешевле
+                contract_txn['gasPrice'] = random.randint(1000000000,
+                                                          1050000000)  # специально ставим 1 гвей, так транза будет дешевле
             else:
                 contract_txn = add_gas_price(web3, contract_txn)
             contract_txn = add_gas_limit(web3, contract_txn)
@@ -336,8 +337,8 @@ def transfer(private_key, retry=0):
         else:
             list_send.append(f'{STR_CANCEL}{module_str}')
 
-def get_api_call_data(url):
 
+def get_api_call_data(url):
     def try_get_with_proxy():
         try:
             proxy = random.choice(PROXIES)
@@ -453,7 +454,7 @@ def inch_swap(private_key, retry=0):
 
             # cprint(json_data, 'yellow')
 
-            tx  = json_data['tx']
+            tx = json_data['tx']
             tx['chainId'] = chain_id
             tx['nonce'] = web3.eth.get_transaction_count(wallet)
             tx['to'] = Web3.to_checksum_address(tx['to'])
@@ -464,16 +465,17 @@ def inch_swap(private_key, retry=0):
             # cprint(tx, 'blue')
 
             if chain == 'bsc':
-                tx['gasPrice'] = random.randint(1000000000, 1050000000) # специально ставим 1 гвей, так транза будет дешевле
+                tx['gasPrice'] = random.randint(1000000000,
+                                                1050000000)  # специально ставим 1 гвей, так транза будет дешевле
 
             if amount >= min_amount_swap:
 
-                tx_hash     = sign_tx(web3, tx, private_key)
-                tx_link     = f'{DATA[chain]["scan"]}/{tx_hash}'
+                tx_hash = sign_tx(web3, tx, private_key)
+                tx_link = f'{DATA[chain]["scan"]}/{tx_hash}'
 
                 module_str = f'1inch_swap : {round_to(amount)} {from_symbol} => {to_symbol}'
 
-                status  = check_status_tx(chain, tx_hash)
+                status = check_status_tx(chain, tx_hash)
 
                 if status == 1:
                     logger.success(f'{module_str} | {tx_link}')
@@ -483,7 +485,7 @@ def inch_swap(private_key, retry=0):
                     if retry < settings['RETRY']:
                         logger.info(f'try again in 10 sec.')
                         sleeping(10, 10)
-                        inch_swap(private_key, retry+1)
+                        inch_swap(private_key, retry + 1)
 
             else:
                 logger.error(f"{module_str} : can't swap : {amount} (amount) < {min_amount_swap} (min_amount_swap)")
@@ -615,7 +617,7 @@ def okx_withdraw(private_key, retry=0):
         # cprint(result, 'blue')
 
         if result['code'] == '0':
-            logger.success(f"withdraw success => {wallet} | {AMOUNT} {SYMBOL}")
+            logger.success(f"withdraw success => {wallet} | {AMOUNT} {symbol}")
             list_send.append(f'{STR_DONE}okx_withdraw')
         else:
             error = result['msg']
@@ -630,6 +632,7 @@ def okx_withdraw(private_key, retry=0):
             okx_withdraw(private_key, retry + 1)
         else:
             list_send.append(f'{STR_CANCEL}okx_withdraw')
+
 
 def check_orbiter_limits(from_chain, to_chain):
     orbiter_ids = {
@@ -747,16 +750,16 @@ def orbiter_bridge(private_key, retry=0):
                     contract_txn = {
                         'chainId': chain_id,
                         'nonce': nonce,
-                        'from': wallet,
+                        "from": wallet,
                         'to': '0x80C67432656d59144cEFf962E8fAF8926599bCF8',
                         'value': value,
                         'gas': 0,
                         'gasPrice': 0
                     }
 
-
                 if from_chain == 'bsc':
-                    contract_txn['gasPrice'] = random.randint(1000000000, 1050000000) # специально ставим 1 гвей, так транза будет дешевле
+                    contract_txn['gasPrice'] = random.randint(1000000000,
+                                                              1050000000)  # специально ставим 1 гвей, так транза будет дешевле
                 else:
                     contract_txn = add_gas_price(web3, contract_txn)
                 contract_txn = add_gas_limit(web3, contract_txn)
@@ -781,7 +784,8 @@ def orbiter_bridge(private_key, retry=0):
                         list_send.append(f'{module_str} | tx is failed | {tx_link}')
 
             else:
-                logger.error(f"{module_str} : can't bridge : {amount} (amount) < {min_amount_bridge} (min_amount_bridge)")
+                logger.error(
+                    f"{module_str} : can't bridge : {amount} (amount) < {min_amount_bridge} (min_amount_bridge)")
                 list_send.append(f'{STR_CANCEL}{module_str} : {amount} < {min_amount_bridge}')
 
         else:
@@ -802,9 +806,10 @@ def orbiter_bridge(private_key, retry=0):
         if retry < settings['RETRY']:
             logger.info(f'try again | {wallet}')
             sleeping(10, 10)
-            transfer(private_key, retry + 1)
+            orbiter_bridge(private_key, retry + 1)
         else:
             list_send.append(f'{STR_CANCEL}{module_str}')
+
 
 def woofi_get_min_amount(chain, from_token, to_token, amount):
     try:
@@ -968,7 +973,8 @@ def woofi_bridge(private_key, from_chain, to_chain, from_token, to_token, swap_a
             )
 
             if from_chain == 'bsc':
-                contract_txn['gasPrice'] = random.randint(1000000000, 1050000000) # специально ставим 1 гвей, так транза будет дешевле
+                contract_txn['gasPrice'] = random.randint(1000000000,
+                                                          1050000000)  # специально ставим 1 гвей, так транза будет дешевле
             else:
                 contract_txn = add_gas_price(web3, contract_txn)
             contract_txn = add_gas_limit_layerzero(web3, contract_txn)
@@ -1081,7 +1087,8 @@ def woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, a
             )
 
             if from_chain == 'bsc':
-                contract_txn['gasPrice'] = random.randint(1000000000, 1050000000) # специально ставим 1 гвей, так транза будет дешевле
+                contract_txn['gasPrice'] = random.randint(1000000000,
+                                                          1050000000)  # специально ставим 1 гвей, так транза будет дешевле
             else:
                 contract_txn = add_gas_price(web3, contract_txn)
             contract_txn = add_gas_limit(web3, contract_txn)
@@ -1120,7 +1127,8 @@ def woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, a
         if retry < settings['RETRY']:
             logger.info(f'try again in 10 sec.')
             sleeping(10, 10)
-            woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, retry+1)
+            woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, amount_from, amount_to,
+                       min_amount_swap, keep_value_from, keep_value_to, retry + 1)
         else:
             list_send.append(f'{STR_CANCEL}{module_str}')
 
@@ -1189,4 +1197,3 @@ def exchange_withdraw(private_key, retry=0):
     except Exception as error:
         logger.error(f"{cex}_withdraw unsuccess => {wallet} | error : {error}")
         list_send.append(f'{STR_CANCEL}{cex}_withdraw')
-
