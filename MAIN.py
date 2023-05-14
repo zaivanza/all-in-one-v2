@@ -30,7 +30,6 @@ def start_module(module, key=''):
         woofi(key)
 
 
-
 if __name__ == "__main__":
 
     cprint(RUN_TEXT, RUN_COLOR)
@@ -49,17 +48,22 @@ if __name__ == "__main__":
         for key in WALLETS:
             zero += 1
 
-            wallet = evm_wallet(key)
-            list_send.append(f'{zero}/{len(WALLETS)} : {wallet}\n')
-            cprint(f'\n{zero}/{len(WALLETS)} : {wallet}\n', 'white')
+            try:
 
-            start_module(MODULE, key)
+                wallet = evm_wallet(key)
+                list_send.append(f'{zero}/{len(WALLETS)} : {wallet}\n')
+                cprint(f'\n{zero}/{len(WALLETS)} : {wallet}\n', 'white')
 
-            if TG_BOT_SEND == True:
-                send_msg() # отправляем результат в телеграм
-            list_send.clear()
+                start_module(MODULE, key)
 
-            if IS_SLEEP == True:
-                sleeping(SLEEP_FROM, SLEEP_TO)
+                if TG_BOT_SEND == True:
+                    send_msg() # отправляем результат в телеграм
+                list_send.clear()
+
+                if IS_SLEEP == True:
+                    sleeping(SLEEP_FROM, SLEEP_TO)
+
+            except Exception as error:
+                logger.error()
 
         
