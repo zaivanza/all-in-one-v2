@@ -1,9 +1,19 @@
-from config import *
+import asyncio
+import csv
+import math
+
+from loguru import logger
+from termcolor import cprint
+from web3 import Web3, AsyncHTTPProvider
+from web3.eth import AsyncEth
+
+from config import settings, DATA, ERC20_ABI, decimalToInt, outfile, WALLETS
 
 RESULT = {
-    'wallets' : [],
-    'balances' : [],
+    'wallets': [],
+    'balances': [],
 }
+
 
 def evm_wallet(key):
     retry = 0
@@ -12,10 +22,11 @@ def evm_wallet(key):
             web3 = Web3(Web3.HTTPProvider(DATA['ethereum']['rpc']))
             wallet = web3.eth.account.from_key(key).address
             return wallet
-        except : 
+        except:
             retry += 1
             if retry >= 2:
                 return key
+
 
 def round_to(num, digits=3):
     try:
@@ -23,85 +34,86 @@ def round_to(num, digits=3):
         scale = int(-math.floor(math.log10(abs(num - int(num))))) + digits - 1
         if scale < digits: scale = digits
         return round(num, scale)
-    except: return num
+    except:
+        return num
+
 
 async def check_data_token(web3, token_address):
-
     try:
 
-        token_contract  = web3.eth.contract(address=Web3.to_checksum_address(token_address), abi=ERC20_ABI)
-        decimals        = await token_contract.functions.decimals().call()
-        symbol          = await token_contract.functions.symbol().call()
+        token_contract = web3.eth.contract(address=Web3.to_checksum_address(token_address), abi=ERC20_ABI)
+        decimals = await token_contract.functions.decimals().call()
+        symbol = await token_contract.functions.symbol().call()
 
         return token_contract, decimals, symbol
-    
+
     except Exception as error:
 
         logger.error(f'{error}')
         await asyncio.sleep(2)
         return await check_data_token(web3, token_address)
 
-async def check_balance(web3, privatekey, chain, address_contract):
+
+async def check_balance(web3, private_key, chain, address_contract):
     try:
 
-        try: 
-            wallet = web3.eth.account.from_key(privatekey)
+        try:
+            wallet = web3.eth.account.from_key(private_key)
             wallet = wallet.address
-        except Exception as error: 
-            wallet = privatekey
-            
-        if address_contract == '': # eth
-            balance         = await web3.eth.get_balance(web3.to_checksum_address(wallet))
-            token_decimal   = 18
+        except Exception as error:
+            # logger.error(str(error))
+            wallet = private_key
+
+        if address_contract == '':  # eth
+            balance = await web3.eth.get_balance(web3.to_checksum_address(wallet))
+            token_decimal = 18
         else:
             token_contract, token_decimal, symbol = await check_data_token(web3, address_contract)
             balance = await token_contract.functions.balanceOf(web3.to_checksum_address(wallet)).call()
 
-        human_readable = decimalToInt(balance, token_decimal) 
+        human_readable = decimalToInt(balance, token_decimal)
 
         return human_readable
 
     except Exception as error:
-        logger.error(f'{error}')
+        logger.error(str(error))
         await asyncio.sleep(1)
-        return await check_balance(web3, privatekey, chain, address_contract)
+        return await check_balance(web3, private_key, chain, address_contract)
 
-async def worker(privatekey, chain, address_contract):
 
+async def worker(private_key, chain, address_contract):
     while True:
         try:
-            web3 = Web3(
-                AsyncHTTPProvider(DATA[chain]['rpc']),
-                modules={"eth": (AsyncEth,)},
-                middlewares=[],
-            )
+            web3 = Web3(AsyncHTTPProvider(DATA[chain]['rpc']),
+                        modules={"eth": (AsyncEth,)},
+                        middlewares=[],
+                        )
             break
-        except Exception as error: 
-            cprint(error, 'red')
+        except Exception as error:
+            cprint(str(error), 'red')
             await asyncio.sleep(1)
 
-
-    balance = await check_balance(web3, privatekey, chain, address_contract)
-    RESULT['wallets'].append({privatekey : balance})
+    balance = await check_balance(web3, private_key, chain, address_contract)
+    RESULT['wallets'].append({private_key: balance})
     RESULT['balances'].append(balance)
 
-async def main(chain, address_contract, wallets):
 
+async def main(chain, address_contract, wallets):
     tasks = [worker(wallet, chain, address_contract) for wallet in wallets]
     await asyncio.gather(*tasks)
 
-def send_result(min_balance, file_name, wallets_):
 
+def send_result(min_balance, file_name, wallets_):
     small_balance = []
     with open(f'{outfile}results/{file_name}.csv', 'w', newline='') as csvfile:
         spamwriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-        
+
         spamwriter.writerow(['wallet', 'balance'])
 
         for address in wallets_:
             for data in RESULT['wallets']:
                 for wallets in data.items():
-                    wallet  = wallets[0]
+                    wallet = wallets[0]
                     balance = wallets[1]
 
                     if wallet == address:
@@ -129,8 +141,7 @@ def send_result(min_balance, file_name, wallets_):
         cprint(f'\nРезультаты записаны в файл : {outfile}results/{file_name}.csv\n', 'blue')
 
 
-def web3_check():
-
+def web3_check(*args):
     cprint(f'\nSTART WEB3 CHECKER\n', 'green')
 
     RESULT['wallets'].clear()
@@ -141,9 +152,11 @@ def web3_check():
         wallet = evm_wallet(key)
         wallets.append(wallet)
 
-    chain, address_contract, min_balance, file_name = value_web3_checker()
+    chain = settings['value_web3_checker']['chain']
+    address_contract = settings['value_web3_checker']['address_contract']
+    min_balance = settings['value_web3_checker']['min_balance']
+    file_name = settings['value_web3_checker']['file_name']
 
     asyncio.run(main(chain, address_contract, wallets))
 
     send_result(min_balance, file_name, wallets)
-
