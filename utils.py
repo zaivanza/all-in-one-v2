@@ -80,7 +80,7 @@ def add_gas_limit(web3, contract_txn):
 def add_gas_limit_layerzero(web3, contract_txn):
 
     try:
-        pluser = [1.3, 1.7]
+        pluser = [1.05, 1.07]
         gasLimit = web3.eth.estimate_gas(contract_txn)
         contract_txn['gas'] = int(gasLimit * random.uniform(pluser[0], pluser[1]))
         # logger.info(f"gasLimit : {contract_txn['gas']}")
@@ -850,23 +850,19 @@ def woofi_bridge(privatekey, from_chain, to_chain, from_token, to_token, swap_al
             approve_(amount, privatekey, from_chain, from_token, WOOFI_BRIDGE_CONTRACTS[from_chain])
             sleeping(5, 10)
 
-        while True:
-            try:
-                fees = contract.functions.quoteLayerZeroFee(
-                    random.randint(112101680502565000, 712101680502565000), # refId
-                    wallet, # to
-                    srcInfos, 
-                    dstInfos
-                    ).call()
-                break
-            except Exception as error: 
-                logger.error(error)
-                time.sleep(1)
-        
+
+        layerzero_fee = contract.functions.quoteLayerZeroFee(
+            random.randint(112101680502565000, 712101680502565000), # refId
+            wallet, # to
+            srcInfos, 
+            dstInfos
+            ).call()
+        layerzero_fee = layerzero_fee[0]
+
         if from_token == '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE':
-            value = int(amount + fees[0])
+            value = int(amount + layerzero_fee)
         else:
-            value = int(fees[0])
+            value = int(layerzero_fee)
 
         if amount_ >= min_amount_swap:
             contract_txn = contract.functions.crossSwap(
@@ -888,12 +884,13 @@ def woofi_bridge(privatekey, from_chain, to_chain, from_token, to_token, swap_al
                 contract_txn['gasPrice'] = random.randint(1000000000, 1050000000) # специально ставим 1 гвей, так транза будет дешевле
             else:
                 contract_txn = add_gas_price(web3, contract_txn)
+
             contract_txn = add_gas_limit_layerzero(web3, contract_txn)
 
             if swap_all_balance == True:
                 if from_token == '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE':
                     gas_gas = int(contract_txn['gas'] * contract_txn['gasPrice'])
-                    contract_txn['value'] = contract_txn['value'] - gas_gas
+                    contract_txn['value'] = int(contract_txn['value'] - gas_gas)
 
             tx_hash = sign_tx(web3, contract_txn, privatekey)
             tx_link = f'{DATA[from_chain]["scan"]}/{tx_hash}'
