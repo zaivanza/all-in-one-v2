@@ -192,8 +192,8 @@ def value_1inch_swap():
 def value_orbiter():
 
     '''
-    бридж нативных токенов через https://www.orbiter.finance/
-    chains : zksync | polygon | ethereum | bsc | arbitrum | optimism | polygon_zkevm | nova | starknet
+    бридж eth через https://www.orbiter.finance/
+    chains : zksync | ethereum | arbitrum | optimism | polygon_zkevm | nova | starknet
 
     минимальный бридж : 0.005
     '''
