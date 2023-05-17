@@ -419,7 +419,7 @@ def inch_swap(privatekey, retry=0):
             # cprint(tx, 'blue')
 
             if chain == 'bsc':
-                tx['gasPrice'] = random.randint(1000000000, 1050000000) # специально ставим 1 гвей, так транза будет дешевле
+                tx['gasPrice'] = 1000000000 # специально ставим 1 гвей, так транза будет дешевле
 
             if amount >= min_amount_swap:
                     
