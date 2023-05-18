@@ -280,7 +280,7 @@ def value_woofi_bridge():
 def value_woofi_swap():
 
     '''
-    свап на https://fi.woo.org/ (бриджи идут через layerzero)
+    свап на https://fi.woo.org/ 
     chains : avalanche | polygon | ethereum | bsc | arbitrum | optimism | fantom
     '''
     
