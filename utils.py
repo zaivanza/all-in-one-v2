@@ -31,10 +31,11 @@ def sign_tx(web3, contract_txn, privatekey):
     
     return tx_hash
 
-def check_data_token(web3, token_address):
+def check_data_token(chain, token_address):
 
     try:
 
+        web3 = Web3(Web3.HTTPProvider(DATA[chain]['rpc']))
         token_contract  = web3.eth.contract(address=Web3.to_checksum_address(token_address), abi=ERC20_ABI)
         decimals        = token_contract.functions.decimals().call()
         symbol          = token_contract.functions.symbol().call()
@@ -66,7 +67,7 @@ def add_gas_limit(web3, contract_txn):
     try:
         value = contract_txn['value']
         contract_txn['value'] = 0
-        pluser = [1.3, 1.7]
+        pluser = [1.05, 1.07]
         gasLimit = web3.eth.estimate_gas(contract_txn)
         contract_txn['gas'] = int(gasLimit * random.uniform(pluser[0], pluser[1]))
         # logger.info(f"gasLimit : {contract_txn['gas']}")
@@ -121,7 +122,7 @@ def check_balance(privatekey, chain, address_contract):
             balance         = web3.eth.get_balance(web3.to_checksum_address(wallet))
             token_decimal   = 18
         else:
-            token_contract, token_decimal, symbol = check_data_token(web3, address_contract)
+            token_contract, token_decimal, symbol = check_data_token(chain, address_contract)
             balance = token_contract.functions.balanceOf(web3.to_checksum_address(wallet)).call()
 
         human_readable = decimalToInt(balance, token_decimal) 
@@ -157,7 +158,7 @@ def approve_(amount, privatekey, chain, token_address, spender, retry=0):
         spender = Web3.to_checksum_address(spender)
 
         wallet = web3.eth.account.from_key(privatekey).address
-        contract, decimals, symbol = check_data_token(web3, token_address)
+        contract, decimals, symbol = check_data_token(chain, token_address)
 
         module_str = f'approve : {symbol}'
 
@@ -228,7 +229,7 @@ def transfer(privatekey, retry=0):
             decimals    = 18
             symbol      = DATA[chain]['token']
         else:
-            token_contract, decimals, symbol = check_data_token(web3, token_address)
+            token_contract, decimals, symbol = check_data_token(chain, token_address)
 
         if transfer_all_balance == True: amount = check_balance(privatekey, chain, token_address) - keep_value
         else: amount = round(random.uniform(amount_from, amount_to), 8)
@@ -372,13 +373,13 @@ def inch_swap(privatekey, retry=0):
             from_decimals = 18
             from_symbol = DATA[chain]['token']
         else:
-            from_token_contract, from_decimals, from_symbol = check_data_token(web3, from_token_address)
+            from_token_contract, from_decimals, from_symbol = check_data_token(chain, from_token_address)
 
         if to_token_address   == '': 
             to_token_address   = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
             to_symbol = DATA[chain]['token']
         else:
-            to_token_contract, to_decimals, to_symbol = check_data_token(web3, to_token_address)
+            to_token_contract, to_decimals, to_symbol = check_data_token(chain, to_token_address)
 
         account = web3.eth.account.from_key(privatekey)
         wallet  = account.address
@@ -419,7 +420,7 @@ def inch_swap(privatekey, retry=0):
             # cprint(tx, 'blue')
 
             if chain == 'bsc':
-                tx['gasPrice'] = 1000000000 # специально ставим 1 гвей, так транза будет дешевле
+                tx['gasPrice'] = random.randint(1000000000, 1050000000) # специально ставим 1 гвей, так транза будет дешевле
 
             if amount >= min_amount_swap:
                     
@@ -759,9 +760,11 @@ def woofi_get_min_amount(chain, from_token, to_token, amount):
         logger.error(f'error : {error}. return 0')
         return 0
 
-def woofi_bridge(privatekey, from_chain, to_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, retry=0):
+def woofi_bridge(privatekey, retry=0):
 
     try:
+
+        from_chain, to_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to = value_woofi_bridge()
 
         def get_srcInfos(amount_, from_chain, from_token):
 
@@ -770,7 +773,7 @@ def woofi_bridge(privatekey, from_chain, to_chain, from_token, to_token, swap_al
             from_token = Web3.to_checksum_address(from_token)
 
             if from_token != '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE':
-                token_contract, decimals, symbol = check_data_token(web3, from_token)
+                token_contract, decimals, symbol = check_data_token(from_chain, from_token)
             else: decimals = 18
 
             amount = intToDecimal(amount_, decimals)
@@ -822,7 +825,7 @@ def woofi_bridge(privatekey, from_chain, to_chain, from_token, to_token, swap_al
         )
 
         if from_token != '':
-            token_contract, decimals, symbol = check_data_token(web3, from_token)
+            token_contract, decimals, symbol = check_data_token(from_chain, from_token)
         else:
             decimals = 18
 
@@ -908,7 +911,7 @@ def woofi_bridge(privatekey, from_chain, to_chain, from_token, to_token, swap_al
                 if retry < RETRY:
                     logger.info(f'try again | {wallet}')
                     time.sleep(3)
-                    woofi_bridge(privatekey, from_chain, to_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, retry+1)
+                    woofi_bridge(privatekey, retry+1)
                 else:
                     list_send.append(f'{STR_CANCEL}{module_str}')
 
@@ -921,13 +924,15 @@ def woofi_bridge(privatekey, from_chain, to_chain, from_token, to_token, swap_al
         if retry < RETRY:
             logger.info(f'try again in 10 sec.')
             sleeping(10, 10)
-            woofi_bridge(privatekey, from_chain, to_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, retry+1)
+            woofi_bridge(privatekey, retry+1)
         else:
             list_send.append(f'{STR_CANCEL}{module_str}')
 
-def woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, retry=0):
+def woofi_swap(privatekey, retry=0):
 
     try:
+
+        from_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to = value_woofi_swap()
 
         module_str = f'woofi_swap : {from_chain}'
         logger.info(module_str)
@@ -948,7 +953,7 @@ def woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, a
         to_token    = Web3.to_checksum_address(to_token)
 
         if from_token != '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE':
-            token_contract, decimals, symbol = check_data_token(web3, from_token)
+            token_contract, decimals, symbol = check_data_token(from_chain, from_token)
         else:
             decimals = 18
 
@@ -1013,7 +1018,7 @@ def woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, a
                 if retry < RETRY:
                     logger.info(f'try again | {wallet}')
                     time.sleep(3)
-                    woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, retry+1)
+                    woofi_swap(privatekey, retry+1)
                 else:
                     list_send.append(f'{STR_CANCEL}{module_str}')
 
@@ -1026,20 +1031,11 @@ def woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, a
         if retry < RETRY:
             logger.info(f'try again in 10 sec.')
             sleeping(10, 10)
-            woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, retry+1)
+            woofi_swap(privatekey, retry+1)
         else:
             list_send.append(f'{STR_CANCEL}{module_str}')
 
-def woofi(privatekey):
-
-    from_chain, to_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to = value_woofi()
-
-    if from_chain == to_chain:
-        woofi_swap(privatekey, from_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to)
-    else:
-        woofi_bridge(privatekey, from_chain, to_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to)
-
-def exchange_withdraw(privatekey, retry=0):
+def exchange_withdraw(privatekey):
 
     try:
 
