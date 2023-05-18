@@ -27,7 +27,10 @@ def start_module(module, key=''):
         orbiter_bridge(key)
 
     if module == 8:
-        woofi(key)
+        woofi_bridge(key)
+
+    if module == 9:
+        woofi_swap(key)
 
 
 if __name__ == "__main__":
