@@ -152,6 +152,8 @@ def approve_(amount, privatekey, chain, token_address, spender, retry=0):
 
     try:
 
+        logger.info('approve')
+
         web3 = Web3(Web3.HTTPProvider(DATA[chain]['rpc']))
         # web3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
@@ -218,6 +220,7 @@ def transfer(privatekey, retry=0):
         keep_value = round(random.uniform(keep_value_from, keep_value_to), 8)
 
         module_str = f'transfer => {to_address}'
+        logger.info(module_str)
 
         web3 = Web3(Web3.HTTPProvider(DATA[chain]['rpc']))
 
@@ -355,6 +358,8 @@ def get_api_call_data(url):
 def inch_swap(privatekey, retry=0):
         
     try:
+
+        logger.info('1inch_swap')
 
         inch_version = 5
 
@@ -615,6 +620,7 @@ def orbiter_bridge(privatekey, retry=0):
         from_chain, to_chain, bridge_all_balance, amount_from, amount_to, min_amount_bridge, keep_value_from, keep_value_to = value_orbiter()
 
         module_str = f'orbiter_bridge : {from_chain} => {to_chain}'
+        logger.info(module_str)
 
         min_bridge, max_bridge, fees = check_orbiter_limits(from_chain, to_chain)
         min_bridge = min_bridge + fees
@@ -1041,6 +1047,8 @@ def exchange_withdraw(privatekey):
 
         cex, chain, symbol, amount_from, amount_to = value_exchange()
         amount_ = round(random.uniform(amount_from, amount_to), 7)
+
+        logger.info(f"{cex}_withdraw")
 
         API_KEY     = CEX_KEYS[cex]['api_key']
         API_SECRET  = CEX_KEYS[cex]['api_secret']
