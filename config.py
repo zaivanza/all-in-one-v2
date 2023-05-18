@@ -19,6 +19,7 @@ from setting import *
 from data.abi.abi import *
 from data.rpc import DATA
 
+
 outfile = ''
 with open(f"{outfile}data/abi/erc20.json", "r") as file:
     ERC20_ABI = json.load(file)
@@ -38,9 +39,9 @@ with open(f"{outfile}data/starknet_address.txt", "r") as f:
 with open(f"{outfile}data/proxies.txt", "r") as f:
     PROXIES = [row.strip() for row in f]
 
-STR_DONE    = '✅ ' 
+STR_DONE    = '✅ '
 STR_CANCEL  = '❌ '
-    
+
 def intToDecimal(qty, decimal):
     return int(qty * int("".join(["1"] + ["0"]*decimal)))
 
@@ -201,5 +202,4 @@ colors = ['green', 'yellow', 'blue', 'magenta', 'cyan']
 
 RUN_TEXT = random.choice(texts)
 RUN_COLOR = random.choice(colors)
-
 
