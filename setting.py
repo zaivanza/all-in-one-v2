@@ -284,7 +284,7 @@ def value_woofi_swap():
     chains : avalanche | polygon | ethereum | bsc | arbitrum | optimism | fantom
     '''
     
-    chain          = 'bsc'
+    chain = 'bsc'
 
     from_token          = '' # пусто если нативный токен сети
     to_token            = '' # пусто если нативный токен сети
