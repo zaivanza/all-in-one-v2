@@ -49,6 +49,7 @@ MAX_GAS_CHARGE = {
     'optimism'      : 1.5,
     'fantom'        : 0.5,
     'zksync'        : 1,
+    'nova'          : 0.1,
 }
 
 
