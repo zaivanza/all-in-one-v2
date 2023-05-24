@@ -32,6 +32,9 @@ def start_module(module, key=''):
     if module == 9:
         woofi_swap(key)
 
+    if module == 10:
+        sushiswap(key)
+
 
 if __name__ == "__main__":
 
@@ -56,6 +59,9 @@ if __name__ == "__main__":
                 wallet = evm_wallet(key)
                 list_send.append(f'{zero}/{len(WALLETS)} : {wallet}\n')
                 cprint(f'\n{zero}/{len(WALLETS)} : {wallet}\n', 'white')
+
+                if CHECK_GWEI == True:
+                    wait_gas() # смотрим газ, если выше MAX_GWEI, ждем
 
                 start_module(MODULE, key)
 
