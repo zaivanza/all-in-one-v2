@@ -263,7 +263,7 @@ def approve_(amount, privatekey, chain, token_address, spender, retry=0):
 
             if status == 1:
                 logger.success(f"{module_str} | {tx_link}")
-                sleeping(10, 10)
+                sleeping(5, 5)
             else:
                 logger.error(f"{module_str} | tx is failed | {tx_link}")
                 if retry < RETRY:
@@ -1203,11 +1203,12 @@ def sushiswap(privatekey, retry=0):
                 [from_token, to_token],
                 ).call()
 
-            return contract_txn[1]
+            return int(contract_txn[1] * 0.99)
+
 
         chain, from_token_address, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to = value_sushiswap()
 
-        module_str = f'sushiswap : {chain}'
+        module_str = f'sushiswap ({chain})'
         logger.info(module_str)
 
         keep_value = round(random.uniform(keep_value_from, keep_value_to), 8)
@@ -1270,15 +1271,15 @@ def sushiswap(privatekey, retry=0):
 
             if from_token_address == '':
 
-                from_token = Web3.to_checksum_address(WETH_CONTRACTS[chain])
-                token_contract, token_decimal, symbol = check_data_token(chain, from_token)
+                from_token  = Web3.to_checksum_address(WETH_CONTRACTS[chain])
+                to_token    = Web3.to_checksum_address(to_token)
 
-                value = intToDecimal(amount, token_decimal)
+                from_token_contract, from_token_decimal, from_symbol    = check_data_token(chain, from_token)
+                to_token_contract, to_token_decimal, to_symbol          = check_data_token(chain, to_token)
+                value = intToDecimal(amount, from_token_decimal)
 
-                to_token = Web3.to_checksum_address(to_token)
 
                 amountOutMin = get_sushi_amountOutMin(contract, value, from_token, to_token)
-                amountOutMin = int(amountOutMin * 0.99)
 
                 contract_txn = contract.functions.swapExactETHForTokens(
                     amountOutMin,
@@ -1297,11 +1298,12 @@ def sushiswap(privatekey, retry=0):
 
             if to_token == '':
 
-                to_token = Web3.to_checksum_address(WETH_CONTRACTS[chain])
-                token_contract, token_decimal, symbol = check_data_token(chain, from_token)
-                value = intToDecimal(amount, token_decimal)
+                from_token  = Web3.to_checksum_address(from_token_address)
+                to_token    = Web3.to_checksum_address(WETH_CONTRACTS[chain])
 
-                from_token = Web3.to_checksum_address(from_token)
+                from_token_contract, from_token_decimal, from_symbol    = check_data_token(chain, from_token)
+                to_token_contract, to_token_decimal, to_symbol          = check_data_token(chain, to_token)
+                value = intToDecimal(amount, from_token_decimal)
 
                 amountOutMin = get_sushi_amountOutMin(contract, value, from_token, to_token)
 
@@ -1321,15 +1323,43 @@ def sushiswap(privatekey, retry=0):
                     }
                 )
 
+            if (to_token != '' and from_token_address != ''):
+
+                from_token  = Web3.to_checksum_address(from_token_address)
+                to_token    = Web3.to_checksum_address(to_token)
+
+                from_token_contract, from_token_decimal, from_symbol    = check_data_token(chain, from_token)
+                to_token_contract, to_token_decimal, to_symbol          = check_data_token(chain, to_token)
+                value = intToDecimal(amount, from_token_decimal)
+
+                amountOutMin = get_sushi_amountOutMin(contract, value, from_token, to_token)
+
+                contract_txn = contract.functions.swapExactTokensForTokens(
+                    value, # amountIn
+                    amountOutMin, # amountOutMin
+                    [from_token, to_token], # path
+                    wallet, # receiver
+                    (int(time.time()) + 10000)  # deadline
+                    ).build_transaction(
+                    {
+                        "from": wallet,
+                        "value": 0,
+                        "nonce": web3.eth.get_transaction_count(wallet),
+                        'gasPrice': 0,
+                        'gas': 0,
+                    }
+                )
+
+
         if from_token_address != '': 
             approve_(value, privatekey, chain, from_token_address, SUSHISWAP_CONTRACTS[chain])
 
         if (amount > 0 and amount > min_amount_swap):
 
-            contract_txn        = add_gas_price(web3, contract_txn)
-
-            gasLimit            = web3.eth.estimate_gas(contract_txn)
-            contract_txn['gas'] = int(gasLimit * random.uniform(1.03, 1.05))
+            contract_txn['nonce']   = web3.eth.get_transaction_count(wallet)
+            contract_txn            = add_gas_price(web3, contract_txn)
+            gasLimit                = web3.eth.estimate_gas(contract_txn)
+            contract_txn['gas']     = int(gasLimit * random.uniform(1.03, 1.05))
             # contract_txn = add_gas_limit(web3, contract_txn)
 
             if chain == 'bsc':
@@ -1349,8 +1379,8 @@ def sushiswap(privatekey, retry=0):
 
             status = check_status_tx(chain, tx_hash)
             if status == 1:
-                logger.success(f'{module_str} | {tx_link}')
-                list_send.append(f'{STR_DONE}{module_str} : {round_to(amount)}')
+                logger.success(f'{module_str} : {round_to(amount)} {from_symbol} => {to_symbol} | {tx_link}')
+                list_send.append(f'{STR_DONE}{module_str} : {round_to(amount)} {from_symbol} => {to_symbol}')
 
             else:
                 if retry < RETRY:
