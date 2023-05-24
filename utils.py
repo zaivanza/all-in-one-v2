@@ -40,6 +40,12 @@ def check_data_token(chain, token_address):
         decimals        = token_contract.functions.decimals().call()
         symbol          = token_contract.functions.symbol().call()
 
+        data = {
+            'contract'  : token_contract,
+            'decimal'   : decimals,
+            'symbol'    : symbol
+        }
+
         return token_contract, decimals, symbol
     
     except Exception as error:
@@ -67,7 +73,7 @@ def add_gas_limit(web3, contract_txn):
     try:
         value = contract_txn['value']
         contract_txn['value'] = 0
-        pluser = [1.05, 1.07]
+        pluser = [1.02, 1.05]
         gasLimit = web3.eth.estimate_gas(contract_txn)
         contract_txn['gas'] = int(gasLimit * random.uniform(pluser[0], pluser[1]))
         # logger.info(f"gasLimit : {contract_txn['gas']}")
@@ -75,7 +81,7 @@ def add_gas_limit(web3, contract_txn):
         contract_txn['gas'] = random.randint(2000000, 3000000)
         logger.info(f"estimate_gas error : {error}. random gasLimit : {contract_txn['gas']}")
 
-    contract_txn['value'] = value
+    # contract_txn['value'] = value
     return contract_txn
 
 def add_gas_limit_layerzero(web3, contract_txn):
@@ -95,7 +101,7 @@ def add_gas_price(web3, contract_txn):
 
     try:
         gas_price = web3.eth.gas_price
-        contract_txn['gasPrice'] = int(gas_price * random.uniform(1.05, 1.08))
+        contract_txn['gasPrice'] = int(gas_price * random.uniform(1.01, 1.02))
     except Exception as error: 
         logger.error(error)
 
@@ -112,8 +118,7 @@ def round_to(num, digits=3):
 def check_balance(privatekey, chain, address_contract):
     try:
 
-        rpc_chain   = DATA[chain]['rpc']
-        web3        = Web3(Web3.HTTPProvider(rpc_chain))
+        web3 = get_web3(chain, privatekey)
 
         try     : wallet = web3.eth.account.from_key(privatekey).address
         except  : wallet = privatekey
@@ -146,6 +151,64 @@ def check_allowance(chain, token_address, wallet, spender):
     except Exception as error:
         logger.error(error)
 
+def get_base_gas():
+
+    try:
+
+        web3 = Web3(Web3.HTTPProvider(DATA['ethereum']['rpc']))
+        gas_price = web3.eth.gas_price
+        gwei_gas_price = web3.from_wei(gas_price, 'gwei')
+
+        return gwei_gas_price
+    
+    except Exception as error: 
+        logger.error(error)
+        return get_base_gas()
+
+def wait_gas():
+
+    logger.info(f'check gas')
+    while True:
+
+        current_gas = get_base_gas()
+
+        if current_gas > MAX_GWEI:
+            logger.info(f'current_gas : {current_gas} > {MAX_GWEI}')
+            time.sleep(60)
+        else: break
+
+def checker_total_fee(chain, gas):
+
+    gas = decimalToInt(gas, 18) * PRICES_NATIVE[chain]
+
+    # cprint(f'total_gas : {round_to(gas)} $', 'blue')
+    logger.info(f'total_gas : {round_to(gas)} $')
+
+    if gas > MAX_GAS_CHARGE[chain]:
+        logger.info(f'gas is too high : {round_to(gas)}$ > {MAX_GAS_CHARGE[chain]}$. sleep and try again')
+        sleeping(30,30)
+        return False
+    else:
+        return True
+    
+def get_web3(chain, wallet):
+
+    rpc = DATA[chain]['rpc']
+
+    if USE_PROXY == True:
+        try:
+            proxy = WALLET_PROXIES[wallet]
+            web3 = Web3(Web3.HTTPProvider(rpc, request_kwargs={"proxies":{'https' : proxy, 'http' : proxy}}))
+        except Exception as error:
+            logger.error(f'{error}. Use web3 without proxy')
+            web3 = Web3(Web3.HTTPProvider(rpc))
+
+    else:
+        web3 = Web3(Web3.HTTPProvider(rpc))
+
+    return web3
+
+
 # ============== modules ==============
 
 def approve_(amount, privatekey, chain, token_address, spender, retry=0):
@@ -154,7 +217,7 @@ def approve_(amount, privatekey, chain, token_address, spender, retry=0):
 
         logger.info('approve')
 
-        web3 = Web3(Web3.HTTPProvider(DATA[chain]['rpc']))
+        web3 = get_web3(chain, privatekey)
         # web3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
         spender = Web3.to_checksum_address(spender)
@@ -188,6 +251,11 @@ def approve_(amount, privatekey, chain, token_address, spender, retry=0):
                 contract_txn = add_gas_price(web3, contract_txn)
             contract_txn = add_gas_limit(web3, contract_txn)
 
+            # смотрим газ, если выше выставленного значения : спим
+            total_fee   = int(contract_txn['gas'] * contract_txn['gasPrice'])
+            is_fee      = checker_total_fee(chain, total_fee)
+            if is_fee   == False: return approve_(amount, privatekey, chain, token_address, spender, retry)
+
             tx_hash = sign_tx(web3, contract_txn, privatekey)
             tx_link = f'{DATA[chain]["scan"]}/{tx_hash}'
 
@@ -195,7 +263,7 @@ def approve_(amount, privatekey, chain, token_address, spender, retry=0):
 
             if status == 1:
                 logger.success(f"{module_str} | {tx_link}")
-                sleeping(5, 5)
+                sleeping(10, 10)
             else:
                 logger.error(f"{module_str} | tx is failed | {tx_link}")
                 if retry < RETRY:
@@ -222,7 +290,7 @@ def transfer(privatekey, retry=0):
         module_str = f'transfer => {to_address}'
         logger.info(module_str)
 
-        web3 = Web3(Web3.HTTPProvider(DATA[chain]['rpc']))
+        web3 = get_web3(chain, privatekey)
 
         account = web3.eth.account.from_key(privatekey)
         wallet  = account.address
@@ -244,6 +312,7 @@ def transfer(privatekey, retry=0):
             if token_address == '':
 
                 contract_txn = {
+                    'from': wallet,
                     'chainId': web3.eth.chain_id,
                     'gasPrice': 0,
                     'nonce': nonce,
@@ -255,10 +324,12 @@ def transfer(privatekey, retry=0):
             else:
 
                 tx = {
+                    'from': wallet,
                     'chainId': web3.eth.chain_id,
                     'gasPrice': 0,
                     'gas': 0,
                     'nonce': nonce,
+                    'value': 0
                 }
 
                 contract_txn = token_contract.functions.transfer(
@@ -269,12 +340,14 @@ def transfer(privatekey, retry=0):
             contract_txn = add_gas_price(web3, contract_txn)
             contract_txn = add_gas_limit(web3, contract_txn)
 
-            if token_address == '':
-                if transfer_all_balance == True:
-                    gas_price = contract_txn['gasPrice']
-                    gas_limit = contract_txn['gas']
-                    gas_gas = gas_price * gas_limit
-                    contract_txn['value'] = int(value) - int(gas_gas)
+            if (token_address == '' and transfer_all_balance == True):
+                gas_gas = int(contract_txn['gas'] * contract_txn['gasPrice'])
+                contract_txn['value'] = int(value) - int(gas_gas)
+
+            # смотрим газ, если выше выставленного значения : спим
+            total_fee   = int(contract_txn['gas'] * contract_txn['gasPrice'])
+            is_fee      = checker_total_fee(chain, total_fee)
+            if is_fee   == False: return transfer(privatekey, retry)
 
             tx_hash     = sign_tx(web3, contract_txn, privatekey)
             tx_link     = f'{DATA[chain]["scan"]}/{tx_hash}'
@@ -322,6 +395,7 @@ def get_api_call_data(url):
         except Exception as error:
             logger.error(error)
             call_data = requests.get(url)
+            return call_data
 
     call_data = requests.get(url)
 
@@ -353,6 +427,7 @@ def get_api_call_data(url):
             
             except Exception as error:
                 logger.error(error)
+                time.sleep(1)
                 return get_api_call_data(url)
 
 def inch_swap(privatekey, retry=0):
@@ -361,16 +436,18 @@ def inch_swap(privatekey, retry=0):
 
         logger.info('1inch_swap')
 
+        base_url = 'https://api-defillama.1inch.io'
+        # base_url = 'https://api.1inch.io'
         inch_version = 5
 
-        chain, swap_all_balance, min_amount_swap, keep_value_from, keep_value_to,  amount_from, amount_to, from_token_address, to_token_address, slippage, divider = value_1inch_swap()
+        chain, swap_all_balance, min_amount_swap, keep_value_from, keep_value_to, amount_from, amount_to, from_token_address, to_token_address, slippage, divider = value_1inch_swap()
 
         keep_value = round(random.uniform(keep_value_from, keep_value_to), 8)
 
         if chain == 'zksync': divider = divider
         else: divider = 1
 
-        web3 = Web3(Web3.HTTPProvider(DATA[chain]['rpc']))
+        web3 = get_web3(chain, privatekey)
         chain_id = web3.eth.chain_id
 
         if from_token_address == '': 
@@ -395,15 +472,17 @@ def inch_swap(privatekey, retry=0):
         amount = amount*0.999
         amount_to_swap = intToDecimal(amount, from_decimals) 
 
-        spender_json    = get_api_call_data(f'https://api.1inch.io/v{inch_version}.0/{chain_id}/approve/spender')
+        spender_json    = get_api_call_data(f'{base_url}/v{inch_version}.0/{chain_id}/approve/spender')
         spender         = Web3.to_checksum_address(spender_json['address'])
 
         # если токен не нативный, тогда проверяем апрув и если он меньше нужного, делаем апруваем
         if from_token_address != '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE':
             approve_(amount_to_swap, privatekey, chain, from_token_address, spender)
 
-        _1inchurl = f'https://api.1inch.io/v{inch_version}.0/{chain_id}/swap?fromTokenAddress={from_token_address}&toTokenAddress={to_token_address}&amount={amount_to_swap}&fromAddress={wallet}&slippage={slippage}'
+        _1inchurl = f'{base_url}/v{inch_version}.0/{chain_id}/swap?fromTokenAddress={from_token_address}&toTokenAddress={to_token_address}&amount={amount_to_swap}&fromAddress={wallet}&slippage={slippage}'
         json_data = get_api_call_data(_1inchurl)
+
+        # cprint(json_data, 'blue')
 
         if json_data == False: 
             
@@ -426,6 +505,11 @@ def inch_swap(privatekey, retry=0):
 
             if chain == 'bsc':
                 tx['gasPrice'] = random.randint(1000000000, 1050000000) # специально ставим 1 гвей, так транза будет дешевле
+
+            # смотрим газ, если выше выставленного значения : спим
+            total_fee   = int(tx['gas'] * tx['gasPrice'])
+            is_fee      = checker_total_fee(chain, total_fee)
+            if is_fee   == False: return inch_swap(privatekey, retry)
 
             if amount >= min_amount_swap:
                     
@@ -503,8 +587,12 @@ def okx_data(api_key, secret_key, passphras, request_path="/api/v5/account/balan
 
 def okx_withdraw(privatekey, retry=0):
 
-    CHAIN, SYMBOL, amount_from, amount_to, api_key, secret_key, passphras, FEE, SUB_ACC = value_okx()
+    CHAIN, SYMBOL, amount_from, amount_to, account, FEE, SUB_ACC = value_okx()
     AMOUNT = round(random.uniform(amount_from, amount_to), 7)
+
+    api_key         = OKX_KEYS[account]['api_key']
+    secret_key      = OKX_KEYS[account]['api_secret']
+    passphras       = OKX_KEYS[account]['password']
 
     wallet = evm_wallet(privatekey)
 
@@ -512,27 +600,32 @@ def okx_withdraw(privatekey, retry=0):
         
         if SUB_ACC == True:
 
-            _, _, headers = okx_data(api_key, secret_key, passphras, request_path=f"/api/v5/users/subaccount/list", meth="GET")
-            list_sub =  requests.get("https://www.okx.cab/api/v5/users/subaccount/list", timeout=10, headers=headers) 
-            list_sub = list_sub.json()
+            try:
 
-            
-            for sub_data in list_sub['data']:
+                _, _, headers = okx_data(api_key, secret_key, passphras, request_path=f"/api/v5/users/subaccount/list", meth="GET")
+                list_sub =  requests.get("https://www.okx.cab/api/v5/users/subaccount/list", timeout=10, headers=headers) 
+                list_sub = list_sub.json()
 
-                name_sub = sub_data['subAcct']
+                
+                for sub_data in list_sub['data']:
 
-                _, _, headers = okx_data(api_key, secret_key, passphras, request_path=f"/api/v5/asset/subaccount/balances?subAcct={name_sub}&ccy={SYMBOL}", meth="GET")
-                sub_balance = requests.get(f"https://www.okx.cab/api/v5/asset/subaccount/balances?subAcct={name_sub}&ccy={SYMBOL}",timeout=10, headers=headers)
-                sub_balance = sub_balance.json()
-                sub_balance = sub_balance['data'][0]['bal']
+                    name_sub = sub_data['subAcct']
 
-                logger.info(f'{name_sub} | sub_balance : {sub_balance}')
+                    _, _, headers = okx_data(api_key, secret_key, passphras, request_path=f"/api/v5/asset/subaccount/balances?subAcct={name_sub}&ccy={SYMBOL}", meth="GET")
+                    sub_balance = requests.get(f"https://www.okx.cab/api/v5/asset/subaccount/balances?subAcct={name_sub}&ccy={SYMBOL}",timeout=10, headers=headers)
+                    sub_balance = sub_balance.json()
+                    sub_balance = sub_balance['data'][0]['bal']
 
-                body = {"ccy": f"{SYMBOL}", "amt": str(sub_balance), "from": 6, "to": 6, "type": "2", "subAcct": name_sub}
-                _, _, headers = okx_data(api_key, secret_key, passphras, request_path=f"/api/v5/asset/transfer", body=str(body), meth="POST")
-                a = requests.post("https://www.okx.cab/api/v5/asset/transfer",data=str(body), timeout=10, headers=headers)
-                a = a.json()
-                time.sleep(1)
+                    logger.info(f'{name_sub} | sub_balance : {sub_balance} {SYMBOL}')
+
+                    body = {"ccy": f"{SYMBOL}", "amt": str(sub_balance), "from": 6, "to": 6, "type": "2", "subAcct": name_sub}
+                    _, _, headers = okx_data(api_key, secret_key, passphras, request_path=f"/api/v5/asset/transfer", body=str(body), meth="POST")
+                    a = requests.post("https://www.okx.cab/api/v5/asset/transfer",data=str(body), timeout=10, headers=headers)
+                    a = a.json()
+                    time.sleep(1)
+
+            except Exception as error:
+                logger.error(f'{error}. list_sub : {list_sub}')
 
         try:
             _, _, headers = okx_data(api_key, secret_key, passphras, request_path=f"/api/v5/account/balance?ccy={SYMBOL}")
@@ -556,7 +649,7 @@ def okx_withdraw(privatekey, retry=0):
 
         if result['code'] == '0':
             logger.success(f"withdraw success => {wallet} | {AMOUNT} {SYMBOL}")
-            list_send.append(f'{STR_DONE}okx_withdraw')
+            list_send.append(f'{STR_DONE}okx_withdraw | {AMOUNT} {SYMBOL}')
         else:
             error = result['msg']
             logger.error(f"withdraw unsuccess => {wallet} | error : {error}")
@@ -637,7 +730,7 @@ def orbiter_bridge(privatekey, retry=0):
             # cprint(amount, 'yellow')
             value   = intToDecimal(amount, 18)
 
-            web3        = Web3(Web3.HTTPProvider(DATA[from_chain]['rpc']))
+            web3        = get_web3(from_chain, privatekey)
             account     = web3.eth.account.from_key(privatekey)
             wallet      = account.address
             chain_id    = web3.eth.chain_id
@@ -690,6 +783,11 @@ def orbiter_bridge(privatekey, retry=0):
 
                 # cprint(contract_txn['value'], 'green')
 
+                # смотрим газ, если выше выставленного значения : спим
+                total_fee   = int(contract_txn['gas'] * contract_txn['gasPrice'])
+                is_fee      = checker_total_fee(from_chain, total_fee)
+                if is_fee   == False: return orbiter_bridge(privatekey, retry)
+
                 tx_hash = sign_tx(web3, contract_txn, privatekey)
                 tx_link = f'{DATA[from_chain]["scan"]}/{tx_hash}'
 
@@ -733,7 +831,7 @@ def orbiter_bridge(privatekey, retry=0):
         else:
             list_send.append(f'{STR_CANCEL}{module_str}')
 
-def woofi_get_min_amount(chain, from_token, to_token, amount):
+def woofi_get_min_amount(privatekey, chain, from_token, to_token, amount):
 
     try:
 
@@ -743,7 +841,7 @@ def woofi_get_min_amount(chain, from_token, to_token, amount):
 
             slippage = 0.95
 
-            web3 = Web3(Web3.HTTPProvider(DATA[chain]['rpc']))
+            web3 = get_web3(chain, privatekey)
             address_contract = web3.to_checksum_address(WOOFI_SWAP_CONTRACTS[chain])
             contract = web3.eth.contract(address=address_contract, abi=ABI_WOOFI_SWAP)
 
@@ -774,8 +872,6 @@ def woofi_bridge(privatekey, retry=0):
 
         def get_srcInfos(amount_, from_chain, from_token):
 
-            web3 = Web3(Web3.HTTPProvider(DATA[from_chain]['rpc']))
-
             from_token = Web3.to_checksum_address(from_token)
 
             if from_token != '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE':
@@ -784,7 +880,7 @@ def woofi_bridge(privatekey, retry=0):
 
             amount = intToDecimal(amount_, decimals)
             bridgeToken = WOOFI_PATH[from_chain]
-            minBridgeAmount = woofi_get_min_amount(from_chain, from_token, WOOFI_PATH[from_chain], amount)
+            minBridgeAmount = woofi_get_min_amount(privatekey, from_chain, from_token, WOOFI_PATH[from_chain], amount)
 
             from_token = Web3.to_checksum_address(from_token)
             bridgeToken = Web3.to_checksum_address(bridgeToken)
@@ -802,7 +898,7 @@ def woofi_bridge(privatekey, retry=0):
 
             chainId     = LAYERZERO_CHAINS_ID[to_chain]
 
-            minToAmount = int(woofi_get_min_amount(to_chain, WOOFI_PATH[to_chain], to_token, amount) * 0.99)
+            minToAmount = int(woofi_get_min_amount(privatekey, to_chain, WOOFI_PATH[to_chain], to_token, amount) * 0.99)
             bridgeToken = WOOFI_PATH[to_chain]
 
             bridgeToken = Web3.to_checksum_address(bridgeToken)
@@ -825,7 +921,7 @@ def woofi_bridge(privatekey, retry=0):
         if swap_all_balance == True: amount_ = check_balance(privatekey, from_chain, from_token) - keep_value
         else: amount_ = round(random.uniform(amount_from, amount_to), 8)
             
-        web3 = Web3(Web3.HTTPProvider(DATA[from_chain]['rpc']))
+        web3 = get_web3(from_chain, privatekey)
         address_contract = web3.to_checksum_address(
             WOOFI_BRIDGE_CONTRACTS[from_chain]
         )
@@ -896,10 +992,14 @@ def woofi_bridge(privatekey, retry=0):
 
             contract_txn = add_gas_limit_layerzero(web3, contract_txn)
 
-            if swap_all_balance == True:
-                if from_token == '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE':
-                    gas_gas = int(contract_txn['gas'] * contract_txn['gasPrice'])
-                    contract_txn['value'] = int(contract_txn['value'] - gas_gas)
+            if (from_token == '' and swap_all_balance == True):
+                gas_gas = int(contract_txn['gas'] * contract_txn['gasPrice'])
+                contract_txn['value'] = int(contract_txn['value'] - gas_gas)
+
+            # смотрим газ, если выше выставленного значения : спим
+            total_fee   = int(contract_txn['gas'] * contract_txn['gasPrice'] + layerzero_fee)
+            is_fee      = checker_total_fee(from_chain, total_fee)
+            if is_fee   == False: return woofi_bridge(privatekey, retry)
 
             tx_hash = sign_tx(web3, contract_txn, privatekey)
             tx_link = f'{DATA[from_chain]["scan"]}/{tx_hash}'
@@ -947,7 +1047,7 @@ def woofi_swap(privatekey, retry=0):
         if swap_all_balance == True: amount_ = check_balance(privatekey, from_chain, from_token) - keep_value
         else: amount_ = round(random.uniform(amount_from, amount_to), 8)
             
-        web3 = Web3(Web3.HTTPProvider(DATA[from_chain]['rpc']))
+        web3 = get_web3(from_chain, privatekey)
         address_contract = web3.to_checksum_address(
             WOOFI_SWAP_CONTRACTS[from_chain]
         )
@@ -978,7 +1078,7 @@ def woofi_swap(privatekey, retry=0):
         else:
             value = 0
 
-        minToAmount = woofi_get_min_amount(from_chain, from_token, to_token, amount)
+        minToAmount = woofi_get_min_amount(privatekey, from_chain, from_token, to_token, amount)
 
         if amount_ >= min_amount_swap:
             contract_txn = contract.functions.swap(
@@ -1004,10 +1104,14 @@ def woofi_swap(privatekey, retry=0):
                 contract_txn = add_gas_price(web3, contract_txn)
             contract_txn = add_gas_limit(web3, contract_txn)
 
-            if swap_all_balance == True:
-                if from_token == '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE':
-                    gas_gas = int(contract_txn['gas'] * contract_txn['gasPrice'])
-                    contract_txn['value'] = contract_txn['value'] - gas_gas
+            if (from_token == '' and swap_all_balance == True):
+                gas_gas = int(contract_txn['gas'] * contract_txn['gasPrice'])
+                contract_txn['value'] = contract_txn['value'] - gas_gas
+
+            # смотрим газ, если выше выставленного значения : спим
+            total_fee   = int(contract_txn['gas'] * contract_txn['gasPrice'])
+            is_fee      = checker_total_fee(from_chain, total_fee)
+            if is_fee   == False: return woofi_swap(privatekey, retry)
 
             tx_hash = sign_tx(web3, contract_txn, privatekey)
             tx_link = f'{DATA[from_chain]["scan"]}/{tx_hash}'
@@ -1084,4 +1188,192 @@ def exchange_withdraw(privatekey):
     except Exception as error:
         logger.error(f"{cex}_withdraw unsuccess => {wallet} | error : {error}")
         list_send.append(f'{STR_CANCEL}{cex}_withdraw')
+
+def sushiswap(privatekey, retry=0):
+
+    try:
+
+        def rem_0x_pref(val):
+            return val[2:] if val.startswith("0x") else val
+
+        def get_sushi_amountOutMin(contract, value, from_token, to_token):
+
+            contract_txn = contract.functions.getAmountsOut(
+                value,
+                [from_token, to_token],
+                ).call()
+
+            return contract_txn[1]
+
+        chain, from_token_address, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to = value_sushiswap()
+
+        module_str = f'sushiswap : {chain}'
+        logger.info(module_str)
+
+        keep_value = round(random.uniform(keep_value_from, keep_value_to), 8)
+        if swap_all_balance == True: amount = check_balance(privatekey, chain, from_token_address) - keep_value
+        else: amount = round(random.uniform(amount_from, amount_to), 8)
+
+        web3        = get_web3(chain, privatekey)
+        account     = web3.eth.account.from_key(privatekey)
+        wallet      = account.address
+
+        if chain in ['optimism']: 
+
+            contract = web3.eth.contract(address=Web3.to_checksum_address(SUSHISWAP_CONTRACTS[chain]), abi=ABI_SUSHISWAP_OPTIMISM)
+
+            route = '0x0301ffff02014c5d5234f232bd2d76b96aa33f5ae4fcf0e4bfab'+ rem_0x_pref(WETH_CONTRACTS[chain]) +'01'+ rem_0x_pref(WETH_CONTRACTS[chain]) + '01ffff0179e11ef350d7c73925f8d0037c2dd1b8ced4153301' + rem_0x_pref(wallet)
+
+            if from_token_address == '': 
+                from_token_ = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
+                from_decimals = 18
+                from_symbol = DATA[chain]['token']
+            else:
+                from_token_contract, from_decimals, from_symbol = check_data_token(chain, from_token_address)
+                from_token_ = Web3.to_checksum_address(from_token_address)
+
+            if to_token   == '': 
+                to_token_   = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
+                to_symbol   = DATA[chain]['token']
+            else:
+                to_token_contract, to_decimals, to_symbol = check_data_token(chain, to_token)
+                to_token_ = Web3.to_checksum_address(to_token)
+
+            value = intToDecimal(amount, from_decimals)
+
+            amountOutMin = 0
+            # amountOutMin = int(amountOutMin * 0.99)
+
+            contract_txn = contract.functions.processRoute(
+                from_token_,
+                value,
+                to_token_,
+                amountOutMin,
+                wallet,
+                route
+                ).build_transaction(
+                {
+                    "from": wallet,
+                    "value": 0,
+                    "nonce": web3.eth.get_transaction_count(wallet),
+                    'gasPrice': 0,
+                    'gas': 0,
+                }
+            )
+
+            if from_token_address == '': 
+                contract_txn['value'] = value
+
+        else:
+
+            contract = web3.eth.contract(address=Web3.to_checksum_address(SUSHISWAP_CONTRACTS[chain]), abi=ABI_SUSHISWAP)
+
+            if from_token_address == '':
+
+                from_token = Web3.to_checksum_address(WETH_CONTRACTS[chain])
+                token_contract, token_decimal, symbol = check_data_token(chain, from_token)
+
+                value = intToDecimal(amount, token_decimal)
+
+                to_token = Web3.to_checksum_address(to_token)
+
+                amountOutMin = get_sushi_amountOutMin(contract, value, from_token, to_token)
+                amountOutMin = int(amountOutMin * 0.99)
+
+                contract_txn = contract.functions.swapExactETHForTokens(
+                    amountOutMin,
+                    [from_token, to_token],
+                    wallet, # receiver
+                    (int(time.time()) + 10000)  # deadline
+                    ).build_transaction(
+                    {
+                        "from": wallet,
+                        "value": value,
+                        "nonce": web3.eth.get_transaction_count(wallet),
+                        'gasPrice': 0,
+                        'gas': 0,
+                    }
+                )
+
+            if to_token == '':
+
+                to_token = Web3.to_checksum_address(WETH_CONTRACTS[chain])
+                token_contract, token_decimal, symbol = check_data_token(chain, from_token)
+                value = intToDecimal(amount, token_decimal)
+
+                from_token = Web3.to_checksum_address(from_token)
+
+                amountOutMin = get_sushi_amountOutMin(contract, value, from_token, to_token)
+
+                contract_txn = contract.functions.swapExactTokensForETH(
+                    value, # amountIn
+                    amountOutMin, # amountOutMin
+                    [from_token, to_token], # path
+                    wallet, # receiver
+                    (int(time.time()) + 10000)  # deadline
+                    ).build_transaction(
+                    {
+                        "from": wallet,
+                        "value": 0,
+                        "nonce": web3.eth.get_transaction_count(wallet),
+                        'gasPrice': 0,
+                        'gas': 0,
+                    }
+                )
+
+        if from_token_address != '': 
+            approve_(value, privatekey, chain, from_token_address, SUSHISWAP_CONTRACTS[chain])
+
+        if (amount > 0 and amount > min_amount_swap):
+
+            contract_txn        = add_gas_price(web3, contract_txn)
+
+            gasLimit            = web3.eth.estimate_gas(contract_txn)
+            contract_txn['gas'] = int(gasLimit * random.uniform(1.03, 1.05))
+            # contract_txn = add_gas_limit(web3, contract_txn)
+
+            if chain == 'bsc':
+                contract_txn['gasPrice'] = random.randint(1000000000, 1050000000) # специально ставим 1 гвей, так транза будет дешевле
+
+            if (from_token_address == '' and swap_all_balance == True):
+                gas_gas = int(contract_txn['gas'] * contract_txn['gasPrice'])
+                contract_txn['value'] = int(value) - int(gas_gas)
+
+            # смотрим газ, если выше выставленного значения : спим
+            total_fee   = int(contract_txn['gas'] * contract_txn['gasPrice'])
+            is_fee      = checker_total_fee(chain, total_fee)
+            if is_fee   == False: return sushiswap(privatekey, retry)
+
+            tx_hash = sign_tx(web3, contract_txn, privatekey)
+            tx_link = f'{DATA[chain]["scan"]}/{tx_hash}'
+
+            status = check_status_tx(chain, tx_hash)
+            if status == 1:
+                logger.success(f'{module_str} | {tx_link}')
+                list_send.append(f'{STR_DONE}{module_str} : {round_to(amount)}')
+
+            else:
+                if retry < RETRY:
+                    logger.info(f'{module_str} | tx is failed, try again in 10 sec | {tx_link}')
+                    sleeping(10, 10)
+                    sushiswap(privatekey, retry+1)
+                else:
+                    logger.error(f'{module_str} | tx is failed | {tx_link}')
+                    list_send.append(f'{STR_CANCEL}{module_str} | tx is failed | {tx_link}')
+
+        else:
+            logger.error(f"{module_str} : can't swap : balance = {amount}")
+            list_send.append(f"{STR_CANCEL}{module_str} : can't swap : balance = {amount}")
+
+
+    except Exception as error:
+        logger.error(f'{module_str} | {error}')
+
+        if retry < RETRY:
+            logger.info(f'try again | {wallet}')
+            sleeping(10, 10)
+            sushiswap(privatekey, retry+1)
+        else:
+            list_send.append(f'{STR_CANCEL}{module_str}')
+
 
