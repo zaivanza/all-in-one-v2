@@ -240,6 +240,7 @@ def get_prices():
                 'optimism'      : prices['ETH'], # ETH
                 'fantom'        : prices['FTM'], # FTM
                 'zksync'        : prices['ETH'], # ETH
+                'nova'          : prices['ETH'], # ETH
             }
 
         return data
