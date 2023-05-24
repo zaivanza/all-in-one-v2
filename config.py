@@ -17,8 +17,9 @@ import decimal
 
 from setting import *
 from data.abi.abi import *
-from data.rpc import DATA
+from data.data import *
 
+max_time_check_tx_status = 100 # в секундах. если транза не выдаст статус за это время, она будет считаться исполненной
 
 outfile = ''
 with open(f"{outfile}data/abi/erc20.json", "r") as file:
@@ -57,36 +58,8 @@ def sleeping(from_sleep, to_sleep):
     for i in tqdm(range(x), desc='sleep ', bar_format='{desc}: {n_fmt}/{total_fmt}'):
         time.sleep(1)
 
-def recipients_evm():
-    try:
-        wallets = {}
-        zero = -1
-        for evm in WALLETS:
-            zero += 1
-            wallets.update({evm : RECIPIENTS[zero]})
-
-        return wallets
-    except Exception as error:
-        # cprint(f'recipients_evm() error : {error}', 'red')
-        return {}
-
-RECIPIENTS_WALLETS = recipients_evm()
-
-def starknet_wallets():
-    try:
-        wallets = {}
-        zero = -1
-        for evm in WALLETS:
-            zero += 1
-            wallets.update({evm : STARKNET_ADDRESS[zero]})
-
-        return wallets
-    except Exception as error:
-        # cprint(f'recipients_evm() error : {error}', 'red')
-        return {}
-    
-STARKNET_WALLETS = starknet_wallets()
-
+RECIPIENTS_WALLETS  = dict(zip(WALLETS, RECIPIENTS))
+STARKNET_WALLETS    = dict(zip(WALLETS, STARKNET_ADDRESS))
 
 ORBITER_AMOUNT = {
     'ethereum'      : 0.000000000000009001,
@@ -172,6 +145,34 @@ WOOFI_PATH = {
     'fantom'        : '0x04068DA6C83AFCFA0e13ba15A6696662335D5B75',
 }
 
+WETH_CONTRACTS = {
+    'ethereum'      : '',
+    'optimism'      : '0x4200000000000000000000000000000000000006',
+    'bsc'           : '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c', # WBNB
+    'arbitrum'      : '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+    'nova'          : '0x722E8BdD2ce80A4422E880164f2079488e115365', # WETH
+    'polygon'       : '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270', # WMATIC
+    'polygon_zkevm' : '',
+    'fantom'        : '0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83',
+    'zksync'        : '',
+    'zksync_lite'   : '',
+    'starknet'      : '',
+}
+
+SUSHISWAP_CONTRACTS = {
+    'ethereum'      : '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F',
+    'optimism'      : '0x4C5D5234f232BD2D76B96aA33F5AE4FCF0E4BFAb',
+    'bsc'           : '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506',
+    'arbitrum'      : '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506',
+    'nova'          : '0x1b02da8cb0d097eb8d57a175b88c7d8b47997506',
+    'polygon'       : '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506',
+    'polygon_zkevm' : '',
+    'fantom'        : '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506',
+    'zksync'        : '',
+    'zksync_lite'   : '',
+    'starknet'      : '',
+}
+
 text1 = '''
  /$$   /$$  /$$$$$$  /$$$$$$$  /$$       /$$      /$$  /$$$$$$  /$$$$$$$ 
 | $$  | $$ /$$__  $$| $$__  $$| $$      | $$$    /$$$ /$$__  $$| $$__  $$
@@ -202,4 +203,53 @@ colors = ['green', 'yellow', 'blue', 'magenta', 'cyan']
 
 RUN_TEXT = random.choice(texts)
 RUN_COLOR = random.choice(colors)
+
+def get_wallet_proxies():
+    result = {}
+    for i in range(len(WALLETS)):
+        result[WALLETS[i]] = PROXIES[i % len(PROXIES)]
+    return result
+
+def get_prices():
+
+    try:
+
+        prices = {
+                'ETH': 0, 'BNB': 0, 'AVAX': 0, 'MATIC': 0, 'FTM': 0,
+            }
+
+        for symbol in prices:
+
+            url =f'https://min-api.cryptocompare.com/data/price?fsym={symbol}&tsyms=USDT'
+            response = requests.get(url)
+
+            try:
+                result  = [response.json()]
+                price   = result[0]['USDT']
+                prices[symbol] = float(price)
+            except Exception as error:
+                logger.error(f'{error}. set price : 0')
+                prices[symbol] = 0
+
+        data = {
+                'avalanche'     : prices['AVAX'], 
+                'polygon'       : prices['MATIC'], # MATIC
+                'ethereum'      : prices['ETH'], # ETH
+                'bsc'           : prices['BNB'], # BNB
+                'arbitrum'      : prices['ETH'], # ETH
+                'optimism'      : prices['ETH'], # ETH
+                'fantom'        : prices['FTM'], # FTM
+                'zksync'        : prices['ETH'], # ETH
+            }
+
+        return data
+    
+    except Exception as error:
+        logger.error(f'{error}. Try again')
+        time.sleep(1)
+        return get_prices()
+    
+PRICES_NATIVE   = get_prices()
+WALLET_PROXIES  = get_wallet_proxies()
+
 
