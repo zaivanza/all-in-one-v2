@@ -205,10 +205,12 @@ RUN_TEXT = random.choice(texts)
 RUN_COLOR = random.choice(colors)
 
 def get_wallet_proxies():
-    result = {}
-    for i in range(len(WALLETS)):
-        result[WALLETS[i]] = PROXIES[i % len(PROXIES)]
-    return result
+    try:
+        result = {}
+        for i in range(len(WALLETS)):
+            result[WALLETS[i]] = PROXIES[i % len(PROXIES)]
+        return result
+    except: None
 
 def get_prices():
 
