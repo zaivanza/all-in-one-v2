@@ -81,7 +81,7 @@ def add_gas_limit(web3, contract_txn):
         contract_txn['gas'] = random.randint(2000000, 3000000)
         logger.info(f"estimate_gas error : {error}. random gasLimit : {contract_txn['gas']}")
 
-    # contract_txn['value'] = value
+    contract_txn['value'] = value
     return contract_txn
 
 def add_gas_limit_layerzero(web3, contract_txn):
