@@ -1206,7 +1206,7 @@ def sushiswap(privatekey, retry=0):
             return int(contract_txn[1] * 0.99)
 
 
-        chain, from_token_address, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to = value_sushiswap()
+        chain, from_token_address, to_token_address, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to = value_sushiswap()
 
         module_str = f'sushiswap ({chain})'
         logger.info(module_str)
@@ -1272,7 +1272,7 @@ def sushiswap(privatekey, retry=0):
             if from_token_address == '':
 
                 from_token  = Web3.to_checksum_address(WETH_CONTRACTS[chain])
-                to_token    = Web3.to_checksum_address(to_token)
+                to_token    = Web3.to_checksum_address(to_token_address)
 
                 from_token_contract, from_token_decimal, from_symbol    = check_data_token(chain, from_token)
                 to_token_contract, to_token_decimal, to_symbol          = check_data_token(chain, to_token)
@@ -1296,7 +1296,7 @@ def sushiswap(privatekey, retry=0):
                     }
                 )
 
-            if to_token == '':
+            if to_token_address == '':
 
                 from_token  = Web3.to_checksum_address(from_token_address)
                 to_token    = Web3.to_checksum_address(WETH_CONTRACTS[chain])
@@ -1323,10 +1323,10 @@ def sushiswap(privatekey, retry=0):
                     }
                 )
 
-            if (to_token != '' and from_token_address != ''):
+            if (to_token_address != '' and from_token_address != ''):
 
                 from_token  = Web3.to_checksum_address(from_token_address)
-                to_token    = Web3.to_checksum_address(to_token)
+                to_token    = Web3.to_checksum_address(to_token_address)
 
                 from_token_contract, from_token_decimal, from_symbol    = check_data_token(chain, from_token)
                 to_token_contract, to_token_decimal, to_symbol          = check_data_token(chain, to_token)
