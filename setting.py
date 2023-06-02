@@ -292,7 +292,7 @@ def value_woofi_swap():
     chain = 'bsc'
 
     from_token          = '' # пусто если нативный токен сети
-    to_token            = '' # пусто если нативный токен сети
+    to_token            = '0x55d398326f99059ff775485246999027b3197955' # пусто если нативный токен сети
 
     amount_from         = 0.0001 # от какого кол-ва from_token свапаем
     amount_to           = 0.0001 # до какого кол-ва from_token свапаем
@@ -308,25 +308,52 @@ def value_woofi_swap():
 def value_sushiswap():
 
     '''
-    ОСТОРОЖНО : не свапай большие суммы, могут зафронтранить.
-    
+    внимание! большие сайзы лучше свапать через 1inch или 0x
+
     свап на https://www.sushi.com/swap
     chains :  arbitrum | nova | bsc | polygon | fantom
     '''
     
-    chain = 'arbitrum'
+    chain = 'nova'
 
-    from_token          = '' # пусто если нативный токен сети
-    to_token            = '0x912CE59144191C1204E64559FE8253a0e49E6548' # пусто если нативный токен сети
+    from_token          = '0x750ba8b76187092B0D1E87E28daaf484d1b5273b' # пусто если нативный токен сети
+    to_token            = '' # пусто если нативный токен сети
 
-    amount_from         = 0.0001 # от какого кол-ва from_token свапаем
-    amount_to           = 0.00013 # до какого кол-ва from_token свапаем
+    amount_from         = 0.03 # от какого кол-ва from_token свапаем
+    amount_to           = 0.5 # до какого кол-ва from_token свапаем
 
     swap_all_balance    = False # True / False. если True, тогда свапаем весь баланс
     min_amount_swap     = 0 # если баланс будет меньше этого числа, свапать не будет
     keep_value_from     = 0 # от скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
     keep_value_to       = 0 # до скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
 
+    slippage = 5 # советую ставить 1-5. если ошибка INSUFFICIENT_OUTPUT_AMOUNT , тогда увеличивай slippage
+
     
-    return chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to
+    return chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, slippage
+
+def value_0x_swap():
+
+    '''
+    свапы через апи 0x (агрегатор)
+    docs : https://0x.org/docs/introduction/0x-cheat-sheet
+    chains : ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | celo
+    '''
+
+    chain               = 'optimism' # в какой сети свапаем
+    from_token_address  = '0x7F5c764cBc14f9669B88837ca1490cCa17c31607' # пусто если нативный токен сети
+    to_token_address    = '0x4200000000000000000000000000000000000042' # пусто если нативный токен сети
+
+    amount_from         = 1    # от какого кол-ва монет свапаем
+    amount_to           = 5    # до какого кол-ва монет свапаем
+
+    swap_all_balance    = False # True / False. если True, тогда свапаем весь баланс
+    min_amount_swap     = 0 # если баланс будет меньше этого числа, свапать не будет
+    keep_value_from     = 0 # от скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
+    keep_value_to       = 0 # до скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
+
+    slippage = 1 # слиппейдж, дефолт от 1 до 3
+
+    return chain, swap_all_balance, min_amount_swap, keep_value_from, keep_value_to, amount_from, amount_to, from_token_address, to_token_address, slippage
+
 
