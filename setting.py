@@ -308,6 +308,8 @@ def value_woofi_swap():
 def value_sushiswap():
 
     '''
+    ОСТОРОЖНО : не свапай большие суммы, могут зафронтранить.
+    
     свап на https://www.sushi.com/swap
     chains :  arbitrum | nova | bsc | polygon | fantom
     '''
