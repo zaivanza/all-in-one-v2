@@ -4,19 +4,19 @@ import random
 
 MODULE :
 
-1. web3_checker
-2. debank checker
-3. exchange withdraw : вывод с биржи
-4. okx withdraw
-5. transfer
-6. 1inch_swap
-7. orbiter finance
-8. woofi_bridge
-9. woofi_swap
+1.  web3_checker
+2.  debank checker
+3.  exchange withdraw : вывод с биржи
+4.  okx withdraw
+5.  transfer
+6.  1inch_swap
+7.  orbiter finance
+8.  woofi_bridge
+9.  woofi_swap
 10. sushiswap
+11. 0x_swap
 
 '''
-
 # ========================
 MODULE = 1
 # ========================
