@@ -35,6 +35,9 @@ def start_module(module, key=''):
     if module == 10:
         sushiswap(key)
 
+    if module == 11:
+        zeroX_swap(key)
+
 
 if __name__ == "__main__":
 
