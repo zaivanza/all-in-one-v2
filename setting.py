@@ -15,8 +15,10 @@ MODULE :
 9.  woofi_swap
 10. sushiswap
 11. 0x_swap
+12. bungee_refuel
 
 '''
+
 # ========================
 MODULE = 1
 # ========================
