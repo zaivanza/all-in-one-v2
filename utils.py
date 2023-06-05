@@ -1523,8 +1523,6 @@ def get_bungee_limits(from_chain, to_chain):
 
     data = BUNGEE_LIMITS
 
-    call_json(data, 'bungee')
-
     for i in range(len(data['result'])):
         if data['result'][i]['chainId'] == from_chain_id:
             infos = data['result'][i]['limits']
