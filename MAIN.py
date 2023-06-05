@@ -38,6 +38,9 @@ def start_module(module, key=''):
     if module == 11:
         zeroX_swap(key)
 
+    if module == 12:
+        bungee_refuel(key)
+
 
 if __name__ == "__main__":
 
