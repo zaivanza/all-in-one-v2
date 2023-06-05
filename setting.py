@@ -52,6 +52,7 @@ MAX_GAS_CHARGE = {
     'fantom'        : 0.5,
     'zksync'        : 1,
     'nova'          : 0.1,
+    'gnosis'        : 0.1,
 }
 
 
@@ -362,7 +363,7 @@ def value_bungee():
 
     '''
     refuel нативных токенов через https://www.bungee.exchange/
-    chains : zksync | polygon | ethereum | bsc | arbitrum | optimism | fantom | polygon_zkevm | avalanche
+    chains : zksync | polygon | ethereum | bsc | arbitrum | optimism | fantom | polygon_zkevm | avalanche | gnosis
     '''
 
     from_chain          = 'arbitrum' # с какой сети 
