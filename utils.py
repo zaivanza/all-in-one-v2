@@ -1522,6 +1522,8 @@ def get_bungee_limits(from_chain, to_chain):
 
     data = BUNGEE_LIMITS
 
+    call_json(data, 'bungee')
+
     for i in range(len(data['result'])):
         if data['result'][i]['chainId'] == from_chain_id:
             infos = data['result'][i]['limits']
@@ -1562,7 +1564,7 @@ def bungee_refuel(privatekey, retry=0):
         account     = web3.eth.account.from_key(privatekey)
         wallet      = account.address
 
-        if amount > min_limit and value < max_limit: None
+        if amount > min_limit and amount < max_limit: None
         else: 
             logger.error(f'amount {amount} but bungee_limits : {min_limit} - {max_limit}')
             list_send.append(f'{STR_CANCEL}{module_str} : amount {amount} but bungee_limits : {min_limit} - {max_limit}')
