@@ -356,4 +356,24 @@ def value_0x_swap():
 
     return chain, swap_all_balance, min_amount_swap, keep_value_from, keep_value_to, amount_from, amount_to, from_token_address, to_token_address, slippage
 
+def value_bungee():
+
+    '''
+    refuel нативных токенов через https://www.bungee.exchange/
+    chains : zksync | polygon | ethereum | bsc | arbitrum | optimism | fantom | polygon_zkevm | avalanche
+    '''
+
+    from_chain          = 'arbitrum' # с какой сети 
+    to_chain            = 'zksync' # в какую сеть 
+
+    amount_from         = 0.001 # от какого кол-ва монет делаем бридж
+    amount_to           = 0.003 # до какого кол-ва монет делаем бридж
+
+    bridge_all_balance  = False         # True / False. если True, тогда бриджим весь баланс
+    min_amount_bridge   = 0             # если баланс будет меньше этого числа, выводить не будет
+    keep_value_from     = 0             # от скольки монет оставляем на кошельке (работает только при : bridge_all_balance = True)
+    keep_value_to       = 0             # до скольки монет оставляем на кошельке (работает только при : bridge_all_balance = True)
+
+    return from_chain, to_chain, bridge_all_balance, amount_from, amount_to, min_amount_bridge, keep_value_from, keep_value_to
+
 
