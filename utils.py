@@ -441,7 +441,8 @@ def inch_swap(privatekey, retry=0):
         
     try:
 
-        logger.info('1inch_swap')
+        module_str = '1inch_swap'
+        logger.info(module_str)
 
         base_url = 'https://api-defillama.1inch.io'
         # base_url = 'https://api.1inch.io'
@@ -543,11 +544,11 @@ def inch_swap(privatekey, retry=0):
 
     except KeyError:
         logger.error(json_data['description'])
-        module_str = f'1inch_swap'
+        module_str = '1inch_swap'
         list_send.append(f'{STR_CANCEL}{module_str}')
 
     except Exception as error:
-        module_str = f'1inch_swap'
+        module_str = '1inch_swap'
         logger.error(f'{module_str} | error : {error}')
         if retry < RETRY:
             logger.info(f'try again in 10 sec.')
