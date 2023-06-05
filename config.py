@@ -182,6 +182,7 @@ BUNGEE_REFUEL_CONTRACTS = {
     'polygon_zkevm' : '0x555a64968e4803e27669d64e349ef3d18fca0895',
     'zksync'        : '0x7Ee459D7fDe8b4a3C22b9c8C7aa52AbadDd9fFD5',
     'avalanche'     : '0x040993fbf458b95871cd2d73ee2e09f4af6d56bb',
+    'gnosis'        : '0xBE51D38547992293c89CC589105784ab60b004A9',
 }
 
 
@@ -229,7 +230,7 @@ def get_prices():
     try:
 
         prices = {
-                'ETH': 0, 'BNB': 0, 'AVAX': 0, 'MATIC': 0, 'FTM': 0,
+                'ETH': 0, 'BNB': 0, 'AVAX': 0, 'MATIC': 0, 'FTM': 0, 'xDAI': 0
             }
 
         for symbol in prices:
@@ -247,14 +248,15 @@ def get_prices():
 
         data = {
                 'avalanche'     : prices['AVAX'], 
-                'polygon'       : prices['MATIC'], # MATIC
-                'ethereum'      : prices['ETH'], # ETH
-                'bsc'           : prices['BNB'], # BNB
-                'arbitrum'      : prices['ETH'], # ETH
-                'optimism'      : prices['ETH'], # ETH
-                'fantom'        : prices['FTM'], # FTM
-                'zksync'        : prices['ETH'], # ETH
-                'nova'          : prices['ETH'], # ETH
+                'polygon'       : prices['MATIC'], 
+                'ethereum'      : prices['ETH'], 
+                'bsc'           : prices['BNB'], 
+                'arbitrum'      : prices['ETH'], 
+                'optimism'      : prices['ETH'], 
+                'fantom'        : prices['FTM'], 
+                'zksync'        : prices['ETH'], 
+                'nova'          : prices['ETH'], 
+                'gnosis'        : prices['xDAI'], 
             }
 
         return data
@@ -274,3 +276,5 @@ def get_bungee_data():
 PRICES_NATIVE   = get_prices()
 WALLET_PROXIES  = get_wallet_proxies()
 BUNGEE_LIMITS   = get_bungee_data()
+
+
