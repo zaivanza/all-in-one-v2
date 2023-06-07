@@ -35,7 +35,7 @@ RETRY = 0 # кол-во попыток при ошибках / фейлах
 # настройка отправки результатов в тг бота
 TG_BOT_SEND = True # True / False. Если True, тогда будет отправлять результаты
 
-USE_PROXY   = False # True / False. True если хочешь юзать прокси
+USE_PROXY   = False # True / False. True если хочешь юзать прокси в web3
 
 CHECK_GWEI  = True # True / False. если True, тогда будем смотреть base gwei, и если он больше MAX_GWEI, скрипт будет ожидать снижения газа
 MAX_GWEI    = 50 # gas в gwei (смотреть здесь : https://etherscan.io/gastracker)
