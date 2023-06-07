@@ -53,6 +53,7 @@ async def get_debank(session, address, type_, chain=''):
                             break
 
                     else:
+                        
                         get_result[type_].update({address : resp_json})
                         logger.success(f'{address} | {type_}')
                         break
@@ -61,38 +62,40 @@ async def get_debank(session, address, type_, chain=''):
                     await asyncio.sleep(sleep)
 
         except Exception as error:
-            logger.info(f'{address} | {type_} : {error}')
+            logger.info(f'{address} | {type_} : {error}, try again in {sleep} sec.')
             await asyncio.sleep(3)
 
 async def checker_main(modules, nft_chains, wallets):
 
     async with aiohttp.ClientSession() as session:
-        tasks = []
 
-        for address in wallets:
+        wallets_list = (list(func_chunks_generators(WALLETS, 50)))
 
+        for wallets in wallets_list:
 
-            if 'token' in modules:
+            tasks = []
 
-                task = asyncio.create_task(get_debank(session, address, 'token'))
-                tasks.append(task)
+            for address in wallets:
 
+                if 'token' in modules:
 
-            if 'protocol' in modules:
-
-                task = asyncio.create_task(get_debank(session, address, 'protocol'))
-                tasks.append(task)
-                
-
-            if 'nft' in modules:
-
-                for chain in nft_chains:
-
-                    task = asyncio.create_task(get_debank(session, address, 'nft', chain))
+                    task = asyncio.create_task(get_debank(session, address, 'token'))
                     tasks.append(task)
 
+                if 'protocol' in modules:
 
-        await asyncio.gather(*tasks)
+                    task = asyncio.create_task(get_debank(session, address, 'protocol'))
+                    tasks.append(task)
+                    
+                if 'nft' in modules:
+
+                    for chain in nft_chains:
+
+                        task = asyncio.create_task(get_debank(session, address, 'nft', chain))
+                        tasks.append(task)
+
+
+            await asyncio.gather(*tasks)
 
 def get_json_data(check_min_value, wallets):
 
@@ -295,9 +298,11 @@ def send_result(get_json, file_name, check_chain, check_coin):
             
 
             if check_coin != '':
-                file.write(f'{check_coin} : {finder}\n')
-                cprint(f'{check_coin} : {finder}\n', 'green')
-                all_finder_token.append(finder)
+                try:
+                    file.write(f'{check_coin} : {finder}\n')
+                    cprint(f'{check_coin} : {finder}\n', 'green')
+                    all_finder_token.append(finder)
+                except : None
                 
 
             spamwriter.writerow([zero, wallet, total_value, protocol_value, token_value, sum(nft_amounts)])
@@ -318,19 +323,78 @@ def send_result(get_json, file_name, check_chain, check_coin):
 
     cprint(f'результаты записаны в файлы : {outfile}{file_name}.csv и {outfile}{file_name}.txt\n', 'blue')
 
+async def get_activate_debank(session, wallet, chain):
+
+    while True:
+
+        try:
+
+            sleep   = 3
+            proxy   = random.choice(PROXIES)
+            url     = f'https://api.debank.com/token/balance_list?user_addr={wallet}&chain={chain[0]}'
+
+            async with session.get(url, proxy=proxy, timeout=10) as resp:
+
+                if resp.status == 200:
+                    logger.success(f'{wallet} | {chain[1]}')
+                    break
+                else:
+                    # logger.info(f'response_status : {resp.status}, try again in {sleep} sec.')
+                    await asyncio.sleep(sleep)
+
+        except Exception as error:
+            logger.info(f'{wallet} | {chain[1]} : {error}, try again in {sleep} sec.')
+            await asyncio.sleep(sleep)
+
+async def activate_wallet_debank(wallets, chains):
+
+    async with aiohttp.ClientSession() as session:
+
+        wallets_list = (list(func_chunks_generators(WALLETS, 50)))
+
+        for wallets in wallets_list:
+
+            tasks = []
+
+            for wallet in wallets:
+
+                for items in chains:
+                    for chain in items.items():
+
+                        task = asyncio.create_task(get_activate_debank(session, wallet, chain))
+                        tasks.append(task)
+
+            await asyncio.gather(*tasks)
+
 
 def start_debank():
+
+    start = time.perf_counter()
 
     wallets = []
     for key in WALLETS:
         wallet = evm_wallet(key)
         wallets.append(wallet)
 
-    file_name, check_min_value, check_chain, check_coin, modules, nft_chains = value_debank()
+    file_name, check_min_value, check_chain, check_coin, modules, nft_chains, activate_wallets = value_debank()
+
+    if activate_wallets == True:
+        print()
+        logger.info('START ACTIVATE WALLETS')
+        print()
+        asyncio.run(activate_wallet_debank(wallets, DEBANK_ACTIVATE_CHAINS))
+
+    print()
+    logger.info('START CHECK WALLETS')
+    print()
 
     asyncio.run(checker_main(modules, nft_chains, wallets))
+    call_json(get_result, 'test')
     get_json = get_json_data(check_min_value, wallets)
     send_result(get_json, file_name, check_chain, check_coin)
 
+    fin = round((time.perf_counter() - start), 1)
+    cprint(f'finish : {int(fin)} sec.', 'white')
+    print()
 
 
