@@ -43,6 +43,179 @@ with open(f"{outfile}data/proxies.txt", "r") as f:
 STR_DONE    = '✅ '
 STR_CANCEL  = '❌ '
 
+# какие сети активируем в дебанке
+DEBANK_ACTIVATE_CHAINS = [
+    {
+        "eth": "Ethereum"
+    },
+    {
+        "bsc": "BNB Chain"
+    },
+    {
+        "xdai": "Gnosis Chain"
+    },
+    # {
+    #     "heco": "HECO"
+    # },
+    {
+        "matic": "Polygon"
+    },
+    {
+        "ftm": "Fantom"
+    },
+    # {
+    #     "okt": "OKC"
+    # },
+    {
+        "avax": "Avalanche"
+    },
+    {
+        "op": "Optimism"
+    },
+    {
+        "arb": "Arbitrum"
+    },
+    # {
+    #     "celo": "Celo"
+    # },
+    # {
+    #     "movr": "Moonriver"
+    # },
+    # {
+    #     "cro": "Cronos"
+    # },
+    # {
+    #     "boba": "Boba"
+    # },
+    # {
+    #     "metis": "Metis"
+    # },
+    # {
+    #     "btt": "BitTorrent"
+    # },
+    # {
+    #     "aurora": "Aurora"
+    # },
+    # {
+    #     "mobm": "Moonbeam"
+    # },
+    # {
+    #     "sbch": "SmartBch"
+    # },
+    # {
+    #     "fuse": "Fuse"
+    # },
+    {
+        "hmy": "Harmony"
+    },
+    # {
+    #     "klay": "Klaytn"
+    # },
+    # {
+    #     "astar": "Astar"
+    # },
+    # {
+    #     "palm": "Palm"
+    # },
+    # {
+    #     "sdn": "Shiden"
+    # },
+    # {
+    #     "iotx": "IoTeX"
+    # },
+    # {
+    #     "rsk": "RSK"
+    # },
+    # {
+    #     "wan": "Wanchain"
+    # },
+    # {
+    #     "kcc": "KCC"
+    # },
+    # {
+    #     "sgb": "Songbird"
+    # },
+    # {
+    #     "evmos": "EvmOS"
+    # },
+    # {
+    #     "dfk": "DFK"
+    # },
+    # {
+    #     "tlos": "Telos"
+    # },
+    # {
+    #     "swm": "Swimmer"
+    # },
+    {
+        "nova": "Arbitrum Nova"
+    },
+    # {
+    #     "canto": "Canto"
+    # },
+    # {
+    #     "doge": "Dogechain"
+    # },
+    # {
+    #     "kava": "Kava"
+    # },
+    # {
+    #     "step": "Step"
+    # },
+    # {
+    #     "cfx": "Conflux"
+    # },
+    # {
+    #     "mada": "Milkomeda"
+    # },
+    # {
+    #     "brise": "Bitgert"
+    # },
+    # {
+    #     "ckb": "Godwoken"
+    # },
+    # {
+    #     "tomb": "TOMB Chain"
+    # },
+    {
+        "era": "zkSync Era"
+    },
+    # {
+    #     "ron": "Ronin"
+    # },
+    {
+        "pze": "Polygon zkEVM"
+    },
+    # {
+    #     "eos": "EOS EVM"
+    # },
+    {
+        "core": "CORE"
+    },
+    # {
+    #     "wemix": "WEMIX"
+    # },
+    # {
+    #     "etc": "Ethereum Classic"
+    # },
+    # {
+    #     "pls": "Pulse"
+    # },
+    # {
+    #     "flr": "Flare"
+    # },
+    # {
+    #     "fsn": "Fusion"
+    # },
+    # {
+    #     "mtr": "Meter"
+    # },
+    # {
+    #     "rose": "Oasis Emerald"
+    # }
+]
+
+
 def intToDecimal(qty, decimal):
     return int(qty * int("".join(["1"] + ["0"]*decimal)))
 
@@ -214,8 +387,13 @@ text2 = '''
 texts = [text1, text2]
 colors = ['green', 'yellow', 'blue', 'magenta', 'cyan']
 
-RUN_TEXT = random.choice(texts)
-RUN_COLOR = random.choice(colors)
+RUN_TEXT    = random.choice(texts)
+RUN_COLOR   = random.choice(colors)
+
+# разбивка массива на части по кол-ву элементов
+def func_chunks_generators(lst, n):
+    for i in range(0, len(lst), n):
+        yield lst[i: i + n]
 
 def get_wallet_proxies():
     try:
