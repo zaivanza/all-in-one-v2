@@ -21,7 +21,7 @@ def start_module(module, key=''):
         transfer(key)
 
     if module == 6:
-        inch_swap(key)
+        zeroX_swap(key)
 
     if module == 7:
         orbiter_bridge(key)
@@ -36,9 +36,6 @@ def start_module(module, key=''):
         sushiswap(key)
 
     if module == 11:
-        zeroX_swap(key)
-
-    if module == 12:
         bungee_refuel(key)
 
 
