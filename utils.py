@@ -1287,7 +1287,7 @@ def zeroX_swap(privatekey, retry=0):
                 'value'     : int(json_data[0]['value']),
             }
 
-            contract_txn['gas'] = int(contract_txn['gas'] * 1.3)
+            contract_txn['gas'] = int(contract_txn['gas'] * 1.5)
 
             # смотрим газ, если выше выставленного значения : спим
             total_fee   = int(contract_txn['gas'] * contract_txn['gasPrice'])
