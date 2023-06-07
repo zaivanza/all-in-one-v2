@@ -1245,10 +1245,11 @@ def zeroX_swap(privatekey, retry=0):
         web3 = get_web3(chain, privatekey)
 
         if from_token_address == '': 
-            from_token_address = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
+            from_token = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
             from_decimals = 18
             from_symbol = DATA[chain]['token']
         else:
+            from_token = from_token_address
             from_token_contract, from_decimals, from_symbol = check_data_token(chain, from_token_address)
 
         if to_token_address   == '': 
@@ -1266,14 +1267,14 @@ def zeroX_swap(privatekey, retry=0):
         amount = amount*0.999
         amount_to_swap = intToDecimal(amount, from_decimals) 
 
-        json_data = get_0x_quote(chain, from_token_address, to_token_address, amount_to_swap, slippage)
+        json_data = get_0x_quote(chain, from_token, to_token_address, amount_to_swap, slippage)
 
         if json_data != False:
 
             spender = json_data[0]['allowanceTarget']
 
             # если токен не нативный, тогда проверяем апрув и если он меньше нужного, делаем апрув
-            if from_token_address != '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE':
+            if from_token != '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE':
                 approve_(amount_to_swap, privatekey, chain, from_token_address, spender)
 
             contract_txn = {
@@ -1288,6 +1289,10 @@ def zeroX_swap(privatekey, retry=0):
             }
 
             contract_txn['gas'] = int(contract_txn['gas'] * 1.5)
+
+            if (from_token_address == '' and swap_all_balance == True):
+                gas_gas = int(contract_txn['gas'] * contract_txn['gasPrice'])
+                contract_txn['value'] = int(int(amount_to_swap - gas_gas) * 0.999)
 
             # смотрим газ, если выше выставленного значения : спим
             total_fee   = int(contract_txn['gas'] * contract_txn['gasPrice'])
