@@ -1236,7 +1236,8 @@ def zeroX_swap(privatekey, retry=0):
         
     try:
 
-        logger.info('0x_swap')
+        module_str = '0x_swap'
+        logger.info(module_str)
 
         chain, swap_all_balance, min_amount_swap, keep_value_from, keep_value_to, amount_from, amount_to, from_token_address, to_token_address, slippage = value_0x_swap()
 
