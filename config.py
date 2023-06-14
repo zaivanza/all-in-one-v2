@@ -356,6 +356,7 @@ BUNGEE_REFUEL_CONTRACTS = {
     'zksync'        : '0x7Ee459D7fDe8b4a3C22b9c8C7aa52AbadDd9fFD5',
     'avalanche'     : '0x040993fbf458b95871cd2d73ee2e09f4af6d56bb',
     'gnosis'        : '0xBE51D38547992293c89CC589105784ab60b004A9',
+    'fantom'        : '0x040993fbF458b95871Cd2D73Ee2E09F4AF6d56bB',
 }
 
 
