@@ -409,7 +409,7 @@ def get_prices():
     try:
 
         prices = {
-                'ETH': 0, 'BNB': 0, 'AVAX': 0, 'MATIC': 0, 'FTM': 0, 'xDAI': 0, 'CELO': 0
+                'ETH': 0, 'BNB': 0, 'AVAX': 0, 'MATIC': 0, 'FTM': 0, 'xDAI': 0, 'CELO': 0, 'CORE': 0, 'ONE': 0
             }
 
         for symbol in prices:
@@ -438,6 +438,8 @@ def get_prices():
                 'gnosis'        : prices['xDAI'], 
                 'celo'          : prices['CELO'], 
                 'polygon_zkevm' : prices['ETH'], 
+                'core'          : prices['CORE'], 
+                'harmony'       : prices['ONE'], 
             }
 
         return data
