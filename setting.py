@@ -15,17 +15,18 @@ MODULE :
 9.  woofi_swap
 10. sushiswap
 11. bungee_refuel
+12. quickswap
 
 '''
 
 # ========================
-MODULE = 2
+MODULE = 1
 # ========================
 
 IS_SLEEP        = True # True / False. True если нужно поставить sleep между кошельками
 # от скольки до скольки спим между кошельками (секунды) :
 SLEEP_FROM      = 100
-SLEEP_TO        = 200
+SLEEP_TO        = 300
 
 # нужно ли рандомизировать (перемешивать) кошельки. True = да. False = нет
 RANDOM_WALLETS  = True # True / False
@@ -35,10 +36,10 @@ RETRY = 0 # кол-во попыток при ошибках / фейлах
 # настройка отправки результатов в тг бота
 TG_BOT_SEND = True # True / False. Если True, тогда будет отправлять результаты
 
-USE_PROXY   = False # True / False. True если хочешь юзать прокси в web3
+USE_PROXY   = False # True / False. True если хочешь юзать прокси
 
 CHECK_GWEI  = True # True / False. если True, тогда будем смотреть base gwei, и если он больше MAX_GWEI, скрипт будет ожидать снижения газа
-MAX_GWEI    = 50 # gas в gwei (смотреть здесь : https://etherscan.io/gastracker)
+MAX_GWEI    = 30 # gas в gwei (смотреть здесь : https://etherscan.io/gastracker)
 
 # если газ за транзу с этой сети будет выше в $, тогда скрипт будет спать 30с и пробовать снова
 MAX_GAS_CHARGE = {
@@ -53,7 +54,7 @@ MAX_GAS_CHARGE = {
     'nova'          : 0.1,
     'gnosis'        : 0.1,
     'celo'          : 0.1,
-    'polygon_zkevm' : 0.5,
+    'polygon_zkevm' : 1,
 }
 
 
@@ -67,45 +68,52 @@ def value_web3_checker():
     datas = {
         'bsc': [
             '', # BNB
-            # '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d', # USDC
+            '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d', # USDC
             '0x55d398326f99059ff775485246999027b3197955', # USDT
+            '0xe9e7cea3dedca5984780bafc599bd69add087d56', # BUSD
             ],
         'arbitrum': [
             '', # ETH
-            # '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9', # USDT
-            # '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8', # USDC
+            '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9', # USDT
+            '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8', # USDC
+            # '0x6694340fc020c5e6b96567843da2df01b2ce1eb6', # STG
             ],
-        # 'optimism': [
-        #     '', # ETH
-        #     '0x7f5c764cbc14f9669b88837ca1490cca17c31607', # USDC
-        #     '0x4200000000000000000000000000000000000042', # OP
-        #     '0x94b008aa00579c1307b0ef2c499ad98a8ce58e58', # USDT
-        #     ],
+        'optimism': [
+            '', # ETH
+            '0x7f5c764cbc14f9669b88837ca1490cca17c31607', # USDC
+            # '0x4200000000000000000000000000000000000042', # OP
+            '0x94b008aa00579c1307b0ef2c499ad98a8ce58e58', # USDT
+            ],
         'polygon': [
             '', # MATIC
+            '0xc2132d05d31c914a87c6611c10748aeb04b58e8f', # USDT
+            '0x2791bca1f2de4661ed88a30c99a7a9449aa84174', # USDC
             ],
-        # 'avalanche': [
-        #     '', # AVAX
-        #     ],
-        # 'ethereum': [
-        #     '', # ETH
-        #     '0xdac17f958d2ee523a2206206994597c13d831ec7', # USDT
-        #     ],
+        'avalanche': [
+            '', # AVAX
+            '0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7', # USDT
+            ],
+        'ethereum': [
+            '', # ETH
+            '0xdac17f958d2ee523a2206206994597c13d831ec7', # USDT
+            '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', # USDC
+            # '0xaf5191b0de278c7286d6c7cc6ab6bb8a73ba2cd6', # STG
+            ],
         'zksync': [
             '', # ETH
             ],
         # 'nova': [
         #     '', # ETH
         #     ],
-        # 'fantom': [
-        #     '', # FTM
-        #     ],
+        'fantom': [
+            '', # FTM
+            ],
     }
 
     min_balance = {
         'chain'     : 'zksync',
         'coin'      : 'ETH',
-        'amount'    : 0.003 # если баланс меньше этого числа, кошелек будет выделен
+        'amount'    : 0 # если баланс меньше этого числа, кошелек будет выделен
     }
     
     file_name   = 'web3_balances' # имя файла в который будем сохранять данные. создается сам
@@ -121,13 +129,13 @@ def value_debank():
     сети, которые мы активируем, записаны в config.py => DEBANK_ACTIVATE_CHAINS. ненужные (как по мне) сети я закомментировал. если нужно, можешь их раскомментировать
     '''
 
-    activate_wallets = True # True если нужно активировать кошельки (при первом запуске). False чтобы отключить
+    activate_wallets = False # True если нужно активировать кошельки (при первом запуске). False чтобы отключить
 
     # какие модули включены. если какой-то модуль не нужен, закомментируй (#) его. модуль nft самый долгий, по ненадобности лучше его отключать
     modules = [
         'token', # смотрит монеты
         # 'nft', # смотрит нфт
-        # 'protocol' # смотрит протоколы
+        'protocol' # смотрит протоколы
     ]
 
     # в каких сетях смотрим нфт. если какая-то сеть не нужна, закомментируй (#) ее
@@ -165,7 +173,7 @@ def value_exchange():
     exchange    = 'binance' # запиши сюда биржу
 
     chain       = 'ETH' # в какой сети выводим
-    symbol      = 'ETH'  # какой токен выводим
+    symbol      = 'ETH' # какой токен выводим
 
     amount_from = 0.015 # от какого кол-ва монет выводим
     amount_to   = 0.02 # до какого кол-ва монет выводим
@@ -197,7 +205,7 @@ def value_okx():
     account = 'account_1'
 
     FEE         = 0.0001 # комса на вывод
-    SUB_ACC     = False # True / False
+    SUB_ACC     = False # True / False. True если хочешь проверять субаккаунты и сначала делать с них перевод на основной счет
 
     return chain, symbol, amount_from, amount_to, account, FEE, SUB_ACC
 
@@ -205,19 +213,19 @@ def value_transfer():
 
     '''
     вывод (трансфер) монет с кошельков
-    chains : ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | nova | zksync
+    chains : ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | nova | zksync | celo | gnosis
     '''
 
-    chain                = 'arbitrum'   # в какой сети выводить
-    token_address        = ''           # пусто если нативный токен сети
+    chain                = 'gnosis' # в какой сети выводить
+    token_address        = '' # пусто если нативный токен сети
 
-    amount_from          = 0.007            # от какого кол-ва монет делаем трансфер
-    amount_to            = 0.007            # до какого кол-ва монет делаем трансфер  
+    amount_from          = 0.007 # от какого кол-ва монет делаем трансфер
+    amount_to            = 0.007 # до какого кол-ва монет делаем трансфер  
 
-    transfer_all_balance = True        # True / False. если True, тогда выводим весь баланс
-    min_amount_transfer  = 0.0005            # если баланс будет меньше этого числа, выводить не будет
-    keep_value_from      = 0.001            # от скольки монет оставляем на кошельке (работает только при : transfer_all_balance = True)
-    keep_value_to        = 0.0015            # до скольки монет оставляем на кошельке (работает только при : transfer_all_balance = True)
+    transfer_all_balance = False # True / False. если True, тогда выводим весь баланс
+    min_amount_transfer  = 0 # если баланс будет меньше этого числа, выводить не будет
+    keep_value_from      = 0 # от скольки монет оставляем на кошельке (работает только при : transfer_all_balance = True)
+    keep_value_to        = 0 # до скольки монет оставляем на кошельке (работает только при : transfer_all_balance = True)
     
     return chain, amount_from, amount_to, transfer_all_balance, min_amount_transfer, keep_value_from, keep_value_to, token_address
 
@@ -231,12 +239,12 @@ def value_0x_swap():
 
     chain               = 'bsc' # в какой сети свапаем
     from_token_address  = '' # пусто если нативный токен сети
-    to_token_address    = '0x55d398326f99059ff775485246999027b3197955' # пусто если нативный токен сети
+    to_token_address    = '0x12f31B73D812C6Bb0d735a218c086d44D5fe5f89' # пусто если нативный токен сети
 
-    amount_from         = 0.0001    # от какого кол-ва монет свапаем
-    amount_to           = 0.0003    # до какого кол-ва монет свапаем
+    amount_from         = 0.0001 # от какого кол-ва монет свапаем
+    amount_to           = 0.0003 # до какого кол-ва монет свапаем
 
-    swap_all_balance    = False # True / False. если True, тогда свапаем весь баланс
+    swap_all_balance    = True # True / False. если True, тогда свапаем весь баланс
     min_amount_swap     = 0 # если баланс будет меньше этого числа, свапать не будет
     keep_value_from     = 0 # от скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
     keep_value_to       = 0 # до скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
@@ -253,16 +261,16 @@ def value_orbiter():
     минимальный бридж : 0.005
     '''
 
-    from_chain          = 'nova'    # с какой сети 
-    to_chain            = 'arbitrum'      # в какую сеть 
+    from_chain          = 'arbitrum' # с какой сети 
+    to_chain            = 'polygon_zkevm' # в какую сеть 
 
-    amount_from         = 0.007 # от какого кол-ва монет делаем бридж
+    amount_from         = 0.006 # от какого кол-ва монет делаем бридж
     amount_to           = 0.008 # до какого кол-ва монет делаем бридж
 
-    bridge_all_balance  = False         # True / False. если True, тогда бриджим весь баланс
-    min_amount_bridge   = 0          # если баланс будет меньше этого числа, выводить не будет
-    keep_value_from     = 0.001             # от скольки монет оставляем на кошельке (работает только при : bridge_all_balance = True)
-    keep_value_to       = 0.002             # до скольки монет оставляем на кошельке (работает только при : bridge_all_balance = True)
+    bridge_all_balance  = True # True / False. если True, тогда бриджим весь баланс
+    min_amount_bridge   = 0 # если баланс будет меньше этого числа, выводить не будет
+    keep_value_from     = 0.001 # от скольки монет оставляем на кошельке (работает только при : bridge_all_balance = True)
+    keep_value_to       = 0.002 # до скольки монет оставляем на кошельке (работает только при : bridge_all_balance = True)
 
     return from_chain, to_chain, bridge_all_balance, amount_from, amount_to, min_amount_bridge, keep_value_from, keep_value_to
 
@@ -274,18 +282,18 @@ def value_woofi_bridge():
     '''
     
     from_chain          = 'polygon'
-    to_chain            = 'arbitrum'  
+    to_chain            = 'avalanche'  
 
-    from_token          = '0xa8ce8aee21bc2a48a5ef670afcc9274c7bbbc035' # пусто если нативный токен сети
-    to_token            = '0xff970a61a04b1ca14834a43f5de4533ebddb5cc8' # пусто если нативный токен сети
+    from_token          = '' # пусто если нативный токен сети
+    to_token            = '' # пусто если нативный токен сети
 
-    amount_from         = 0.001 # от какого кол-ва from_token свапаем
-    amount_to           = 0.002 # до какого кол-ва from_token свапаем
+    amount_from         = 0.1 # от какого кол-ва from_token свапаем
+    amount_to           = 0.2 # до какого кол-ва from_token свапаем
 
     swap_all_balance    = False # True / False. если True, тогда свапаем весь баланс
     min_amount_swap     = 0 # если баланс будет меньше этого числа, свапать не будет
-    keep_value_from     = 3 # от скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
-    keep_value_to       = 4 # до скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
+    keep_value_from     = 0 # от скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
+    keep_value_to       = 0 # до скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
 
     
     return from_chain, to_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to
@@ -297,13 +305,13 @@ def value_woofi_swap():
     chains : avalanche | polygon | ethereum | bsc | arbitrum | optimism | fantom
     '''
     
-    chain = 'fantom'
+    chain = 'bsc'
 
-    from_token          = '0x04068DA6C83AFCFA0e13ba15A6696662335D5B75' # пусто если нативный токен сети
-    to_token            = '' # пусто если нативный токен сети
+    from_token          = '' # пусто если нативный токен сети
+    to_token            = '0x55d398326f99059ff775485246999027b3197955' # пусто если нативный токен сети
 
-    amount_from         = 1 # от какого кол-ва from_token свапаем
-    amount_to           = 2 # до какого кол-ва from_token свапаем
+    amount_from         = 0.1 # от какого кол-ва from_token свапаем
+    amount_to           = 0.2 # до какого кол-ва from_token свапаем
 
     swap_all_balance    = False # True / False. если True, тогда свапаем весь баланс
     min_amount_swap     = 0 # если баланс будет меньше этого числа, свапать не будет
@@ -324,8 +332,8 @@ def value_sushiswap():
     
     chain = 'nova'
 
-    from_token          = '0x750ba8b76187092B0D1E87E28daaf484d1b5273b' # пусто если нативный токен сети
-    to_token            = '' # пусто если нативный токен сети
+    from_token          = '' # пусто если нативный токен сети
+    to_token            = '0x750ba8b76187092B0D1E87E28daaf484d1b5273b' # пусто если нативный токен сети
 
     amount_from         = 0.00003 # от какого кол-ва from_token свапаем
     amount_to           = 0.00005 # до какого кол-ва from_token свапаем
@@ -337,6 +345,7 @@ def value_sushiswap():
 
     slippage = 5 # советую ставить 1-5. если ошибка INSUFFICIENT_OUTPUT_AMOUNT , тогда увеличивай slippage
 
+    
     return chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, slippage
 
 def value_bungee():
@@ -346,11 +355,11 @@ def value_bungee():
     chains : zksync | polygon | ethereum | bsc | arbitrum | optimism | fantom | polygon_zkevm | avalanche | gnosis
     '''
 
-    from_chain          = 'gnosis' # с какой сети 
-    to_chain            = 'polygon' # в какую сеть 
+    from_chain          = 'polygon_zkevm' # с какой сети 
+    to_chain            = 'arbitrum' # в какую сеть 
 
-    amount_from         = 0.3 # от какого кол-ва монет делаем бридж
-    amount_to           = 0.4 # до какого кол-ва монет делаем бридж
+    amount_from         = 0.0016 # от какого кол-ва монет делаем бридж
+    amount_to           = 0.00167 # до какого кол-ва монет делаем бридж
 
     bridge_all_balance  = False # True / False. если True, тогда бриджим весь баланс
     min_amount_bridge   = 0 # если баланс будет меньше этого числа, выводить не будет
@@ -358,7 +367,6 @@ def value_bungee():
     keep_value_to       = 0 # до скольки монет оставляем на кошельке (работает только при : bridge_all_balance = True)
 
     return from_chain, to_chain, bridge_all_balance, amount_from, amount_to, min_amount_bridge, keep_value_from, keep_value_to
-
 
 
 
