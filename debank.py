@@ -69,7 +69,7 @@ async def checker_main(modules, nft_chains, wallets):
 
     async with aiohttp.ClientSession() as session:
 
-        wallets_list = (list(func_chunks_generators(WALLETS, 50)))
+        wallets_list = (list(func_chunks_generators(wallets, 50)))
 
         for wallets in wallets_list:
 
@@ -350,7 +350,7 @@ async def activate_wallet_debank(wallets, chains):
 
     async with aiohttp.ClientSession() as session:
 
-        wallets_list = (list(func_chunks_generators(WALLETS, 50)))
+        wallets_list = (list(func_chunks_generators(wallets, 50)))
 
         for wallets in wallets_list:
 
