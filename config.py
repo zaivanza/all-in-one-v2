@@ -409,7 +409,7 @@ def get_prices():
     try:
 
         prices = {
-                'ETH': 0, 'BNB': 0, 'AVAX': 0, 'MATIC': 0, 'FTM': 0, 'xDAI': 0
+                'ETH': 0, 'BNB': 0, 'AVAX': 0, 'MATIC': 0, 'FTM': 0, 'xDAI': 0, 'CELO': 0
             }
 
         for symbol in prices:
@@ -436,6 +436,7 @@ def get_prices():
                 'zksync'        : prices['ETH'], 
                 'nova'          : prices['ETH'], 
                 'gnosis'        : prices['xDAI'], 
+                'celo'          : prices['CELO'], 
                 'polygon_zkevm' : prices['ETH'], 
             }
 
