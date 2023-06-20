@@ -52,6 +52,7 @@ MAX_GAS_CHARGE = {
     'zksync'        : 1,
     'nova'          : 0.1,
     'gnosis'        : 0.1,
+    'polygon_zkevm' : 0.5,
 }
 
 
