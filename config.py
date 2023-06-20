@@ -436,6 +436,7 @@ def get_prices():
                 'zksync'        : prices['ETH'], 
                 'nova'          : prices['ETH'], 
                 'gnosis'        : prices['xDAI'], 
+                'polygon_zkevm' : prices['ETH'], 
             }
 
         return data
