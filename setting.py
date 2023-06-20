@@ -15,7 +15,6 @@ MODULE :
 9.  woofi_swap
 10. sushiswap
 11. bungee_refuel
-12. quickswap
 
 '''
 
@@ -55,6 +54,8 @@ MAX_GAS_CHARGE = {
     'gnosis'        : 0.1,
     'celo'          : 0.1,
     'polygon_zkevm' : 1,
+    'core'          : 0.1,
+    'harmony'       : 0.1,
 }
 
 
