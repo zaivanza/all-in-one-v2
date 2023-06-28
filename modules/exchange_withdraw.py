@@ -106,7 +106,6 @@ def okx_withdraw(privatekey, retry=0):
         _, _, headers = okx_data(api_key, secret_key, passphras, request_path=f"/api/v5/asset/withdrawal", meth="POST", body=str(body))
         a = requests.post("https://www.okx.cab/api/v5/asset/withdrawal",data=str(body), timeout=10, headers=headers)
         result = a.json()
-        # cprint(result, 'blue')
 
         if result['code'] == '0':
             logger.success(f"withdraw success => {wallet} | {AMOUNT} {SYMBOL}")

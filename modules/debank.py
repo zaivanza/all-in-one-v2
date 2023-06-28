@@ -193,8 +193,6 @@ def get_json_data(check_min_value, wallets):
     for wallet in wallets:
         total_result[wallet]['total_value'] = total_result[wallet]['protocol_value'] + total_result[wallet]['token_value']
 
-    # call_json(total_result, 'test2')
-
     return total_result
 
 def round_to(num, digits=3):
@@ -391,7 +389,6 @@ def start_debank():
     print()
 
     asyncio.run(checker_main(modules, nft_chains, wallets))
-    call_json(get_result, 'test')
     get_json = get_json_data(check_min_value, wallets)
     send_result(get_json, file_name, check_chain, check_coin)
 
