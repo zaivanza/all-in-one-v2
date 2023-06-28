@@ -1,27 +1,5 @@
 import random
 
-'''
-
-MODULE :
-
-1.  web3_checker
-2.  debank checker
-3.  exchange withdraw : вывод с биржи
-4.  okx withdraw
-5.  transfer
-6.  0x_swap
-7.  orbiter finance
-8.  woofi_bridge
-9.  woofi_swap
-10. sushiswap
-11. bungee_refuel
-
-'''
-
-# ========================
-MODULE = 1
-# ========================
-
 IS_SLEEP        = True # True / False. True если нужно поставить sleep между кошельками
 # от скольки до скольки спим между кошельками (секунды) :
 SLEEP_FROM      = 100
@@ -53,7 +31,7 @@ MAX_GAS_CHARGE = {
     'nova'          : 0.1,
     'gnosis'        : 0.1,
     'celo'          : 0.1,
-    'polygon_zkevm' : 1,
+    'polygon_zkevm' : 0.5,
     'core'          : 0.1,
     'harmony'       : 0.1,
 }
@@ -63,15 +41,15 @@ def value_web3_checker():
 
     '''
     чекер монет через web3
-    chains : ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | nova | zksync
+    chains : ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | nova | zksync | polygon_zkevm | celo | gnosis | core | harmony
     '''
 
     datas = {
         'bsc': [
             '', # BNB
             '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d', # USDC
-            '0x55d398326f99059ff775485246999027b3197955', # USDT
-            '0xe9e7cea3dedca5984780bafc599bd69add087d56', # BUSD
+            # '0x55d398326f99059ff775485246999027b3197955', # USDT
+            # '0xe9e7cea3dedca5984780bafc599bd69add087d56', # BUSD
             ],
         'arbitrum': [
             '', # ETH
@@ -87,8 +65,8 @@ def value_web3_checker():
             ],
         'polygon': [
             '', # MATIC
-            '0xc2132d05d31c914a87c6611c10748aeb04b58e8f', # USDT
-            '0x2791bca1f2de4661ed88a30c99a7a9449aa84174', # USDC
+            # '0xc2132d05d31c914a87c6611c10748aeb04b58e8f', # USDT
+            # '0x2791bca1f2de4661ed88a30c99a7a9449aa84174', # USDC
             ],
         'avalanche': [
             '', # AVAX
@@ -103,18 +81,30 @@ def value_web3_checker():
         'zksync': [
             '', # ETH
             ],
-        # 'nova': [
-        #     '', # ETH
-        #     ],
+        'nova': [
+            '', # ETH
+            ],
         'fantom': [
             '', # FTM
             ],
+        'polygon_zkevm': [
+            '', # ETH
+            ],
+        # 'celo': [
+        #     '', # CELO
+        #     ],
+        # 'gnosis': [
+        #     '', # xDAI
+        #     ],
+        # 'harmony': [
+        #     '', # ONE
+        #     ],
     }
 
     min_balance = {
         'chain'     : 'zksync',
         'coin'      : 'ETH',
-        'amount'    : 0 # если баланс меньше этого числа, кошелек будет выделен
+        'amount'    : 1 # если баланс меньше этого числа, кошелек будет выделен
     }
     
     file_name   = 'web3_balances' # имя файла в который будем сохранять данные. создается сам
@@ -130,13 +120,13 @@ def value_debank():
     сети, которые мы активируем, записаны в config.py => DEBANK_ACTIVATE_CHAINS. ненужные (как по мне) сети я закомментировал. если нужно, можешь их раскомментировать
     '''
 
-    activate_wallets = False # True если нужно активировать кошельки (при первом запуске). False чтобы отключить
+    activate_wallets = True # True если нужно активировать кошельки (при первом запуске). False чтобы отключить
 
     # какие модули включены. если какой-то модуль не нужен, закомментируй (#) его. модуль nft самый долгий, по ненадобности лучше его отключать
     modules = [
         'token', # смотрит монеты
         # 'nft', # смотрит нфт
-        'protocol' # смотрит протоколы
+        # 'protocol' # смотрит протоколы
     ]
 
     # в каких сетях смотрим нфт. если какая-то сеть не нужна, закомментируй (#) ее
@@ -148,7 +138,7 @@ def value_debank():
         # 'bsc'
         ]
 
-    check_min_value     = 0 # $. если баланс монеты / протокола будет меньше этого числа, монета / протокол не будут записаны в файл
+    check_min_value     = 1 # $. если баланс монеты / протокола будет меньше этого числа, монета / протокол не будут записаны в файл
     check_chain         = '' # в какой сети ищем монету (отдельно выделит ее баланс)
     check_coin          = '' # какую монету ищем (отдельно выделит ее баланс)
 
@@ -161,7 +151,7 @@ def value_exchange():
 
     '''
     withdraw coins from exchange.
-    exchanges : binance | bybit | kucoin | mexc | huobi
+    exchanges : binance | bybit | kucoin | mexc | huobi | bitget
 
     chains : 
     - binance : ETH | BEP20 | AVAXC | MATIC | ARBITRUM | OPTIMISM | APT
@@ -169,18 +159,20 @@ def value_exchange():
     - kucoin
     - mexc
     - huobi
+    - bitget : zkSyncEra | ArbitrumNova | ArbitrumOne | ETH / ERC20 | Optimism | BEP20 | TRC20 | Polygon | Aptos | CELO | CoreDAO | Harmony
     '''
 
     exchange    = 'binance' # запиши сюда биржу
 
-    chain       = 'ETH' # в какой сети выводим
-    symbol      = 'ETH' # какой токен выводим
+    chain       = 'APT' # в какой сети выводим
+    symbol      = 'APT' # какой токен выводим
 
-    amount_from = 0.015 # от какого кол-ва монет выводим
-    amount_to   = 0.02 # до какого кол-ва монет выводим
+    amount_from = 0.03 # от какого кол-ва монет выводим
+    amount_to   = 0.04 # до какого кол-ва монет выводим
 
+    is_private_key = False # True если в wallets.txt вставил evm приватники. False если адреса (evm / не evm)
 
-    return exchange, chain, symbol, amount_from, amount_to
+    return exchange, chain, symbol, amount_from, amount_to, is_private_key
 
 def value_okx():
 
@@ -192,12 +184,12 @@ def value_okx():
     Polygon
     Avalanche C-Chain
     Avalanche X-Chain
-    Arbitrum one
+    Arbitrum One
     Optimism
     Fantom
     '''
 
-    chain       = 'Arbitrum one'
+    chain       = 'Arbitrum One'
     symbol      = 'ETH'
 
     amount_from = 0.02
@@ -208,7 +200,9 @@ def value_okx():
     FEE         = 0.0001 # комса на вывод
     SUB_ACC     = False # True / False. True если хочешь проверять субаккаунты и сначала делать с них перевод на основной счет
 
-    return chain, symbol, amount_from, amount_to, account, FEE, SUB_ACC
+    is_private_key = False # True если в wallets.txt вставил evm приватники. False если адреса (evm / не evm)
+
+    return chain, symbol, amount_from, amount_to, account, FEE, SUB_ACC, is_private_key
 
 def value_transfer():
 
@@ -217,7 +211,7 @@ def value_transfer():
     chains : ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | nova | zksync | celo | gnosis
     '''
 
-    chain                = 'gnosis' # в какой сети выводить
+    chain                = 'optimism' # в какой сети выводить
     token_address        = '' # пусто если нативный токен сети
 
     amount_from          = 0.007 # от какого кол-ва монет делаем трансфер
@@ -238,14 +232,14 @@ def value_0x_swap():
     chains : ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | celo
     '''
 
-    chain               = 'bsc' # в какой сети свапаем
+    chain               = 'polygon' # в какой сети свапаем
     from_token_address  = '' # пусто если нативный токен сети
-    to_token_address    = '0x12f31B73D812C6Bb0d735a218c086d44D5fe5f89' # пусто если нативный токен сети
+    to_token_address    = '0xe0b52e49357fd4daf2c15e02058dce6bc0057db4' # пусто если нативный токен сети
 
     amount_from         = 0.0001 # от какого кол-ва монет свапаем
     amount_to           = 0.0003 # до какого кол-ва монет свапаем
 
-    swap_all_balance    = True # True / False. если True, тогда свапаем весь баланс
+    swap_all_balance    = False # True / False. если True, тогда свапаем весь баланс
     min_amount_swap     = 0 # если баланс будет меньше этого числа, свапать не будет
     keep_value_from     = 0 # от скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
     keep_value_to       = 0 # до скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
@@ -303,16 +297,16 @@ def value_woofi_swap():
 
     '''
     свап на https://fi.woo.org/ 
-    chains : avalanche | polygon | ethereum | bsc | arbitrum | optimism | fantom
+    chains : avalanche | polygon | ethereum | bsc | arbitrum | optimism | fantom 
     '''
     
     chain = 'bsc'
 
-    from_token          = '' # пусто если нативный токен сети
-    to_token            = '0x55d398326f99059ff775485246999027b3197955' # пусто если нативный токен сети
+    from_token          = '0xe9e7cea3dedca5984780bafc599bd69add087d56' # пусто если нативный токен сети
+    to_token            = '' # пусто если нативный токен сети
 
     amount_from         = 0.1 # от какого кол-ва from_token свапаем
-    amount_to           = 0.2 # до какого кол-ва from_token свапаем
+    amount_to           = 2 # до какого кол-ва from_token свапаем
 
     swap_all_balance    = False # True / False. если True, тогда свапаем весь баланс
     min_amount_swap     = 0 # если баланс будет меньше этого числа, свапать не будет
@@ -333,8 +327,8 @@ def value_sushiswap():
     
     chain = 'nova'
 
-    from_token          = '' # пусто если нативный токен сети
-    to_token            = '0x750ba8b76187092B0D1E87E28daaf484d1b5273b' # пусто если нативный токен сети
+    from_token          = '0x750ba8b76187092B0D1E87E28daaf484d1b5273b' # пусто если нативный токен сети
+    to_token            = '' # пусто если нативный токен сети
 
     amount_from         = 0.00003 # от какого кол-ва from_token свапаем
     amount_to           = 0.00005 # до какого кол-ва from_token свапаем
@@ -369,5 +363,31 @@ def value_bungee():
 
     return from_chain, to_chain, bridge_all_balance, amount_from, amount_to, min_amount_bridge, keep_value_from, keep_value_to
 
+def value_tx_check():
+
+    '''
+    чекер кол-ва транзакций (nonce) в каждой сети.
+    1. если nonce < заданного числа, кошелек выделяется.
+    2. закомментируй сеть, чтобы отключить ее.
+    '''
+
+    chains = {
+        'ethereum'      : 1,
+        'optimism'      : 0,
+        'bsc'           : 0,
+        'polygon'       : 0,
+        'polygon_zkevm' : 3,
+        'arbitrum'      : 0,
+        'avalanche'     : 0,
+        'fantom'        : 0,
+        'nova'          : 5,
+        'zksync'        : 0,
+        'celo'          : 0,
+        'gnosis'        : 1,
+        'core'          : 1,
+        'harmony'       : 0,
+    }
+
+    return chains
 
 

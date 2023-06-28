@@ -1,5 +1,16 @@
+from .helpers import func_chunks_generators, evm_wallet, call_json
+from config import outfile, PROXIES, WALLETS, DEBANK_ACTIVATE_CHAINS
+from setting import value_debank
 
-from config import *
+import time
+from loguru import logger
+import asyncio, aiohttp
+from termcolor import cprint
+import random
+import csv
+from tabulate import tabulate
+import math
+
 
 get_result = {
     'token' : {},
@@ -12,15 +23,6 @@ get_result = {
     },
     'protocol' : {}
 }
-
-def evm_wallet(key):
-
-    try:
-        web3 = Web3(Web3.HTTPProvider(DATA['ethereum']['rpc']))
-        wallet = web3.eth.account.from_key(key).address
-        return wallet
-    except:
-        return key
 
 async def get_debank(session, address, type_, chain=''):
 
@@ -321,7 +323,7 @@ def send_result(get_json, file_name, check_chain, check_coin):
 
     file.close()
 
-    cprint(f'результаты записаны в файлы : {outfile}{file_name}.csv и {outfile}{file_name}.txt\n', 'blue')
+    cprint(f'Результаты записаны в файлы : {outfile}{file_name}.csv и {outfile}{file_name}.txt\n', 'blue')
 
 async def get_activate_debank(session, wallet, chain):
 

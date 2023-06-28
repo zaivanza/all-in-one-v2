@@ -1,23 +1,7 @@
-import requests, json, time, ccxt
-from ccxt import ExchangeError
+import json, time
+import random, requests
 from loguru import logger
-from web3 import Web3, AsyncHTTPProvider
-from web3.eth import AsyncEth
-import asyncio, aiohttp
-from termcolor import cprint
-import random
-import telebot
 from tqdm import tqdm
-import hmac, base64
-import csv
-from pyuseragents import random as random_useragent
-from tabulate import tabulate
-import math
-import decimal
-
-from setting import *
-from data.abi.abi import *
-from data.data import *
 
 max_time_check_tx_status = 100 # в секундах. если транза не выдаст статус за это время, она будет считаться исполненной
 
@@ -39,6 +23,7 @@ with open(f"{outfile}data/starknet_address.txt", "r") as f:
 
 with open(f"{outfile}data/proxies.txt", "r") as f:
     PROXIES = [row.strip() for row in f]
+
 
 STR_DONE    = '✅ '
 STR_CANCEL  = '❌ '
@@ -305,6 +290,7 @@ WOOFI_SWAP_CONTRACTS = {
     'arbitrum'      : '0x9aed3a8896a85fe9a8cac52c9b402d092b629a30',
     'optimism'      : '0xEAf1Ac8E89EA0aE13E0f03634A4FF23502527024',
     'fantom'        : '0x382A9b0bC5D29e96c3a0b81cE9c64d6C8F150Efb',
+    'zksync'        : '0xfd505702b37Ae9b626952Eb2DD736d9045876417',
 }
 
 # через что бриджим на woofi (usdc / usdt)
@@ -388,19 +374,14 @@ text2 = '''
 texts = [text1, text2]
 colors = ['green', 'yellow', 'blue', 'magenta', 'cyan']
 
-RUN_TEXT    = random.choice(texts)
-RUN_COLOR   = random.choice(colors)
+RUN_TEXT        = random.choice(texts)
+RUN_COLOR       = random.choice(colors)
 
-# разбивка массива на части по кол-ву элементов
-def func_chunks_generators(lst, n):
-    for i in range(0, len(lst), n):
-        yield lst[i: i + n]
-
-def get_wallet_proxies():
+def get_wallet_proxies(wallets, proxies):
     try:
         result = {}
-        for i in range(len(WALLETS)):
-            result[WALLETS[i]] = PROXIES[i % len(PROXIES)]
+        for i in range(len(wallets)):
+            result[wallets[i]] = proxies[i % len(proxies)]
         return result
     except: None
 
@@ -457,7 +438,7 @@ def get_bungee_data():
         return data
     
 PRICES_NATIVE   = get_prices()
-WALLET_PROXIES  = get_wallet_proxies()
+WALLET_PROXIES  = get_wallet_proxies(WALLETS, PROXIES)
 BUNGEE_LIMITS   = get_bungee_data()
 
 

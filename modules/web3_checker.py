@@ -1,26 +1,19 @@
-from config import *
+from data.data import DATA
+from config import WALLETS, ERC20_ABI, outfile
+from setting import value_web3_checker
+from .helpers import evm_wallet, round_to, check_balance, check_data_token, decimalToInt
+
+import requests
+from loguru import logger
+from web3 import Web3, AsyncHTTPProvider
+from web3.eth import AsyncEth
+import asyncio
+from termcolor import cprint
+import csv
+from tabulate import tabulate
+
 
 RESULT = {}
-
-def evm_wallet(key):
-    retry = 0
-    while True:
-        try:
-            web3 = Web3(Web3.HTTPProvider(DATA['ethereum']['rpc']))
-            wallet = web3.eth.account.from_key(key).address
-            return wallet
-        except : 
-            retry += 1
-            if retry >= 2:
-                return key
-
-def round_to(num, digits=3):
-    try:
-        if num == 0: return 0
-        scale = int(-math.floor(math.log10(abs(num - int(num))))) + digits - 1
-        if scale < digits: scale = digits
-        return round(num, scale)
-    except: return num
 
 def get_prices(datas):
 
@@ -71,7 +64,7 @@ async def check_data_token(web3, token_address):
     
     except Exception as error:
 
-        logger.error(f'{error}')
+        logger.error(f'{error} : {token_address}')
         await asyncio.sleep(2)
         return await check_data_token(web3, token_address)
 
@@ -137,7 +130,7 @@ def send_result(min_balance, file_name, prices):
 
     balances = {}
         
-    headers = [['number', 'wallet'], [], ['', ''], ['TOTAL_VALUE:']]
+    headers = [['number', 'wallet'], [], ['TOTAL_AMOUNTS', ''], ['TOTAL_VALUE']]
 
     number = 0
     for data in RESULT.items():
@@ -216,13 +209,16 @@ def send_result(min_balance, file_name, prices):
         head_table  = ['token', 'amount', 'value']
         tokens_     = tabulate(send_table, head_table, tablefmt=table_type)
 
-        small_text = f'{min_balance["coin"]} balance in {min_balance["chain"]} of these wallets < {min_balance["amount"]} :'
-        cprint(small_text, 'blue')
-        spamwriter.writerow([])
-        spamwriter.writerow([small_text])
-        for wallet in small_wallets:
-            cprint(wallet, 'white')
-            spamwriter.writerow([wallet])
+        if len(small_wallets) > 0:
+            small_text = f'{min_balance["coin"]} balance in {min_balance["chain"]} of these wallets < {min_balance["amount"]} :'
+            cprint(small_text, 'blue')
+            spamwriter.writerow([])
+            spamwriter.writerow(['', small_text])
+            zero = 0
+            for wallet in small_wallets:
+                zero += 1
+                cprint(wallet, 'white')
+                spamwriter.writerow([zero, wallet])
 
         cprint(f'\nall balances :\n', 'blue')
         cprint(tokens_, 'white')
@@ -230,8 +226,6 @@ def send_result(min_balance, file_name, prices):
         cprint(f'\nРезультаты записаны в файл : {outfile}results/{file_name}.csv\n', 'blue')
 
 def web3_check():
-
-    cprint(f'\nSTART WEB3 CHECKER\n', 'green')
 
     datas, min_balance, file_name = value_web3_checker()
 

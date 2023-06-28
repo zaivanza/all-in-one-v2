@@ -39,6 +39,7 @@ CEX_KEYS = {
     'kucoin'    : {'api_key': 'your_api_key', 'api_secret': 'your_api_secret', 'password': 'your_api_password'},
     'huobi'     : {'api_key': 'your_api_key', 'api_secret': 'your_api_secret'},
     'bybit'     : {'api_key': 'your_api_key', 'api_secret': 'your_api_secret'},
+    'bitget'    : {'api_key': 'your_api_key', 'api_secret': 'your_api_secret', 'password': 'your_api_password'},
 }
 
 # можешь записать любое кол-во аккаунтов, сделал таким образом чтобы постоянно данные от новых акков не вводить, а просто вызывать по имени аккаунта
