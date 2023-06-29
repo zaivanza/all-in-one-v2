@@ -141,8 +141,6 @@ def exchange_withdraw(privatekey):
         else:
             wallet = privatekey
 
-        print(wallet)
-
         dict_ = {
             'apiKey': API_KEY,
             'secret': API_SECRET,
