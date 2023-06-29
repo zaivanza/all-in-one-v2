@@ -168,7 +168,7 @@ def exchange_withdraw(privatekey):
             params = params
         )
         logger.success(f"{cex}_withdraw success => {wallet} | {amount_} {symbol}")
-        list_send.append(f'{STR_DONE}{cex}_withdraw')
+        list_send.append(f'{STR_DONE}{cex}_withdraw | {amount_} {symbol}')
 
     except Exception as error:
         logger.error(f"{cex}_withdraw unsuccess => {wallet} | error : {error}")
