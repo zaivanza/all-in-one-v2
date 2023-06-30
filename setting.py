@@ -208,7 +208,7 @@ def value_transfer():
 
     '''
     вывод (трансфер) монет с кошельков
-    chains : ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | nova | zksync | celo | gnosis
+    chains : ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | nova | zksync | celo | gnosis | core
     '''
 
     chain                = 'optimism' # в какой сети выводить
