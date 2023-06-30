@@ -2,6 +2,7 @@ import json, time
 import random, requests
 from loguru import logger
 from tqdm import tqdm
+import asyncio, aiohttp
 
 max_time_check_tx_status = 100 # в секундах. если транза не выдаст статус за это время, она будет считаться исполненной
 
@@ -374,8 +375,8 @@ text2 = '''
 texts = [text1, text2]
 colors = ['green', 'yellow', 'blue', 'magenta', 'cyan']
 
-RUN_TEXT        = random.choice(texts)
-RUN_COLOR       = random.choice(colors)
+RUN_TEXT    = random.choice(texts)
+RUN_COLOR   = random.choice(colors)
 
 def get_wallet_proxies(wallets, proxies):
     try:
@@ -385,50 +386,65 @@ def get_wallet_proxies(wallets, proxies):
         return result
     except: None
 
-def get_prices():
+async def get_prices():
 
-    try:
-
-        prices = {
+    prices = {
                 'ETH': 0, 'BNB': 0, 'AVAX': 0, 'MATIC': 0, 'FTM': 0, 'xDAI': 0, 'CELO': 0, 'CORE': 0, 'ONE': 0
             }
 
-        for symbol in prices:
+    async def get_get(session, symbol):
 
-            url =f'https://min-api.cryptocompare.com/data/price?fsym={symbol}&tsyms=USDT'
-            response = requests.get(url)
+        url =f'https://min-api.cryptocompare.com/data/price?fsym={symbol}&tsyms=USDT'
+
+        async with session.get(url, timeout=10) as resp:
 
             try:
-                result  = [response.json()]
-                price   = result[0]['USDT']
-                prices[symbol] = float(price)
+
+                if resp.status == 200:
+                    resp_json = await resp.json(content_type=None)
+                    
+                    try:
+                        prices[symbol] = float(resp_json['USDT'])
+                    except Exception as error:
+                        logger.error(f'{error}. set price : 0')
+                        prices[symbol] = 0
+
+                else:
+                    await asyncio.sleep(1)
+                    return await get_get(session, url)
+
             except Exception as error:
-                logger.error(f'{error}. set price : 0')
-                prices[symbol] = 0
+                await asyncio.sleep(1)
+                return await get_get(session, url)
 
-        data = {
-                'avalanche'     : prices['AVAX'], 
-                'polygon'       : prices['MATIC'], 
-                'ethereum'      : prices['ETH'], 
-                'bsc'           : prices['BNB'], 
-                'arbitrum'      : prices['ETH'], 
-                'optimism'      : prices['ETH'], 
-                'fantom'        : prices['FTM'], 
-                'zksync'        : prices['ETH'], 
-                'nova'          : prices['ETH'], 
-                'gnosis'        : prices['xDAI'], 
-                'celo'          : prices['CELO'], 
-                'polygon_zkevm' : prices['ETH'], 
-                'core'          : prices['CORE'], 
-                'harmony'       : prices['ONE'], 
-            }
+    async with aiohttp.ClientSession() as session:
 
-        return data
-    
-    except Exception as error:
-        logger.error(f'{error}. Try again')
-        time.sleep(1)
-        return get_prices()
+        tasks = []
+            
+        for symbol in prices:
+            task = asyncio.create_task(get_get(session, symbol))
+            tasks.append(task)
+
+        await asyncio.gather(*tasks)
+
+    data = {
+            'avalanche'     : prices['AVAX'], 
+            'polygon'       : prices['MATIC'], 
+            'ethereum'      : prices['ETH'], 
+            'bsc'           : prices['BNB'], 
+            'arbitrum'      : prices['ETH'], 
+            'optimism'      : prices['ETH'], 
+            'fantom'        : prices['FTM'], 
+            'zksync'        : prices['ETH'], 
+            'nova'          : prices['ETH'], 
+            'gnosis'        : prices['xDAI'], 
+            'celo'          : prices['CELO'], 
+            'polygon_zkevm' : prices['ETH'], 
+            'core'          : prices['CORE'], 
+            'harmony'       : prices['ONE'], 
+        }
+
+    return data
     
 def get_bungee_data():
     url = "https://refuel.socket.tech/chains"
@@ -437,7 +453,8 @@ def get_bungee_data():
         data = json.loads(response.text)
         return data
     
-PRICES_NATIVE   = get_prices()
+
+PRICES_NATIVE   = asyncio.run(get_prices())
 WALLET_PROXIES  = get_wallet_proxies(WALLETS, PROXIES)
 BUNGEE_LIMITS   = get_bungee_data()
 
