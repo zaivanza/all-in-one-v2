@@ -106,6 +106,7 @@ def okx_withdraw(privatekey, retry=0):
         _, _, headers = okx_data(api_key, secret_key, passphras, request_path=f"/api/v5/asset/withdrawal", meth="POST", body=str(body))
         a = requests.post("https://www.okx.cab/api/v5/asset/withdrawal",data=str(body), timeout=10, headers=headers)
         result = a.json()
+        # cprint(result, 'blue')
 
         if result['code'] == '0':
             logger.success(f"withdraw success => {wallet} | {AMOUNT} {SYMBOL}")
@@ -113,7 +114,12 @@ def okx_withdraw(privatekey, retry=0):
         else:
             error = result['msg']
             logger.error(f"withdraw unsuccess => {wallet} | error : {error}")
-            list_send.append(f"{STR_CANCEL}okx_withdraw :  {result['msg']}")
+            if retry < RETRY:
+                logger.info(f"try again in 10 sec. => {wallet}")
+                sleeping(10, 10)
+                okx_withdraw(privatekey, retry+1)
+            else:
+                list_send.append(f"{STR_CANCEL}okx_withdraw :  {result['msg']}")
 
     except Exception as error:
         logger.error(f"withdraw unsuccess => {wallet} | error : {error}")
@@ -124,7 +130,7 @@ def okx_withdraw(privatekey, retry=0):
         else:
             list_send.append(f'{STR_CANCEL}okx_withdraw')
 
-def exchange_withdraw(privatekey):
+def exchange_withdraw(privatekey, retry=0):
 
     try:
 
@@ -172,5 +178,9 @@ def exchange_withdraw(privatekey):
 
     except Exception as error:
         logger.error(f"{cex}_withdraw unsuccess => {wallet} | error : {error}")
-        list_send.append(f'{STR_CANCEL}{cex}_withdraw')
-
+        if retry < RETRY:
+            logger.info(f"try again in 10 sec. => {wallet}")
+            sleeping(10, 10)
+            exchange_withdraw(privatekey, retry+1)
+        else:
+            list_send.append(f'{STR_CANCEL}{cex}_withdraw')
