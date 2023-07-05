@@ -389,7 +389,7 @@ def get_wallet_proxies(wallets, proxies):
 async def get_prices():
 
     prices = {
-                'ETH': 0, 'BNB': 0, 'AVAX': 0, 'MATIC': 0, 'FTM': 0, 'xDAI': 0, 'CELO': 0, 'CORE': 0, 'ONE': 0
+                'ETH': 0, 'BNB': 0, 'AVAX': 0, 'MATIC': 0, 'FTM': 0, 'xDAI': 0, 'CELO': 0, 'COREDAO': 0, 'ONE': 0
             }
 
     async def get_get(session, symbol):
@@ -440,7 +440,7 @@ async def get_prices():
             'gnosis'        : prices['xDAI'], 
             'celo'          : prices['CELO'], 
             'polygon_zkevm' : prices['ETH'], 
-            'core'          : prices['CORE'], 
+            'core'          : prices['COREDAO'], 
             'harmony'       : prices['ONE'], 
         }
 
