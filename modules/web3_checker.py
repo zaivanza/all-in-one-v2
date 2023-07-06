@@ -39,7 +39,11 @@ def get_prices(datas):
         
     for symbol in prices:
 
-        url =f'https://min-api.cryptocompare.com/data/price?fsym={symbol}&tsyms=USDT'
+        if symbol == 'CORE':
+            url = f'https://min-api.cryptocompare.com/data/price?fsym=COREDAO&tsyms=USDT'
+        else:
+            url = f'https://min-api.cryptocompare.com/data/price?fsym={symbol}&tsyms=USDT'
+
         response = requests.get(url)
 
         try:
