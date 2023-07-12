@@ -187,6 +187,7 @@ def value_okx():
     Arbitrum One
     Optimism
     Fantom
+    zkSync Era
     '''
 
     chain       = 'Arbitrum One'
