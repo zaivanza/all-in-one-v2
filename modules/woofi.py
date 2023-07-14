@@ -126,7 +126,7 @@ def woofi_bridge(privatekey, retry=0):
 
         dstInfos    = get_dstInfos(amount_src, to_chain, to_token)
 
-        cprint(f'\nsrcInfos : {srcInfos}\ndstInfos : {dstInfos}', 'blue')
+        # cprint(f'\nsrcInfos : {srcInfos}\ndstInfos : {dstInfos}', 'blue')
 
         # если токен не нативный, тогда проверяем апрув и если он меньше нужного, делаем апруваем
         if from_token != '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE':
@@ -141,8 +141,6 @@ def woofi_bridge(privatekey, retry=0):
             dstInfos
             ).call()
         layerzero_fee = int(layerzero_fee[0] * 1)
-
-        cprint(decimalToInt(layerzero_fee, 18), 'yellow')
 
         if from_token == '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE':
             value = int(amount + layerzero_fee)
@@ -259,11 +257,6 @@ def woofi_swap(privatekey, retry=0):
             value = 0
 
         minToAmount = woofi_get_min_amount(privatekey, from_chain, from_token, to_token, amount)
-        # minToAmount = int(minToAmount * 0.9)
-
-        cprint(value, 'blue')
-        cprint(amount, 'blue')
-        cprint(minToAmount, 'blue')
 
         if amount_ >= min_amount_swap:
             contract_txn = contract.functions.swap(
