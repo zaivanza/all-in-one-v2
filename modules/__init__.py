@@ -8,3 +8,4 @@ from .woofi import woofi_bridge, woofi_swap
 from .web3_checker import web3_check
 from .debank import start_debank
 from .tx_checker import start_tx_check
+from .inch_swap import inch_swap

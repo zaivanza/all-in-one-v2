@@ -391,4 +391,26 @@ def value_tx_check():
 
     return chains
 
+def value_1inch_swap():
+
+    '''
+    свапы через 1inch
+    chains : ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | zksync
+    '''
+
+    chain               = 'zksync' # в какой сети свапаем
+    from_token_address  = '' # пусто если нативный токен сети
+    to_token_address    = '0x3355df6d4c9c3035724fd0e3914de96a5a83aaf4' # пусто если нативный токен сети
+
+    amount_from         = 0.0001 # от какого кол-ва монет свапаем
+    amount_to           = 0.0001 # до какого кол-ва монет свапаем
+
+    swap_all_balance    = False # True / False. если True, тогда свапаем весь баланс
+    min_amount_swap     = 0 # если баланс будет меньше этого числа, свапать не будет
+    keep_value_from     = 0 # от скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
+    keep_value_to       = 0 # до скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
+
+    slippage = 1 # слиппейдж, дефолт от 1 до 3
+
+    return chain, swap_all_balance, min_amount_swap, keep_value_from, keep_value_to, amount_from, amount_to, from_token_address, to_token_address, slippage
 

@@ -1,6 +1,8 @@
 TG_TOKEN = 'your_tgbot_token' # создать можешь здесь : https://t.me/BotFather
 TG_ID = 0 # узнать можешь здесь : https://t.me/getmyid_bot
 
+API_0x = 'your_0x_api_key' # получить api key от 0x здесь : https://dashboard.0x.org/apps
+
 # меняем рпс на свои
 DATA = {
     'ethereum'      : {'rpc': 'https://rpc.ankr.com/eth', 'scan': 'https://etherscan.io/tx', 'token': 'ETH', 'chain_id': 1},

@@ -59,6 +59,10 @@ def start_module(module, key=''):
         cprint(f'\nstart : tx_checker\n', 'white')
         start_tx_check()
 
+    if module == 13:
+        cprint(f'\nstart : 1inch_swap\n', 'white')
+        inch_swap(key)
+
 
 if __name__ == "__main__":
 
@@ -79,8 +83,9 @@ MODULE:
 10. sushiswap
 11. bungee_refuel
 12. tx_checker
+13. 1inch_swap
 
-Выберите модуль (1 - 12) : '''))
+Выберите модуль (1 - 13) : '''))
 
     if MODULE in [1, 2, 12]:
         start_module(MODULE)

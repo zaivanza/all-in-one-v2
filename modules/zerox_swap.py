@@ -1,4 +1,4 @@
-from data.data import DATA
+from data.data import DATA, API_0x
 from setting import value_0x_swap, RETRY
 from config import STR_DONE, STR_CANCEL
 from .helpers import get_web3, approve_, sign_tx, check_balance, check_data_token, check_status_tx, checker_total_fee, round_to, list_send, intToDecimal, sleeping
@@ -22,9 +22,10 @@ def get_0x_quote(chain, from_token, to_token, value, slippage):
             'celo'      : 'celo.',
         }
 
-        url = f'https://{url_chains[chain]}api.0x.org/swap/v1/quote?buyToken={to_token}&sellToken={from_token}&sellAmount={value}&slippagePercentage={slippage/100}'
+        url     = f'https://{url_chains[chain]}api.0x.org/swap/v1/quote?buyToken={to_token}&sellToken={from_token}&sellAmount={value}&slippagePercentage={slippage/100}'
+        header  = {'0x-api-key' : API_0x}
         
-        response = requests.get(url)
+        response = requests.get(url, headers=header)
 
         if response.status_code == 200:
             result = [response.json()]
@@ -138,6 +139,3 @@ def zeroX_swap(privatekey, retry=0):
             zeroX_swap(privatekey, retry+1)
         else:
             list_send.append(f'{STR_CANCEL}{module_str}')
-
-
-
