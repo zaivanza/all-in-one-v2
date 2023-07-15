@@ -432,8 +432,8 @@ def value_merkly_refuel():
     from_chain  = random.choice(from_chains)
     to_chain    = random.choice(to_chains)
 
-    amount_from         = 0.000001 # от какого кол-ва нативного токена сети from_chain свапаем
-    amount_to           = 0.00001 # до какого кол-ва нативного токена сети from_chain свапаем
+    amount_from         = 0.000001 # от какого кол-ва нативного токена сети to_chain получаем
+    amount_to           = 0.00001 # до какого кол-ва нативного токена сети to_chain получаем
 
     swap_all_balance    = False # True / False. если True, тогда свапаем весь баланс
     min_amount_swap     = 0 # если баланс будет меньше этого числа, свапать не будет
