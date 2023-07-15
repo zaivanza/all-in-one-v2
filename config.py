@@ -259,7 +259,6 @@ CONTRACTS_ORBITER_TO_STARKNET = {
     'zksync_lite'   : '',
 }
 
-
 LAYERZERO_CHAINS_ID = {
     'avalanche' : 106,
     'polygon'   : 109,
@@ -268,7 +267,23 @@ LAYERZERO_CHAINS_ID = {
     'arbitrum'  : 110,
     'optimism'  : 111,
     'fantom'    : 112,
-    'aptos'     : 108
+    'aptos'     : 108,
+    'harmony'   : 116,
+    'celo'      : 125,
+    'moonbeam'  : 126,
+    'fuse'      : 138,
+    'gnosis'    : 145,
+    'klaytn'    : 150,
+    'metis'     : 151,
+    'core'      : 153,
+    'polygon_zkevm': 158,
+    'canto'     : 159,
+    'zksync'    : 165,
+    'moonriver' : 167,
+    'tenet'     : 173,
+    'nova'      : 175,
+    'kava'      : 177,
+    'meter'     : 176,
 }
 
 # контракты бриджа
@@ -346,6 +361,23 @@ BUNGEE_REFUEL_CONTRACTS = {
     'fantom'        : '0x040993fbF458b95871Cd2D73Ee2E09F4AF6d56bB',
 }
 
+MERKLY_CONTRACTS = {
+    'optimism'      : '0xa2c203d7ef78ed80810da8404090f926d67cd892',
+    'bsc'           : '0xfdc9018af0e37abf89233554c937eb5068127080',
+    'arbitrum'      : '0xaa58e77238f0e4a565343a89a79b4addd744d649',
+    'polygon'       : '0xa184998ec58dc1da77a1f9f1e361541257a50cf4',
+    # 'polygon_zkevm' : '', пока недоступен
+    'zksync'        : '0x6dd28C2c5B91DD63b4d4E78EcAC7139878371768',
+    'avalanche'     : '0xe030543b943bdcd6559711ec8d344389c66e1d56',
+    'gnosis'        : '0xb58f5110855fbef7a715d325d60543e7d4c18143',
+    'fantom'        : '0x97337a9710beb17b8d77ca9175defba5e9afe62e',
+    'nova'          : '0x484c402b0c8254bd555b68827239bace7f491023',
+    # 'harmony'       : '', # надо конвертировать в one-address
+    'core'          : '0xCA230856343C300f0cc2Bd77C89F0fCBeDc45B0f',
+    'celo'          : '0xe33519c400b8f040e73aeda2f45dfdd4634a7ca0',
+    'moonbeam'      : '0x766b7aC73b0B33fc282BdE1929db023da1fe6458',
+    'moonriver'     : '0x97337A9710BEB17b8D77cA9175dEFBA5e9AFE62e',
+}
 
 text1 = '''
  /$$   /$$  /$$$$$$  /$$$$$$$  /$$       /$$      /$$  /$$$$$$  /$$$$$$$ 
@@ -389,7 +421,7 @@ def get_wallet_proxies(wallets, proxies):
 async def get_prices():
 
     prices = {
-                'ETH': 0, 'BNB': 0, 'AVAX': 0, 'MATIC': 0, 'FTM': 0, 'xDAI': 0, 'CELO': 0, 'COREDAO': 0, 'ONE': 0
+                'ETH': 0, 'BNB': 0, 'AVAX': 0, 'MATIC': 0, 'FTM': 0, 'xDAI': 0, 'CELO': 0, 'COREDAO': 0, 'ONE': 0, 'MOVR': 0, 'GLMR': 0
             }
 
     async def get_get(session, symbol):
@@ -442,6 +474,8 @@ async def get_prices():
             'polygon_zkevm' : prices['ETH'], 
             'core'          : prices['COREDAO'], 
             'harmony'       : prices['ONE'], 
+            'moonbeam'      : prices['GLMR'], 
+            'moonriver'     : prices['MOVR'], 
         }
 
     return data

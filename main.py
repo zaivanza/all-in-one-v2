@@ -63,6 +63,10 @@ def start_module(module, key=''):
         cprint(f'\nstart : 1inch_swap\n', 'white')
         inch_swap(key)
 
+    if module == 14:
+        cprint(f'\nstart : merkly_refuel\n', 'white')
+        merkly_refuel(key)
+        
 
 if __name__ == "__main__":
 
@@ -84,8 +88,9 @@ MODULE:
 11. bungee_refuel
 12. tx_checker
 13. 1inch_swap
-
-Выберите модуль (1 - 13) : '''))
+14. merkly_refuel
+                       
+Выберите модуль (1 - 14) : '''))
 
     if MODULE in [1, 2, 12]:
         start_module(MODULE)

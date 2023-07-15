@@ -1,3 +1,5 @@
+import random
+
 '''вся настройка в этом файле'''
 
 IS_SLEEP        = True # True / False. True если нужно поставить sleep между кошельками
@@ -413,4 +415,32 @@ def value_1inch_swap():
     slippage = 1 # слиппейдж, дефолт от 1 до 3
 
     return chain, swap_all_balance, min_amount_swap, keep_value_from, keep_value_to, amount_from, amount_to, from_token_address, to_token_address, slippage
+
+def value_merkly_refuel():
+
+    '''
+    gas refuel через https://minter.merkly.com/gas
+    внимание! сначала посмотри максималку руками, только потом запускай скрипт, иначе можешь потерять свои $.
+
+    from_chains : optimism | bsc | polygon | arbitrum | avalanche | fantom | celo | zksync | polygon_zkevm | nova | harmony | gnosis | core
+    to_chains   : optimism | bsc | polygon | arbitrum | avalanche | fantom | celo | meter | canto | polygon_zkevm | nova | harmony | moonbeam | moonriver | metis | kava 
+    '''
+
+    from_chains = ['bsc', 'polygon', 'arbitrum', 'avalanche'] # запиши сюда сети, с которых хочешь делать refuel (>= 1 сети)
+    to_chains   = ['kava', 'nova', 'tenet', 'moonriver', 'moonbeam'] # запиши сюда сети, на которые хочешь делать refuel (>= 1 сети)
+    
+    from_chain  = random.choice(from_chains)
+    to_chain    = random.choice(to_chains)
+
+    amount_from         = 0.000001 # от какого кол-ва нативного токена сети from_chain свапаем
+    amount_to           = 0.00001 # до какого кол-ва нативного токена сети from_chain свапаем
+
+    swap_all_balance    = False # True / False. если True, тогда свапаем весь баланс
+    min_amount_swap     = 0 # если баланс будет меньше этого числа, свапать не будет
+    keep_value_from     = 0 # от скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
+    keep_value_to       = 0 # до скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
+
+    get_layerzero_fee   = False # True если хочешь посмотреть газ. False если хочешь делать refuel
+    
+    return from_chain, to_chain, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, get_layerzero_fee
 
