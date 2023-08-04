@@ -36,6 +36,10 @@ DATA = {
     'moonbeam'      : {'rpc': 'https://rpc.ankr.com/moonbeam', 'scan': 'https://moonscan.io/tx', 'token': 'GLMR', 'chain_id': 1284},
 
     'moonriver'     : {'rpc': 'https://moonriver.public.blastapi.io', 'scan': 'https://moonriver.moonscan.io/tx', 'token': 'MOVR', 'chain_id': 1285},
+
+    'linea'         : {'rpc': 'https://rpc.linea.build', 'scan': 'https://lineascan.build/tx', 'token': 'ETH', 'chain_id': 59144},
+
+    'base'          : {'rpc': 'https://mainnet.base.org', 'scan': 'https://basescan.org/tx', 'token': 'ETH', 'chain_id': 8453},
 }
 
 # апи ключи от бирж. если биржей не пользуешься, можно не вставлять

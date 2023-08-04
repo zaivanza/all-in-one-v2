@@ -11,7 +11,7 @@ with open(f"{outfile}data/abi/erc20.json", "r") as file:
     ERC20_ABI = json.load(file)
 
 with open(f"{outfile}data/abi/orbiter_maker.json", "r") as file:
-    ORBITER_MAKER = json.load(file)
+    ORBITER_MAKER = json.load(file) # https://github.com/Orbiter-Finance/OrbiterFE-V2/tree/main/src/config
 
 with open(f"{outfile}data/wallets.txt", "r") as f:
     WALLETS = [row.strip() for row in f]
@@ -231,6 +231,9 @@ ORBITER_AMOUNT = {
     'zksync'        : 0.000000000000009014,
     'zksync_lite'   : 0.000000000000009003,
     'starknet'      : 0.000000000000009004,
+    'linea'         : 0.000000000000009023,
+    'base'          : 0.000000000000009021,
+    'mantle'        : 0.000000000000009024,
 }
 
 ORBITER_AMOUNT_STR = {
@@ -244,6 +247,9 @@ ORBITER_AMOUNT_STR = {
     'zksync'        : '9014',
     'zksync_lite'   : '9003',
     'starknet'      : '9004',
+    'linea'         : '9023',
+    'base'          : '9021',
+    'mantle'        : '9024',
 }
 
 # контракт с X сети в starknet
@@ -476,6 +482,8 @@ async def get_prices():
             'harmony'       : prices['ONE'], 
             'moonbeam'      : prices['GLMR'], 
             'moonriver'     : prices['MOVR'], 
+            'linea'         : prices['ETH'], 
+            'base'          : prices['ETH'], 
         }
 
     return data

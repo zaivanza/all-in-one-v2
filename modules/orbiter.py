@@ -27,6 +27,9 @@ def check_orbiter_limits(from_chain, to_chain):
         'zksync'        : '14',
         'zksync_lite'   : '3',
         'starknet'      : '4',
+        'linea'         : '23',
+        'base'          : '21',
+        'mantle'        : '24',
     }
 
     from_maker  = orbiter_ids[from_chain]
@@ -35,7 +38,6 @@ def check_orbiter_limits(from_chain, to_chain):
     maker_x_maker = f'{from_maker}-{to_maker}'
 
     for maker in ORBITER_MAKER:
-
 
         if maker_x_maker == maker:
             
@@ -145,6 +147,7 @@ def orbiter_bridge(privatekey, retry=0):
                 if status == 1:
                     logger.success(f'{module_str} | {tx_link}')
                     list_send.append(f'{STR_DONE}{module_str}')
+                    return "success"
 
                 else:
                     if retry < RETRY:
