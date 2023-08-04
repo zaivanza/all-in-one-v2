@@ -99,7 +99,7 @@ def bungee_refuel(privatekey, retry=0):
                 if status == 1:
                     logger.success(f'{module_str} | {tx_link}')
                     list_send.append(f'{STR_DONE}{module_str}')
-                    return True
+                    return "success"
 
                 else:
                     if retry < RETRY:

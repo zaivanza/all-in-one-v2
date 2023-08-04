@@ -203,6 +203,7 @@ def sushiswap(privatekey, retry=0):
             if status == 1:
                 logger.success(f'{module_str} : {round_to(amount)} {from_symbol} => {to_symbol} | {tx_link}')
                 list_send.append(f'{STR_DONE}{module_str} : {round_to(amount)} {from_symbol} => {to_symbol}')
+                return "success"
 
             else:
                 if retry < RETRY:

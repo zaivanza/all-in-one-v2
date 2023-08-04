@@ -13,59 +13,61 @@ def start_module(module, key=''):
 
     if module == 1:
         cprint(f'\nstart : web3_checker\n', 'white')
-        web3_check()
+        result = web3_check()
 
     if module == 2:
         cprint(f'\nstart : debank_checker\n', 'white')
-        start_debank()
+        result = start_debank()
 
     if module == 3:
         cprint(f'\nstart : exchange_withdraw\n', 'white')
-        exchange_withdraw(key)
+        result = exchange_withdraw(key)
 
     if module == 4:
         cprint(f'\nstart : okx_withdraw\n', 'white')
-        okx_withdraw(key)
+        result = okx_withdraw(key)
 
     if module == 5:
         cprint(f'\nstart : transfer\n', 'white')
-        transfer(key)
+        result = transfer(key)
 
     if module == 6:
         cprint(f'\nstart : 0x_swap\n', 'white')
-        zeroX_swap(key)
+        result = zeroX_swap(key)
 
     if module == 7:
         cprint(f'\nstart : orbiter_bridge\n', 'white')
-        orbiter_bridge(key)
+        result = orbiter_bridge(key)
 
     if module == 8:
         cprint(f'\nstart : woofi_bridge\n', 'white')
-        woofi_bridge(key)
+        result = woofi_bridge(key)
 
     if module == 9:
         cprint(f'\nstart : woofi_swap\n', 'white')
-        woofi_swap(key)
+        result = woofi_swap(key)
 
     if module == 10:
         cprint(f'\nstart : sushiswap\n', 'white')
-        sushiswap(key)
+        result = sushiswap(key)
 
     if module == 11:
         cprint(f'\nstart : bungee_refuel\n', 'white')
-        bungee_refuel(key)
+        result = bungee_refuel(key)
 
     if module == 12:
         cprint(f'\nstart : tx_checker\n', 'white')
-        start_tx_check()
+        result = start_tx_check()
 
     if module == 13:
         cprint(f'\nstart : 1inch_swap\n', 'white')
-        inch_swap(key)
-
+        result = inch_swap(key)
+    
     if module == 14:
         cprint(f'\nstart : merkly_refuel\n', 'white')
-        merkly_refuel(key)
+        result = merkly_refuel(key)
+
+    return result
         
 
 if __name__ == "__main__":
@@ -112,14 +114,15 @@ MODULE:
                 if CHECK_GWEI == True:
                     wait_gas() # смотрим газ, если выше MAX_GWEI, ждем
 
-                start_module(MODULE, key)
+                result = start_module(MODULE, key)
 
                 if TG_BOT_SEND == True:
                     send_msg() # отправляем результат в телеграм
                 list_send.clear()
 
                 if IS_SLEEP == True:
-                    sleeping(SLEEP_FROM, SLEEP_TO)
+                    if result == "success": # если действие выполнено - спим
+                        sleeping(SLEEP_FROM, SLEEP_TO)
 
             except Exception as error:
                 logger.error()

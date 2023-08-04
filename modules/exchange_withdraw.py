@@ -111,6 +111,7 @@ def okx_withdraw(privatekey, retry=0):
         if result['code'] == '0':
             logger.success(f"withdraw success => {wallet} | {AMOUNT} {SYMBOL}")
             list_send.append(f'{STR_DONE}okx_withdraw | {AMOUNT} {SYMBOL}')
+            return "success"
         else:
             error = result['msg']
             logger.error(f"withdraw unsuccess => {wallet} | error : {error}")
@@ -175,6 +176,7 @@ def exchange_withdraw(privatekey, retry=0):
         )
         logger.success(f"{cex}_withdraw success => {wallet} | {amount_} {symbol}")
         list_send.append(f'{STR_DONE}{cex}_withdraw | {amount_} {symbol}')
+        return "success"
 
     except Exception as error:
         logger.error(f"{cex}_withdraw unsuccess => {wallet} | error : {error}")

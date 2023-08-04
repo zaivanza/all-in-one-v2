@@ -119,6 +119,7 @@ def zeroX_swap(privatekey, retry=0):
                 if status == 1:
                     logger.success(f'{module_str} | {tx_link}')
                     list_send.append(f'{STR_DONE}{module_str}')
+                    return "success"
                 else:
                     logger.error(f'{module_str} | tx is failed | {tx_link}')
                     if retry < RETRY:

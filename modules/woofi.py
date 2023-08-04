@@ -133,7 +133,6 @@ def woofi_bridge(privatekey, retry=0):
             approve_(amount, privatekey, from_chain, from_token, WOOFI_BRIDGE_CONTRACTS[from_chain])
             sleeping(5, 10)
 
-
         layerzero_fee = contract.functions.quoteLayerZeroFee(
             random.randint(112101680502565000, 712101680502565000), # refId
             wallet, # to
@@ -186,7 +185,7 @@ def woofi_bridge(privatekey, retry=0):
             if status == 1:
                 logger.success(f'{module_str} | {tx_link}')
                 list_send.append(f'{STR_DONE}{module_str}')
-                time.sleep(3)
+                return "success"
 
             else:
                 logger.error(f'{module_str} | tx is failed | {tx_link}')
@@ -298,7 +297,7 @@ def woofi_swap(privatekey, retry=0):
             if status == 1:
                 logger.success(f'{module_str} | {tx_link}')
                 list_send.append(f'{STR_DONE}{module_str}')
-                time.sleep(3)
+                return "success"
 
             else:
                 logger.error(f'{module_str} | tx is failed | {tx_link}')
