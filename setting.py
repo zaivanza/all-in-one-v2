@@ -462,9 +462,8 @@ def value_nft_checker():
 
     chain       = 'bsc'
     contract    = '' # nft contract
-    abi         = '' # abi of nft contract
 
     min_balance = 1 # если баланс nft меньше этого числа, кошелек выделяется
     file_name   = 'nft_balances' # имя файла в который будем сохранять данные. создается сам
 
-    return chain, contract, abi, min_balance, file_name
+    return chain, contract, min_balance, file_name

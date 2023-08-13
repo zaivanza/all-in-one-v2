@@ -1,5 +1,5 @@
 from data.data import DATA
-from config import WALLETS, outfile
+from config import WALLETS, outfile, ERC20_ABI
 from setting import value_nft_checker
 from .helpers import evm_wallet, round_to, check_balance
 
@@ -14,7 +14,7 @@ from tabulate import tabulate
 
 RESULT = {}
 
-async def check_balance(web3, wallet, address_contract, abi):
+async def check_balance(web3, wallet, address_contract):
     try:
 
         try: 
@@ -22,7 +22,7 @@ async def check_balance(web3, wallet, address_contract, abi):
         except Exception as error: 
             wallet = wallet
             
-        token_contract = web3.eth.contract(address=Web3.to_checksum_address(address_contract), abi=abi)
+        token_contract = web3.eth.contract(address=Web3.to_checksum_address(address_contract), abi=ERC20_ABI)
         balance = await token_contract.functions.balanceOf(web3.to_checksum_address(wallet)).call()
 
         return balance
@@ -30,9 +30,9 @@ async def check_balance(web3, wallet, address_contract, abi):
     except Exception as error:
         logger.error(f'{error}')
         await asyncio.sleep(1)
-        return await check_balance(web3, wallet, address_contract, abi)
+        return await check_balance(web3, wallet, address_contract)
 
-async def worker(wallet, chain, address_contract, abi):
+async def worker(wallet, chain, address_contract):
 
     web3 = Web3(
         AsyncHTTPProvider(DATA[chain]['rpc']),
@@ -40,12 +40,12 @@ async def worker(wallet, chain, address_contract, abi):
         middlewares=[],
     )
 
-    balance = await check_balance(web3, wallet, address_contract, abi)
+    balance = await check_balance(web3, wallet, address_contract)
     RESULT[wallet] = balance
 
-async def main(contract, chain, abi, wallets):
+async def main(contract, chain, wallets):
 
-    tasks = [worker(wallet, chain, contract, abi) for wallet in wallets]
+    tasks = [worker(wallet, chain, contract) for wallet in wallets]
     await asyncio.gather(*tasks)
 
 def send_result(min_balance, file_name):
@@ -98,7 +98,7 @@ def send_result(min_balance, file_name):
 
 def nft_check():
 
-    chain, contract, abi, min_balance, file_name = value_nft_checker()
+    chain, contract, min_balance, file_name = value_nft_checker()
 
     wallets = []
     for key in WALLETS:
@@ -107,5 +107,5 @@ def nft_check():
 
         RESULT.update({wallet : 0})
 
-    asyncio.run(main(contract, chain, abi, wallets))
+    asyncio.run(main(contract, chain, wallets))
     send_result(min_balance, file_name)
