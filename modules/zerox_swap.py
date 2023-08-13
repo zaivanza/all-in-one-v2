@@ -131,6 +131,9 @@ def zeroX_swap(privatekey, retry=0):
                 logger.error(f"{module_str} : can't swap : {amount} (amount) < {min_amount_swap} (min_amount_swap)")
                 list_send.append(f'{STR_CANCEL}{module_str} : {amount} less {min_amount_swap}')
 
+        else:
+            list_send.append(f'{STR_CANCEL}{module_str}')
+
     except Exception as error:
         module_str = f'0x_swap'
         logger.error(f'{module_str} | error : {error}')
