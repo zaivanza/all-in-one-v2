@@ -67,6 +67,10 @@ def start_module(module, key=''):
         cprint(f'\nstart : merkly_refuel\n', 'white')
         result = merkly_refuel(key)
 
+    if module == 15:
+        cprint(f'\nstart : nft_checker\n', 'white')
+        result = nft_check()
+
     return result
         
 
@@ -91,10 +95,11 @@ MODULE:
 12. tx_checker
 13. 1inch_swap
 14. merkly_refuel
+15. nft_checker
                        
-Выберите модуль (1 - 14) : '''))
+Выберите модуль (1 - 15) : '''))
 
-    if MODULE in [1, 2, 12]:
+    if MODULE in [1, 2, 12, 15]:
         start_module(MODULE)
 
     else:

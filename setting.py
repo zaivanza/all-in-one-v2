@@ -453,3 +453,18 @@ def value_merkly_refuel():
     
     return from_chain, to_chain, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, get_layerzero_fee
 
+def value_nft_checker():
+
+    '''
+    чекер nft
+    chains : ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | nova | zksync | polygon_zkevm | celo | gnosis | core | harmony | linea | base
+    '''
+
+    chain       = 'bsc'
+    contract    = '' # nft contract
+    abi         = '' # abi of nft contract
+
+    min_balance = 1 # если баланс nft меньше этого числа, кошелек выделяется
+    file_name   = 'nft_balances' # имя файла в который будем сохранять данные. создается сам
+
+    return chain, contract, abi, min_balance, file_name
