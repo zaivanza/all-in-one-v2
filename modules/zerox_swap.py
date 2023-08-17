@@ -49,6 +49,8 @@ def zeroX_swap(privatekey, retry=0):
         chain, swap_all_balance, min_amount_swap, keep_value_from, keep_value_to, amount_from, amount_to, from_token_address, to_token_address, slippage = value_0x_swap()
 
         keep_value = round(random.uniform(keep_value_from, keep_value_to), 8)
+        if swap_all_balance == True: amount = check_balance(privatekey, chain, from_token_address) - keep_value
+        else: amount = round(random.uniform(amount_from, amount_to), 8)
 
         web3 = get_web3(chain, privatekey)
 
@@ -68,9 +70,6 @@ def zeroX_swap(privatekey, retry=0):
 
         account = web3.eth.account.from_key(privatekey)
         wallet  = account.address
-
-        if swap_all_balance == True: amount = check_balance(privatekey, chain, from_token_address) - keep_value
-        else: amount = round(random.uniform(amount_from, amount_to), 8)
 
         amount = amount*0.999
         amount_to_swap = intToDecimal(amount, from_decimals) 
