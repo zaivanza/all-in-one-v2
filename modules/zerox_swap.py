@@ -39,14 +39,26 @@ def get_0x_quote(chain, from_token, to_token, value, slippage):
         logger.error(error)
         return False
 
-def zeroX_swap(privatekey, retry=0):
+def zeroX_swap(privatekey, params, retry=0):
         
     try:
 
         module_str = '0x_swap'
         logger.info(module_str)
 
-        chain, swap_all_balance, min_amount_swap, keep_value_from, keep_value_to, amount_from, amount_to, from_token_address, to_token_address, slippage = value_0x_swap()
+        if params is not None:
+            chain = params['chain']
+            from_token_address = params['from_token_address']
+            to_token_address = params['to_token_address']
+            swap_all_balance = params['swap_all_balance']
+            amount_from = params['amount_from']
+            amount_to = params['amount_to']
+            min_amount_swap = params['min_amount_swap']
+            keep_value_from = params['keep_value_from']
+            keep_value_to = params['keep_value_to']
+            slippage = params['slippage']
+        else:
+            chain, swap_all_balance, min_amount_swap, keep_value_from, keep_value_to, amount_from, amount_to, from_token_address, to_token_address, slippage = value_0x_swap()
 
         keep_value = round(random.uniform(keep_value_from, keep_value_to), 8)
         if swap_all_balance == True: amount = check_balance(privatekey, chain, from_token_address) - keep_value
@@ -104,7 +116,7 @@ def zeroX_swap(privatekey, retry=0):
             # смотрим газ, если выше выставленного значения : спим
             total_fee   = int(contract_txn['gas'] * contract_txn['gasPrice'])
             is_fee      = checker_total_fee(chain, total_fee)
-            if is_fee   == False: return zeroX_swap(privatekey, retry)
+            if is_fee   == False: return zeroX_swap(privatekey, params, retry)
 
             if amount >= min_amount_swap:
                     
@@ -124,7 +136,7 @@ def zeroX_swap(privatekey, retry=0):
                     if retry < RETRY:
                         logger.info(f'try again in 10 sec.')
                         sleeping(10, 10)
-                        zeroX_swap(privatekey, retry+1)
+                        zeroX_swap(privatekey, params, retry+1)
 
             else:
                 logger.error(f"{module_str} : can't swap : {amount} (amount) < {min_amount_swap} (min_amount_swap)")
@@ -139,6 +151,6 @@ def zeroX_swap(privatekey, retry=0):
         if retry < RETRY:
             logger.info(f'try again in 10 sec.')
             sleeping(10, 10)
-            zeroX_swap(privatekey, retry+1)
+            zeroX_swap(privatekey, params, retry+1)
         else:
             list_send.append(f'{STR_CANCEL}{module_str}')

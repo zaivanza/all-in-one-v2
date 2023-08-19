@@ -42,11 +42,23 @@ def woofi_get_min_amount(privatekey, chain, from_token, to_token, amount):
         logger.error(f'error : {error}. return 0')
         return 0
 
-def woofi_bridge(privatekey, retry=0):
+def woofi_bridge(privatekey, params, retry=0):
 
     try:
 
-        from_chain, to_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to = value_woofi_bridge()
+        if params is not None:
+            from_chain = params['from_chain']
+            to_chain = params['to_chain']
+            from_token = params['from_token']
+            to_token = params['to_token']
+            swap_all_balance = params['swap_all_balance']
+            amount_from = params['amount_from']
+            amount_to = params['amount_to']
+            min_amount_swap = params['min_amount_swap']
+            keep_value_from = params['keep_value_from']
+            keep_value_to = params['keep_value_to']
+        else:
+            from_chain, to_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to = value_woofi_bridge()
 
         def get_srcInfos(amount_, from_chain, from_token):
 
@@ -176,7 +188,7 @@ def woofi_bridge(privatekey, retry=0):
             # смотрим газ, если выше выставленного значения : спим
             total_fee   = int(contract_txn['gas'] * contract_txn['gasPrice'] + layerzero_fee)
             is_fee      = checker_total_fee(from_chain, total_fee)
-            if is_fee   == False: return woofi_bridge(privatekey, retry)
+            if is_fee   == False: return woofi_bridge(privatekey, params, retry)
 
             tx_hash = sign_tx(web3, contract_txn, privatekey)
             tx_link = f'{DATA[from_chain]["scan"]}/{tx_hash}'
@@ -194,7 +206,7 @@ def woofi_bridge(privatekey, retry=0):
                 if retry < RETRY:
                     logger.info(f'try again | {wallet}')
                     time.sleep(3)
-                    woofi_bridge(privatekey, retry+1)
+                    woofi_bridge(privatekey, params, retry+1)
                 else:
                     list_send.append(f'{STR_CANCEL}{module_str}')
 
@@ -207,15 +219,25 @@ def woofi_bridge(privatekey, retry=0):
         if retry < RETRY:
             logger.info(f'try again in 10 sec.')
             sleeping(10, 10)
-            woofi_bridge(privatekey, retry+1)
+            woofi_bridge(privatekey, params, retry+1)
         else:
             list_send.append(f'{STR_CANCEL}{module_str}')
 
-def woofi_swap(privatekey, retry=0):
+def woofi_swap(privatekey, params, retry=0):
 
     try:
-
-        from_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to = value_woofi_swap()
+        if params is not None:
+            from_chain = params['chain']
+            from_token = params['from_token']
+            to_token = params['to_token']
+            swap_all_balance = params['swap_all_balance']
+            amount_from = params['amount_from']
+            amount_to = params['amount_to']
+            min_amount_swap = params['min_amount_swap']
+            keep_value_from = params['keep_value_from']
+            keep_value_to = params['keep_value_to']
+        else:
+            from_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to = value_woofi_swap()
 
         module_str = f'woofi_swap : {from_chain}'
         logger.info(module_str)
@@ -288,7 +310,7 @@ def woofi_swap(privatekey, retry=0):
             # смотрим газ, если выше выставленного значения : спим
             total_fee   = int(contract_txn['gas'] * contract_txn['gasPrice'])
             is_fee      = checker_total_fee(from_chain, total_fee)
-            if is_fee   == False: return woofi_swap(privatekey, retry)
+            if is_fee   == False: return woofi_swap(privatekey, params, retry)
 
             tx_hash = sign_tx(web3, contract_txn, privatekey)
             tx_link = f'{DATA[from_chain]["scan"]}/{tx_hash}'
@@ -305,7 +327,7 @@ def woofi_swap(privatekey, retry=0):
                 if retry < RETRY:
                     logger.info(f'try again | {wallet}')
                     time.sleep(3)
-                    woofi_swap(privatekey, retry+1)
+                    woofi_swap(privatekey, params, retry+1)
                 else:
                     list_send.append(f'{STR_CANCEL}{module_str}')
 
@@ -318,7 +340,7 @@ def woofi_swap(privatekey, retry=0):
         if retry < RETRY:
             logger.info(f'try again in 10 sec.')
             sleeping(10, 10)
-            woofi_swap(privatekey, retry+1)
+            woofi_swap(privatekey, params, retry+1)
         else:
             list_send.append(f'{STR_CANCEL}{module_str}')
 

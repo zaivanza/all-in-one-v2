@@ -33,11 +33,22 @@ def get_bungee_limits(from_chain, to_chain):
             except Exception as error:
                 logger.error(error)
 
-def bungee_refuel(privatekey, retry=0):
+def bungee_refuel(privatekey, params, retry=0):
 
     try:
 
-        from_chain, to_chain, bridge_all_balance, amount_from, amount_to, min_amount_bridge, keep_value_from, keep_value_to = value_bungee()
+        if params is not None:
+            from_chain = params['from_chain']
+            to_chain = params['to_chain']
+            bridge_all_balance = params['bridge_all_balance']
+            amount_from = params['amount_from']
+            amount_to = params['amount_to']
+            min_amount_bridge = params['min_amount_bridge']
+            keep_value_from = params['keep_value_from']
+            keep_value_to = params['keep_value_to']
+
+        else:
+            from_chain, to_chain, bridge_all_balance, amount_from, amount_to, min_amount_bridge, keep_value_from, keep_value_to = value_bungee()
 
         module_str = f'bungee_refuel : {from_chain} => {to_chain}'
         logger.info(module_str)
@@ -105,13 +116,13 @@ def bungee_refuel(privatekey, retry=0):
                     if retry < RETRY:
                         logger.info(f'{module_str} | tx is failed, try again in 10 sec | {tx_link}')
                         sleeping(10, 10)
-                        bungee_refuel(privatekey, retry+1)
+                        bungee_refuel(privatekey,  params,retry+1)
                     else:
                         logger.error(f'{module_str} | tx is failed | {tx_link}')
                         list_send.append(f'{STR_CANCEL}{module_str} | tx is failed | {tx_link}')
 
             else:
-                bungee_refuel(privatekey, retry)
+                bungee_refuel(privatekey, params, retry)
 
         else:
             logger.error(f"{module_str} : can't bridge : {amount} (amount) < {min_amount_bridge} (min_amount_bridge)")
@@ -124,7 +135,7 @@ def bungee_refuel(privatekey, retry=0):
         if retry < RETRY:
             logger.info(f'try again | {wallet}')
             sleeping(10, 10)
-            bungee_refuel(privatekey, retry+1)
+            bungee_refuel(privatekey, params, retry+1)
         else:
             list_send.append(f'{STR_CANCEL}{module_str}')
 

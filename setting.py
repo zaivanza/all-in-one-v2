@@ -1,6 +1,10 @@
 import random
+from tracks import *
 
 '''вся настройка в этом файле'''
+
+USE_TRACKS = False # True если используем треки, False если 1 модуль
+TRACK = track_1 # меняется на переменную трека из routes.py
 
 IS_SLEEP        = True # True / False. True если нужно поставить sleep между кошельками
 # от скольки до скольки спим между кошельками (секунды) :

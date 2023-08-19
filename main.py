@@ -1,7 +1,7 @@
 from config import RUN_TEXT, RUN_COLOR, WALLETS
-from setting import RANDOM_WALLETS, CHECK_GWEI, TG_BOT_SEND , IS_SLEEP, SLEEP_FROM, SLEEP_TO
+from setting import RANDOM_WALLETS, CHECK_GWEI, TG_BOT_SEND , IS_SLEEP, SLEEP_FROM, SLEEP_TO, USE_TRACKS, TRACK
 
-from modules.helpers import evm_wallet, list_send, wait_gas, send_msg, sleeping
+from modules.helpers import evm_wallet, list_send, wait_gas, send_msg, sleeping, wait_balance
 from modules import *
 
 from loguru import logger
@@ -9,7 +9,7 @@ from termcolor import cprint
 import random
 
 
-def start_module(module, key=''):
+def start_module(module, key='', params=None):
 
     if module == 1:
         cprint(f'\nstart : web3_checker\n', 'white')
@@ -21,39 +21,39 @@ def start_module(module, key=''):
 
     if module == 3:
         cprint(f'\nstart : exchange_withdraw\n', 'white')
-        result = exchange_withdraw(key)
+        result = exchange_withdraw(key, params)
 
     if module == 4:
         cprint(f'\nstart : okx_withdraw\n', 'white')
-        result = okx_withdraw(key)
+        result = okx_withdraw(key, params)
 
     if module == 5:
         cprint(f'\nstart : transfer\n', 'white')
-        result = transfer(key)
+        result = transfer(key, params)
 
     if module == 6:
         cprint(f'\nstart : 0x_swap\n', 'white')
-        result = zeroX_swap(key)
+        result = zeroX_swap(key, params)
 
     if module == 7:
         cprint(f'\nstart : orbiter_bridge\n', 'white')
-        result = orbiter_bridge(key)
+        result = orbiter_bridge(key, params)
 
     if module == 8:
         cprint(f'\nstart : woofi_bridge\n', 'white')
-        result = woofi_bridge(key)
+        result = woofi_bridge(key, params)
 
     if module == 9:
         cprint(f'\nstart : woofi_swap\n', 'white')
-        result = woofi_swap(key)
+        result = woofi_swap(key, params)
 
     if module == 10:
         cprint(f'\nstart : sushiswap\n', 'white')
-        result = sushiswap(key)
+        result = sushiswap(key, params)
 
     if module == 11:
         cprint(f'\nstart : bungee_refuel\n', 'white')
-        result = bungee_refuel(key)
+        result = bungee_refuel(key, params)
 
     if module == 12:
         cprint(f'\nstart : tx_checker\n', 'white')
@@ -61,25 +61,71 @@ def start_module(module, key=''):
 
     if module == 13:
         cprint(f'\nstart : 1inch_swap\n', 'white')
-        result = inch_swap(key)
+        result = inch_swap(key, params)
     
     if module == 14:
         cprint(f'\nstart : merkly_refuel\n', 'white')
-        result = merkly_refuel(key)
+        result = merkly_refuel(key, params)
 
     if module == 15:
         cprint(f'\nstart : nft_checker\n', 'white')
         result = nft_check()
 
     return result
-        
+
 
 if __name__ == "__main__":
 
     cprint(RUN_TEXT, RUN_COLOR)
     cprint(f'\nsubscribe to us : https://t.me/hodlmodeth\n', RUN_COLOR)
 
-    MODULE = int(input('''
+    if RANDOM_WALLETS == True: random.shuffle(WALLETS)
+
+    if USE_TRACKS == True:
+
+        cprint('\n>>> running track. press ENTER <<<', 'white')
+        input()
+        
+        number = 0
+        for key in WALLETS:
+            number += 1
+
+            try:
+
+                wallet = evm_wallet(key)
+                list_send.append(f'{number}/{len(WALLETS)} : {wallet}\n')
+                cprint(f'\n{number}/{len(WALLETS)} : {wallet}\n', 'white')
+
+                if CHECK_GWEI == True:
+                    wait_gas() # смотрим газ, если выше MAX_GWEI, ждем
+
+                for params in TRACK:
+
+                    if params['module_name'] == 'wait_balance':
+                        wait_balance(key, params['params']['chain'], params['params']['min_balance'], params['params']['token'])
+                    
+                    elif params['module_name'] == 'sleeping':
+                        sleeping(int(params['params']['from']), int(params['params']['to']))
+                    
+                    else:
+                        result = start_module(params['module_number'], key, params['params'])
+                        if result != "success": 
+                            logger.error('Module is not success, cycle broken')
+                            break
+
+                if TG_BOT_SEND == True:
+                    send_msg() # отправляем результат в телеграм
+                list_send.clear()
+
+                if IS_SLEEP == True:
+                    sleeping(SLEEP_FROM, SLEEP_TO)
+
+            except Exception as error:
+                logger.error()
+
+    else:
+ 
+        MODULE = int(input('''
 MODULE:
 1.  web3_checker
 2.  debank checker
@@ -96,39 +142,40 @@ MODULE:
 13. 1inch_swap
 14. merkly_refuel
 15. nft_checker
-                       
+
 Выберите модуль (1 - 15) : '''))
 
-    if MODULE in [1, 2, 12, 15]:
-        start_module(MODULE)
+        if MODULE in [1, 2, 12, 15]:
+            start_module(MODULE)
 
-    else:
+        else:
 
-        if RANDOM_WALLETS == True: random.shuffle(WALLETS)
+            cprint(f'\n>>> running module {MODULE}. press ENTER <<<', 'white')
+            input()
 
-        zero = 0
-        for key in WALLETS:
-            zero += 1
+            number = 0
+            for key in WALLETS:
+                number += 1
 
-            try:
+                try:
 
-                wallet = evm_wallet(key)
-                list_send.append(f'{zero}/{len(WALLETS)} : {wallet}\n')
-                cprint(f'\n{zero}/{len(WALLETS)} : {wallet}\n', 'white')
+                    wallet = evm_wallet(key)
+                    list_send.append(f'{number}/{len(WALLETS)} : {wallet}\n')
+                    cprint(f'\n{number}/{len(WALLETS)} : {wallet}\n', 'white')
 
-                if CHECK_GWEI == True:
-                    wait_gas() # смотрим газ, если выше MAX_GWEI, ждем
+                    if CHECK_GWEI == True:
+                        wait_gas() # смотрим газ, если выше MAX_GWEI, ждем
 
-                result = start_module(MODULE, key)
+                    result = start_module(MODULE, key)
 
-                if TG_BOT_SEND == True:
-                    send_msg() # отправляем результат в телеграм
-                list_send.clear()
+                    if TG_BOT_SEND == True:
+                        send_msg() # отправляем результат в телеграм
+                    list_send.clear()
 
-                if IS_SLEEP == True:
-                    if result == "success": # если действие выполнено - спим
-                        sleeping(SLEEP_FROM, SLEEP_TO)
+                    if IS_SLEEP == True:
+                        if result == "success": # если действие выполнено - спим
+                            sleeping(SLEEP_FROM, SLEEP_TO)
 
-            except Exception as error:
-                logger.error()
+                except Exception as error:
+                    logger.error()
 

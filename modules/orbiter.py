@@ -58,11 +58,21 @@ def get_orbiter_value(base_num, chain):
     result_str = result_str[:-4] + orbiter_str
     return decimal.Decimal(result_str)
 
-def orbiter_bridge(privatekey, retry=0):
+def orbiter_bridge(privatekey, params, retry=0):
 
     try:
 
-        from_chain, to_chain, bridge_all_balance, amount_from, amount_to, min_amount_bridge, keep_value_from, keep_value_to = value_orbiter()
+        if params is not None:
+            from_chain = params['from_chain']
+            to_chain = params['to_chain']
+            bridge_all_balance = params['bridge_all_balance']
+            min_amount_bridge = params['min_amount_bridge']
+            amount_from = params['amount_from']
+            amount_to = params['amount_to']
+            keep_value_from = params['keep_value_from']
+            keep_value_to = params['keep_value_to']
+        else:
+            from_chain, to_chain, bridge_all_balance, amount_from, amount_to, min_amount_bridge, keep_value_from, keep_value_to = value_orbiter()
 
         module_str = f'orbiter_bridge : {from_chain} => {to_chain}'
         logger.info(module_str)
@@ -138,7 +148,7 @@ def orbiter_bridge(privatekey, retry=0):
                 # смотрим газ, если выше выставленного значения : спим
                 total_fee   = int(contract_txn['gas'] * contract_txn['gasPrice'])
                 is_fee      = checker_total_fee(from_chain, total_fee)
-                if is_fee   == False: return orbiter_bridge(privatekey, retry)
+                if is_fee   == False: return orbiter_bridge(privatekey, params, retry)
 
                 tx_hash = sign_tx(web3, contract_txn, privatekey)
                 tx_link = f'{DATA[from_chain]["scan"]}/{tx_hash}'
@@ -153,7 +163,7 @@ def orbiter_bridge(privatekey, retry=0):
                     if retry < RETRY:
                         logger.info(f'{module_str} | tx is failed, try again in 10 sec | {tx_link}')
                         sleeping(10, 10)
-                        orbiter_bridge(privatekey, retry+1)
+                        orbiter_bridge(privatekey, params, retry+1)
                     else:
                         logger.error(f'{module_str} | tx is failed | {tx_link}')
                         list_send.append(f'{STR_CANCEL}{module_str} | tx is failed | {tx_link}')
@@ -180,7 +190,7 @@ def orbiter_bridge(privatekey, retry=0):
         if retry < RETRY:
             logger.info(f'try again | {wallet}')
             sleeping(10, 10)
-            orbiter_bridge(privatekey, retry+1)
+            orbiter_bridge(privatekey, params, retry+1)
         else:
             list_send.append(f'{STR_CANCEL}{module_str}')
 

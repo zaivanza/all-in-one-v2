@@ -43,9 +43,21 @@ def okx_data(api_key, secret_key, passphras, request_path="/api/v5/account/balan
         logger.error(ex)
     return base_url, request_path, headers
 
-def okx_withdraw(privatekey, retry=0):
+def okx_withdraw(privatekey, params, retry=0):
 
-    CHAIN, SYMBOL, amount_from, amount_to, account, FEE, SUB_ACC, is_private_key = value_okx()
+    if params is not None:
+        CHAIN = params['chain']
+        SYMBOL = params['symbol']
+        amount_from = params['amount_from']
+        amount_to = params['amount_to']
+        account = params['account']
+        FEE = params['fee']
+        SUB_ACC = params['sub_acc']
+        is_private_key = params['is_private_key']
+
+    else:
+        CHAIN, SYMBOL, amount_from, amount_to, account, FEE, SUB_ACC, is_private_key = value_okx()
+
     AMOUNT = round(random.uniform(amount_from, amount_to), 7)
 
     api_key         = OKX_KEYS[account]['api_key']
@@ -118,7 +130,7 @@ def okx_withdraw(privatekey, retry=0):
             if retry < RETRY:
                 logger.info(f"try again in 10 sec. => {wallet}")
                 sleeping(10, 10)
-                okx_withdraw(privatekey, retry+1)
+                okx_withdraw(privatekey, params, retry+1)
             else:
                 list_send.append(f"{STR_CANCEL}okx_withdraw :  {result['msg']}")
 
@@ -127,15 +139,25 @@ def okx_withdraw(privatekey, retry=0):
         if retry < RETRY:
             logger.info(f"try again in 10 sec. => {wallet}")
             sleeping(10, 10)
-            okx_withdraw(privatekey, retry+1)
+            okx_withdraw(privatekey, params, retry+1)
         else:
             list_send.append(f'{STR_CANCEL}okx_withdraw')
 
-def exchange_withdraw(privatekey, retry=0):
+def exchange_withdraw(privatekey, params, retry=0):
 
     try:
 
-        cex, chain, symbol, amount_from, amount_to, is_private_key = value_exchange()
+        if params is not None:
+            cex = params['cex']
+            chain = params['chain']
+            symbol = params['symbol']
+            amount_from = params['amount_from']
+            amount_to = params['amount_to']
+            is_private_key = params['is_private_key']
+
+        else:
+            cex, chain, symbol, amount_from, amount_to, is_private_key = value_exchange()
+
         amount_ = round(random.uniform(amount_from, amount_to), 7)
 
         logger.info(f"{cex}_withdraw")
@@ -183,6 +205,6 @@ def exchange_withdraw(privatekey, retry=0):
         if retry < RETRY:
             logger.info(f"try again in 10 sec. => {wallet}")
             sleeping(10, 10)
-            exchange_withdraw(privatekey, retry+1)
+            exchange_withdraw(privatekey, params, retry+1)
         else:
             list_send.append(f'{STR_CANCEL}{cex}_withdraw')

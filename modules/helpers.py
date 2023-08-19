@@ -132,9 +132,6 @@ def check_balance(privatekey, chain, address_contract):
             balance = token_contract.functions.balanceOf(web3.to_checksum_address(wallet)).call()
 
         human_readable = decimalToInt(balance, token_decimal) 
-
-        # cprint(human_readable, 'blue')
-
         return human_readable
 
     except Exception as error:
@@ -349,11 +346,26 @@ def get_prices():
         time.sleep(1)
         return get_prices()
     
-def get_bungee_data():
-    url = "https://refuel.socket.tech/chains"
-    response = requests.get(url)
-    if response.status_code == 200:
-        data = json.loads(response.text)
-        return data
-    
+def wait_balance(privatekey, chain, min_balance, token):
+
+    if token == '':
+        symbol = DATA[chain]['token']
+    else:
+        token_contract, token_decimal, symbol = check_data_token(chain, token)
+
+    logger.info(f'waiting {min_balance} {symbol} in {chain}')
+
+    while True:
+
+        try:
+            balance = check_balance(privatekey, chain, token)
+
+            if balance > min_balance:
+                logger.info(f'balance : {balance}')
+                break
+            time.sleep(10)
+
+        except Exception as error:
+            logger.error(f'balance error : {error}. check again')
+            sleeping(10,10)
 

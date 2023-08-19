@@ -57,7 +57,7 @@ def get_api_call_data(url):
                 time.sleep(1)
                 return get_api_call_data(url)
 
-def inch_swap(privatekey, retry=0):
+def inch_swap(privatekey, params, retry=0):
 
     try:
 
@@ -68,7 +68,20 @@ def inch_swap(privatekey, retry=0):
         base_url = 'https://api.1inch.io'
         inch_version = 5
 
-        chain, swap_all_balance, min_amount_swap, keep_value_from, keep_value_to, amount_from, amount_to, from_token_address, to_token_address, slippage = value_1inch_swap()
+        if params is not None:
+            chain = params['chain']
+            swap_all_balance = params['swap_all_balance']
+            min_amount_swap = params['min_amount_swap']
+            amount_from = params['amount_from']
+            amount_to = params['amount_to']
+            keep_value_from = params['keep_value_from']
+            keep_value_to = params['keep_value_to']
+            from_token_address = params['from_token_address']
+            to_token_address = params['to_token_address']
+            slippage = params['slippage']
+
+        else:
+            chain, swap_all_balance, min_amount_swap, keep_value_from, keep_value_to, amount_from, amount_to, from_token_address, to_token_address, slippage = value_1inch_swap()
 
         keep_value = round(random.uniform(keep_value_from, keep_value_to), 8)
         if swap_all_balance == True: amount = check_balance(privatekey, chain, from_token_address) - keep_value
@@ -130,7 +143,7 @@ def inch_swap(privatekey, retry=0):
             # смотрим газ, если выше выставленного значения : спим
             total_fee   = int(tx['gas'] * tx['gasPrice'])
             is_fee      = checker_total_fee(chain, total_fee)
-            if is_fee   == False: return inch_swap(privatekey, retry)
+            if is_fee   == False: return inch_swap(privatekey, params, retry)
 
             if amount >= min_amount_swap:
 
@@ -150,7 +163,7 @@ def inch_swap(privatekey, retry=0):
                     if retry < RETRY:
                         logger.info(f'try again in 10 sec.')
                         sleeping(10, 10)
-                        inch_swap(privatekey, retry+1)
+                        inch_swap(privatekey, params, retry+1)
 
             else:
                 logger.error(f"{module_str} : can't swap : {amount} (amount) < {min_amount_swap} (min_amount_swap)")
@@ -167,6 +180,6 @@ def inch_swap(privatekey, retry=0):
         if retry < RETRY:
             logger.info(f'try again in 10 sec.')
             sleeping(10, 10)
-            inch_swap(privatekey, retry+1)
+            inch_swap(privatekey, params, retry+1)
         else:
             list_send.append(f'{STR_CANCEL}{module_str}')

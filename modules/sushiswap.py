@@ -39,42 +39,54 @@ def get_0x_quote(chain, from_token, to_token, value, slippage):
         logger.error(error)
         return False
 
-def sushiswap(privatekey, retry=0):
+def get_sushi_amountOutMin(contract, value, from_token, to_token, slippage):
+
+    contract_txn = contract.functions.getAmountsOut(
+        value,
+        [from_token, to_token],
+        ).call()
+
+    return int(contract_txn[1] * slippage)
+
+def get_amountOut(chain, contract, value, from_token, to_token, slippage_, from_token_address, to_token_address):
+
+    slippage = (1 - slippage_ / 100)
+
+    if chain in ['nova']:
+        amountOutMin    = get_sushi_amountOutMin(contract, value, from_token, to_token, slippage)
+    else:
+
+        if from_token_address == '':
+            json_data = get_0x_quote(chain, '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', to_token, value, slippage_)
+        elif to_token_address == '':
+            json_data = get_0x_quote(chain, from_token, '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', value, slippage_)
+        elif (to_token_address != '' and from_token_address != ''):
+            json_data = get_0x_quote(chain, from_token, '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', value, slippage_)
+
+        if json_data != False:
+            amountOutMin = int(int(json_data[0]['buyAmount']) * slippage)
+        else:
+            amountOutMin = get_sushi_amountOutMin(contract, value, from_token, to_token, slippage)
+
+    return amountOutMin
+
+def sushiswap(privatekey, params, retry=0):
 
     try:
 
-        def get_sushi_amountOutMin(contract, value, from_token, to_token, slippage):
-
-            contract_txn = contract.functions.getAmountsOut(
-                value,
-                [from_token, to_token],
-                ).call()
-
-            return int(contract_txn[1] * slippage)
-
-        def get_amountOut(chain, contract, value, from_token, to_token, slippage_, from_token_address):
-
-            slippage = (1 - slippage_ / 100)
-
-            if chain in ['nova']:
-                amountOutMin    = get_sushi_amountOutMin(contract, value, from_token, to_token, slippage)
-            else:
-
-                if from_token_address == '':
-                    json_data = get_0x_quote(chain, '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', to_token, value, slippage_)
-                elif to_token_address == '':
-                    json_data = get_0x_quote(chain, from_token, '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', value, slippage_)
-                elif (to_token_address != '' and from_token_address != ''):
-                    json_data = get_0x_quote(chain, from_token, '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', value, slippage_)
-
-                if json_data != False:
-                    amountOutMin = int(int(json_data[0]['buyAmount']) * slippage)
-                else:
-                    amountOutMin = get_sushi_amountOutMin(contract, value, from_token, to_token, slippage)
-
-            return amountOutMin
-
-        chain, from_token_address, to_token_address, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, slippage_ = value_sushiswap()
+        if params is not None:
+            chain = params['chain']
+            from_token_address = params['from_token_address']
+            to_token_address = params['to_token_address']
+            swap_all_balance = params['swap_all_balance']
+            amount_from = params['amount_from']
+            amount_to = params['amount_to']
+            min_amount_swap = params['min_amount_swap']
+            keep_value_from = params['keep_value_from']
+            keep_value_to = params['keep_value_to']
+            slippage_ = params['slippage']
+        else:
+            chain, from_token_address, to_token_address, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, slippage_ = value_sushiswap()
 
         module_str = f'sushiswap ({chain})'
         logger.info(module_str)
@@ -99,7 +111,7 @@ def sushiswap(privatekey, retry=0):
             to_token_contract, to_token_decimal, to_symbol          = check_data_token(chain, to_token)
             value = intToDecimal(amount, from_token_decimal)
 
-            amountOutMin = get_amountOut(chain, contract, value, from_token, to_token, slippage_, from_token_address)
+            amountOutMin = get_amountOut(chain, contract, value, from_token, to_token, slippage_, from_token_address, to_token_address)
 
             contract_txn = contract.functions.swapExactETHForTokens(
                 amountOutMin,
@@ -126,7 +138,7 @@ def sushiswap(privatekey, retry=0):
             to_token_contract, to_token_decimal, to_symbol          = check_data_token(chain, to_token)
             value = intToDecimal(amount, from_token_decimal)
 
-            amountOutMin = get_amountOut(chain, contract, value, from_token, to_token, slippage_, from_token_address)
+            amountOutMin = get_amountOut(chain, contract, value, from_token, to_token, slippage_, from_token_address, to_token_address)
 
             contract_txn = contract.functions.swapExactTokensForETH(
                 value, # amountIn
@@ -154,7 +166,7 @@ def sushiswap(privatekey, retry=0):
             to_token_contract, to_token_decimal, to_symbol          = check_data_token(chain, to_token)
             value = intToDecimal(amount, from_token_decimal)
 
-            amountOutMin = get_amountOut(chain, contract, value, from_token, to_token, slippage_, from_token_address)
+            amountOutMin = get_amountOut(chain, contract, value, from_token, to_token, slippage_, from_token_address, to_token_address)
 
             contract_txn = contract.functions.swapExactTokensForTokens(
                 value, # amountIn
@@ -194,7 +206,7 @@ def sushiswap(privatekey, retry=0):
             # смотрим газ, если выше выставленного значения : спим
             total_fee   = int(contract_txn['gas'] * contract_txn['gasPrice'])
             is_fee      = checker_total_fee(chain, total_fee)
-            if is_fee   == False: return sushiswap(privatekey, retry)
+            if is_fee   == False: return sushiswap(privatekey, params, retry)
 
             tx_hash = sign_tx(web3, contract_txn, privatekey)
             tx_link = f'{DATA[chain]["scan"]}/{tx_hash}'
@@ -209,7 +221,7 @@ def sushiswap(privatekey, retry=0):
                 if retry < RETRY:
                     logger.info(f'{module_str} | tx is failed, try again in 10 sec | {tx_link}')
                     sleeping(10, 10)
-                    sushiswap(privatekey, retry+1)
+                    sushiswap(privatekey, params, retry+1)
                 else:
                     logger.error(f'{module_str} | tx is failed | {tx_link}')
                     list_send.append(f'{STR_CANCEL}{module_str} | tx is failed | {tx_link}')
@@ -225,7 +237,7 @@ def sushiswap(privatekey, retry=0):
         if retry < RETRY:
             logger.info(f'try again | {wallet}')
             sleeping(10, 10)
-            sushiswap(privatekey, retry+1)
+            sushiswap(privatekey, params, retry+1)
         else:
             list_send.append(f'{STR_CANCEL}{module_str}')
 

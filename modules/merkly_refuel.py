@@ -50,11 +50,22 @@ def check_merkly_fees():
     cprint(f'\nРезультаты записаны в {path}.json\n', 'blue')
     sys.exit()
 
-def merkly_refuel(privatekey, retry=0):
+def merkly_refuel(privatekey, params, retry=0):
 
     try:
 
-        from_chain, to_chain, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, get_layerzero_fee = value_merkly_refuel()
+        if params is not None:
+            from_chain = params['from_chain']
+            to_chain = params['to_chain']
+            swap_all_balance = params['swap_all_balance']
+            min_amount_swap = params['min_amount_swap']
+            amount_from = params['amount_from']
+            amount_to = params['amount_to']
+            keep_value_from = params['keep_value_from']
+            keep_value_to = params['keep_value_to']
+            get_layerzero_fee = params['get_layerzero_fee']
+        else:
+            from_chain, to_chain, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, get_layerzero_fee = value_merkly_refuel()
 
         if get_layerzero_fee == True:
             check_merkly_fees()
@@ -109,7 +120,7 @@ def merkly_refuel(privatekey, retry=0):
             # смотрим газ, если выше выставленного значения : спим
             total_fee   = int(contract_txn['gas'] * contract_txn['gasPrice'])
             is_fee      = checker_total_fee(from_chain, total_fee)
-            if is_fee   == False: return merkly_refuel(privatekey, retry)
+            if is_fee   == False: return merkly_refuel(privatekey, params, retry)
 
             tx_hash = sign_tx(web3, contract_txn, privatekey)
             tx_link = f'{DATA[from_chain]["scan"]}/{tx_hash}'
@@ -124,7 +135,7 @@ def merkly_refuel(privatekey, retry=0):
                 if retry < RETRY:
                     logger.info(f'{module_str} | tx is failed, try again in 10 sec | {tx_link}')
                     sleeping(10, 10)
-                    merkly_refuel(privatekey, retry+1)
+                    merkly_refuel(privatekey, params, retry+1)
                 else:
                     logger.error(f'{module_str} | tx is failed | {tx_link}')
                     list_send.append(f'{STR_CANCEL}{module_str} | tx is failed | {tx_link}')
@@ -140,7 +151,7 @@ def merkly_refuel(privatekey, retry=0):
         if retry < RETRY:
             logger.info(f'try again | {wallet}')
             sleeping(10, 10)
-            merkly_refuel(privatekey, retry+1)
+            merkly_refuel(privatekey, params, retry+1)
         else:
             list_send.append(f'{STR_CANCEL}{module_str}')
 

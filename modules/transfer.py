@@ -7,12 +7,23 @@ from loguru import logger
 from web3 import Web3
 import random
 
-def transfer(privatekey, retry=0):
+def transfer(privatekey, params, retry=0):
 
     try:
 
         to_address = RECIPIENTS_WALLETS[privatekey]
-        chain, amount_from, amount_to, transfer_all_balance, min_amount_transfer, keep_value_from, keep_value_to, token_address = value_transfer()
+
+        if params is not None:
+            chain = params['chain']
+            token_address = params['token_address']
+            amount_from = params['amount_from']
+            amount_to = params['amount_to']
+            transfer_all_balance = params['transfer_all_balance']
+            min_amount_transfer = params['min_amount_transfer']
+            keep_value_from = params['keep_value_from']
+            keep_value_to = params['keep_value_to']
+        else:
+            chain, amount_from, amount_to, transfer_all_balance, min_amount_transfer, keep_value_from, keep_value_to, token_address = value_transfer()
 
         keep_value = round(random.uniform(keep_value_from, keep_value_to), 8)
 
@@ -76,7 +87,7 @@ def transfer(privatekey, retry=0):
             # смотрим газ, если выше выставленного значения : спим
             total_fee   = int(contract_txn['gas'] * contract_txn['gasPrice'])
             is_fee      = checker_total_fee(chain, total_fee)
-            if is_fee   == False: return transfer(privatekey, retry)
+            if is_fee   == False: return transfer(privatekey, params, retry)
 
             tx_hash     = sign_tx(web3, contract_txn, privatekey)
             tx_link     = f'{DATA[chain]["scan"]}/{tx_hash}'
@@ -92,7 +103,7 @@ def transfer(privatekey, retry=0):
                 if retry < RETRY:
                     logger.info(f'{module_str} | tx is failed, try again in 10 sec | {tx_link}')
                     sleeping(10, 10)
-                    transfer(privatekey, retry+1)
+                    transfer(privatekey, params, retry+1)
                 else:
                     logger.error(f'{module_str} | tx is failed | {tx_link}')
 
@@ -106,6 +117,6 @@ def transfer(privatekey, retry=0):
         if retry < RETRY:
             logger.info(f'try again | {wallet}')
             sleeping(10, 10)
-            transfer(privatekey, retry+1)
+            transfer(privatekey, params, retry+1)
         else:
             list_send.append(f'{STR_CANCEL}{module_str}')
