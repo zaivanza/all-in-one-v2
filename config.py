@@ -290,6 +290,9 @@ LAYERZERO_CHAINS_ID = {
     'nova'      : 175,
     'kava'      : 177,
     'meter'     : 176,
+    'base'      : 184,
+    'linea'     : 183,
+    'zora'      : 195,
 }
 
 # контракты бриджа

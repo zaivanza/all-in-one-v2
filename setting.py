@@ -436,7 +436,7 @@ def value_merkly_refuel():
     внимание! сначала посмотри максималку руками, только потом запускай скрипт, иначе можешь потерять свои $.
 
     from_chains : optimism | bsc | polygon | arbitrum | avalanche | fantom | celo | zksync | polygon_zkevm | nova | harmony | gnosis | core
-    to_chains   : avalanche | ethereum | bsc | arbitrum | optimism | fantom | harmony | celo | moonbeam | fuse | gnosis | klaytn | metis | core | polygon_zkevm | canto | zksync | moonriver | tenet | nova | kava | meter
+    to_chains   : avalanche | ethereum | bsc | arbitrum | optimism | fantom | harmony | celo | moonbeam | fuse | gnosis | klaytn | metis | core | polygon_zkevm | canto | zksync | moonriver | tenet | nova | kava | meter | base | linea | zora
     '''
 
     from_chains = ['polygon', 'bsc'] # запиши сюда сети, с которых хочешь делать refuel (>= 1 сети)
