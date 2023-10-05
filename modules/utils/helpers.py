@@ -59,10 +59,10 @@ def func_chunks_generators(lst, n):
         yield lst[i: i + n]
 
 def intToDecimal(qty, decimal):
-    return int(qty * int("".join(["1"] + ["0"]*decimal)))
+    return int(qty * 10**decimal)
 
 def decimalToInt(qty, decimal):
-    return qty/ int("".join((["1"]+ ["0"]*decimal)))
+    return int(qty / 10**decimal)
 
 def sleeping(from_sleep, to_sleep):
     x = random.randint(from_sleep, to_sleep)
