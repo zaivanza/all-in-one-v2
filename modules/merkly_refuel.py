@@ -1,14 +1,17 @@
 from data.data import DATA
-from data.abi.abi import ABI_MERKLY_REFUEL
-from config import STR_DONE, STR_CANCEL, MERKLY_CONTRACTS, LAYERZERO_CHAINS_ID, PRICES_NATIVE
-from setting import value_merkly_refuel, RETRY
-from .helpers import get_web3, add_gas_price, sign_tx, check_balance, add_gas_limit_layerzero, check_status_tx, checker_total_fee, list_send, intToDecimal, sleeping, decimalToInt, round_to, call_json
+from .utils.contracts.abi import ABI_MERKLY_REFUEL
+from .utils.contracts.contract import  MERKLY_CONTRACTS, LAYERZERO_CHAINS_ID
+from config import STR_CANCEL, PRICES_NATIVE
+from setting import Value_Merkly_Refuel
+from .utils.helpers import list_send, intToDecimal, decimalToInt, round_to
+from .utils.files import call_json
+from .utils.manager_async import Web3ManagerAsync
 
 from loguru import logger
 from web3 import Web3
-import random
 from eth_abi import encode
 from termcolor import cprint
+import random
 import sys
 
 def get_adapterParams(gaslimit: int, amount: int):
@@ -50,108 +53,84 @@ def check_merkly_fees():
     cprint(f'\nРезультаты записаны в {path}.json\n', 'blue')
     sys.exit()
 
-def merkly_refuel(privatekey, params, retry=0):
-
-    try:
-
-        if params is not None:
-            from_chain = params['from_chain']
-            to_chain = params['to_chain']
-            swap_all_balance = params['swap_all_balance']
-            min_amount_swap = params['min_amount_swap']
-            amount_from = params['amount_from']
-            amount_to = params['amount_to']
-            keep_value_from = params['keep_value_from']
-            keep_value_to = params['keep_value_to']
-            get_layerzero_fee = params['get_layerzero_fee']
+class MerklyRefuel:
+    
+    def __init__(self, key, number, params=None):
+        self.params = params
+        if self.params:
+            self.from_chain = self.params['from_chain']
+            self.to_chain = self.params['to_chain']
+            self.amount_from = self.params['amount_from']
+            self.amount_to = self.params['amount_to']
+            self.swap_all_balance = self.params['swap_all_balance']
+            self.min_amount_swap = self.params['min_amount_swap']
+            self.keep_value_from = self.params['keep_value_from']
+            self.keep_value_to = self.params['keep_value_to']
+            self.get_layerzero_fee = self.params['get_layerzero_fee']
         else:
-            from_chain, to_chain, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, get_layerzero_fee = value_merkly_refuel()
+            self.from_chain = Value_Merkly_Refuel.from_chain
+            self.to_chain = Value_Merkly_Refuel.to_chain
+            self.amount_from = Value_Merkly_Refuel.amount_from
+            self.amount_to = Value_Merkly_Refuel.amount_to
+            self.swap_all_balance = Value_Merkly_Refuel.swap_all_balance
+            self.min_amount_swap = Value_Merkly_Refuel.min_amount_swap
+            self.keep_value_from = Value_Merkly_Refuel.keep_value_from
+            self.keep_value_to = Value_Merkly_Refuel.keep_value_to
+            self.get_layerzero_fee = Value_Merkly_Refuel.get_layerzero_fee
+        self.key = key
+        self.number = number
 
-        if get_layerzero_fee == True:
+    async def setup(self):
+        self.from_chain = random.choice(self.from_chain)
+        self.to_chain = random.choice(self.to_chain)
+        self.manager = Web3ManagerAsync(self.key, self.from_chain)
+        self.amount = await self.manager.get_amount_in(self.keep_value_from, self.keep_value_to, self.swap_all_balance, '', self.amount_from, self.amount_to)
+        self.token_data = await self.manager.get_token_info('')
+        self.value = intToDecimal(self.amount, 18)
+        self.adapterParams = get_adapterParams(250000, self.value) + self.manager.address[2:].lower()
+        self.module_str = f'{self.number} {self.manager.address} | merkly_refuel : {self.from_chain} => {self.to_chain}'
+
+        if self.get_layerzero_fee:
             check_merkly_fees()
-            return
 
-        module_str = f'merkly_refuel : {from_chain} => {to_chain}'
-        logger.info(module_str)
+    async def get_txn(self):
 
-        keep_value = round(random.uniform(keep_value_from, keep_value_to), 8)
-        if swap_all_balance == True: amount = check_balance(privatekey, from_chain, '') - keep_value
-        else: amount = round(random.uniform(amount_from, amount_to), 8)
+        try:
 
-        web3        = get_web3(from_chain, privatekey)
-        account     = web3.eth.account.from_key(privatekey)
-        wallet      = account.address
+            contract = self.manager.web3.eth.contract(address=Web3.to_checksum_address(MERKLY_CONTRACTS[self.from_chain]), abi=ABI_MERKLY_REFUEL)
+            send_value = await contract.functions.estimateGasBridgeFee(LAYERZERO_CHAINS_ID[self.to_chain], False, self.adapterParams).call()
 
-        contract = web3.eth.contract(address=Web3.to_checksum_address(MERKLY_CONTRACTS[from_chain]), abi=ABI_MERKLY_REFUEL)
+            contract_txn = await contract.functions.bridgeGas(
+                    LAYERZERO_CHAINS_ID[self.to_chain],
+                    '0x0000000000000000000000000000000000000000', # _zroPaymentAddress
+                    self.adapterParams
+                ).build_transaction(
+                {
+                    "from": self.manager.address,
+                    "value": send_value[0],
+                    "nonce": await self.manager.web3.eth.get_transaction_count(self.manager.address),
+                    'gasPrice': 0,
+                    'gas': 0,
+                }
+            )
 
-        value = intToDecimal(amount, 18)
-        adapterParams = get_adapterParams(250000, value) + wallet[2:].lower()
-        send_value = contract.functions.estimateGasBridgeFee(LAYERZERO_CHAINS_ID[to_chain], False, adapterParams).call()
+            contract_txn = await self.manager.add_gas_price(contract_txn)
+            contract_txn = await self.manager.add_gas_limit_layerzero(contract_txn)
 
-        contract_txn = contract.functions.bridgeGas(
-                LAYERZERO_CHAINS_ID[to_chain],
-                '0x0000000000000000000000000000000000000000', # _zroPaymentAddress
-                adapterParams
-            ).build_transaction(
-            {
-                "from": wallet,
-                "value": send_value[0],
-                "nonce": web3.eth.get_transaction_count(wallet),
-                'gasPrice': 0,
-                'gas': 0,
-            }
-        )
+            if self.manager.get_total_fee(contract_txn) == False: return False
 
-        if (amount > 0 and amount > min_amount_swap):
-
-            if from_chain == 'bsc':
-                contract_txn['gasPrice'] = 1000000000 # специально ставим 1 гвей, так транза будет дешевле
-            else:
-                contract_txn = add_gas_price(web3, contract_txn)
-
-            contract_txn = add_gas_limit_layerzero(web3, contract_txn)
-
-            if swap_all_balance == True:
+            if self.swap_all_balance:
                 gas_gas = int(contract_txn['gas'] * contract_txn['gasPrice'])
-                contract_txn['value'] = int(contract_txn['value'] - gas_gas)
+                contract_txn['value'] = contract_txn['value'] - gas_gas
 
-            # cprint(contract_txn, 'blue')
-
-            # смотрим газ, если выше выставленного значения : спим
-            total_fee   = int(contract_txn['gas'] * contract_txn['gasPrice'])
-            is_fee      = checker_total_fee(from_chain, total_fee)
-            if is_fee   == False: return merkly_refuel(privatekey, params, retry)
-
-            tx_hash = sign_tx(web3, contract_txn, privatekey)
-            tx_link = f'{DATA[from_chain]["scan"]}/{tx_hash}'
-
-            status = check_status_tx(from_chain, tx_hash)
-            if status == 1:
-                logger.success(f'{module_str} | {tx_link}')
-                list_send.append(f'{STR_DONE}{module_str}')
-                return "success"
-
+            if self.amount >= self.min_amount_swap:
+                return contract_txn
             else:
-                if retry < RETRY:
-                    logger.info(f'{module_str} | tx is failed, try again in 10 sec | {tx_link}')
-                    sleeping(10, 10)
-                    merkly_refuel(privatekey, params, retry+1)
-                else:
-                    logger.error(f'{module_str} | tx is failed | {tx_link}')
-                    list_send.append(f'{STR_CANCEL}{module_str} | tx is failed | {tx_link}')
-
-        else:
-            logger.error(f"{module_str} : can't refuel : balance = {amount}")
-            list_send.append(f"{STR_CANCEL}{module_str} : can't refuel : balance = {amount}")
-
-
-    except Exception as error:
-        logger.error(f'{module_str} | {error}')
-
-        if retry < RETRY:
-            logger.info(f'try again | {wallet}')
-            sleeping(10, 10)
-            merkly_refuel(privatekey, params, retry+1)
-        else:
-            list_send.append(f'{STR_CANCEL}{module_str}')
-
+                logger.error(f"{self.module_str} | {self.amount} (amount) < {self.min_amount_swap} (min_amount_swap)")
+                list_send.append(f'{STR_CANCEL}{self.module_str} | {round_to(self.amount)} less {self.min_amount_swap}')
+                return False
+            
+        except Exception as error:
+            logger.error(error)
+            list_send.append(f'{STR_CANCEL}{self.module_str} | {error}')
+            return False

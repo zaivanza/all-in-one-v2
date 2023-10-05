@@ -1,154 +1,103 @@
+from data.data import DATA
+from .utils.helpers import func_chunks_generators
+from config import WALLETS
+from setting import Value_Txn_Checker
+
 from web3 import Web3, AsyncHTTPProvider
 from loguru import logger
 from web3.eth import AsyncEth
 import asyncio
 from termcolor import cprint
-from data.data import DATA
-from .helpers import call_json, evm_wallet, func_chunks_generators
-from config import outfile, WALLETS
-from setting import value_tx_check
 import csv
 import time
 
+class TxChecker:
 
-nonces = {}
-async def get_nonce(web3, wallet, chain):
-    try:
-            
-        nonce = await web3.eth.get_transaction_count(Web3.to_checksum_address(wallet))
-        nonces[wallet][chain] = nonce
+    def __init__(self):
+        self.nonces = {}
+        self.send_file = 'results/tx_checker.csv'
 
-    except Exception as error:
-        logger.error(f'{chain} : {error}')
-        await asyncio.sleep(3)
-        return await get_nonce(web3, wallet, chain)
+    def get_address(self, wallet):
+        try:
+            web3 = Web3(Web3.HTTPProvider(DATA['ethereum']['rpc']))
+            wallet = web3.eth.account.from_key(wallet).address
+        except:
+            wallet = wallet
+        return wallet
 
-async def main(WALLETS, CHAINS):
+    async def get_nonce(self, web3, wallet, chain):
+        try:
+            nonce = await web3.eth.get_transaction_count(Web3.to_checksum_address(wallet))
+            self.nonces[wallet][chain] = nonce
+        except Exception as error:
+            logger.error(f'{chain} : {error}')
+            await asyncio.sleep(3)
+            return await self.get_nonce(web3, wallet, chain)
 
-    wallets_list = (list(func_chunks_generators(WALLETS, 100)))
-
-    lens = 0
-    for wallets in wallets_list:
-
+    async def fetch_nonces(self, wallets):
         tasks = []
-
         for wallet in wallets:
-
-            wallet = evm_wallet(wallet)
-
-            nonces.update({wallet:{
-                    'ethereum'      : 0,
-                    'optimism'      : 0,
-                    'bsc'           : 0,
-                    'polygon'       : 0,
-                    'polygon_zkevm' : 0,
-                    'arbitrum'      : 0,
-                    'avalanche'     : 0,
-                    'fantom'        : 0,
-                    'nova'          : 0,
-                    'zksync'        : 0,
-                    'celo'          : 0,
-                    'gnosis'        : 0,
-                    'core'          : 0,
-                    'harmony'       : 0,
-                }})
-
-            for data in DATA.items():
-                chain = data[0]
-                rpc = data[1]['rpc']
-
-                if chain in CHAINS:
-
-                    web3 = Web3(
-                        AsyncHTTPProvider(rpc),
-                        modules={"eth": (AsyncEth,)},
-                        middlewares=[],
-                    )
-
-                    task = asyncio.create_task(get_nonce(web3, wallet, chain))
-                    tasks.append(task)
-
+            wallet = self.get_address(wallet)
+            self.nonces[wallet] = {chain: 0 for chain in Value_Txn_Checker.chains}
+            for chain in Value_Txn_Checker.chains:
+                web3 = self.get_web3(chain)
+                task = asyncio.create_task(self.get_nonce(web3, wallet, chain))
+                tasks.append(task)
         await asyncio.gather(*tasks)
 
-        lens = len(wallets) + lens
-        cprint(f'{lens} / {len(WALLETS)} wallets', 'green')
-        time.sleep(3)
+    async def main(self):
+        wallets_list = list(func_chunks_generators(WALLETS, 100))
+        lens = 0
+        for wallets in wallets_list:
+            await self.fetch_nonces(wallets)
+            lens += len(wallets)
+            cprint(f'{lens} / {len(WALLETS)} wallets', 'green')
+            time.sleep(3)
 
-def send_results(CHAINS):
+    def get_web3(self, chain):
+        web3 = Web3(AsyncHTTPProvider(DATA[chain]['rpc']), modules={"eth": AsyncEth}, middlewares=[])
+        return web3
 
-    send_file = 'results/tx_checker.csv'
-
-    low_nonces = {
-        'ethereum'      : [],
-        'optimism'      : [],
-        'bsc'           : [],
-        'polygon'       : [],
-        'polygon_zkevm' : [],
-        'arbitrum'      : [],
-        'avalanche'     : [],
-        'fantom'        : [],
-        'nova'          : [],
-        'zksync'        : [],
-        'celo'          : [],
-        'gnosis'        : [],
-        'core'          : [],
-        'harmony'       : [],
-    }
-
-    # записываем в csv
-    with open(f'{outfile}{send_file}', 'w', newline='') as csvfile:
-        spamwriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-
+    def write_csv(self):
+        low_nonces = {chain: [] for chain in Value_Txn_Checker.chains}
         headers = [['number', 'wallet'], []]
 
-        zero = 0
-        for data in nonces.items():
-            zero += 1
-            wallet = data[0]
+        with open(self.send_file, 'w', newline='') as csvfile:
+            spamwriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
 
-            head = [zero, wallet]
-            
-            for chains in data[1].items():
-                chain = chains[0]
-                nonce = chains[1]
+            zero = 0
+            for wallet, chain_nonces in self.nonces.items():
+                zero += 1
+                head = [zero, wallet]
 
-                if chain not in headers[0]:
-                    headers[0].append(chain)
+                for chain, nonce in chain_nonces.items():
+                    if chain not in headers[0]:
+                        headers[0].append(chain)
+                    head.append(nonce)
 
-                head.append(nonce)
-            
-                if chain in CHAINS:
-                    if nonce < CHAINS[chain]:
+                    if chain in Value_Txn_Checker.chains and nonce < Value_Txn_Checker.chains[chain]:
                         low_nonces[chain].append(wallet)
-            
-            headers[1].append(head)
 
-        spamwriter.writerow(headers[0])
-        for header in headers[1]:
-            spamwriter.writerow(header)
+                headers[1].append(head)
 
-        for items in low_nonces.items():
-            chain   = items[0]
-            wallets = items[1]
+            spamwriter.writerow(headers[0])
+            for header in headers[1]:
+                spamwriter.writerow(header)
 
-            if len(wallets) > 0:
+            for chain, wallets in low_nonces.items():
+                if wallets:
+                    cprint(f'\nnonce in {chain} < {Value_Txn_Checker.chains[chain]}\n', 'blue')
+                    spamwriter.writerow([])
+                    spamwriter.writerow(['number', f'nonce in {chain} < {Value_Txn_Checker.chains[chain]}'])
 
-                cprint(f'\nnonce in {chain} < {CHAINS[chain]}\n', 'blue')
-                spamwriter.writerow([])
-                spamwriter.writerow(['number', f'nonce in {chain} < {CHAINS[chain]}'])
+                    zero = 0
+                    for wallet in wallets:
+                        zero += 1
+                        cprint(wallet, 'white')
+                        spamwriter.writerow([zero, wallet])
 
-                zero = 0
-                for wallet in wallets:
-                    zero += 1
-                    cprint(wallet, 'white')
-                    spamwriter.writerow([zero, wallet])
+        cprint(f'\nРезультаты записаны в файл : {self.send_file}\n', 'blue')
 
-    cprint(f'\nРезультаты записаны в файл : {send_file}\n', 'blue')
-
-def start_tx_check():
-
-    chains = value_tx_check()
-
-    asyncio.run(main(WALLETS, chains))
-
-    send_results(chains)
+    async def start(self):
+        await self.main()
+        self.write_csv()

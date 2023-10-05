@@ -1,251 +1,228 @@
 from data.data import DATA
-from config import WALLETS, ERC20_ABI, outfile
-from setting import value_web3_checker
-from .helpers import evm_wallet, round_to, check_balance, check_data_token, decimalToInt
+from config import WALLETS, ERC20_ABI
+from setting import Value_Web3_Checker
+from .utils.helpers import round_to
+from .utils.multicall import Multicall
 
-import requests
 from loguru import logger
 from web3 import Web3, AsyncHTTPProvider
 from web3.eth import AsyncEth
-import asyncio
+import asyncio, aiohttp
 from termcolor import cprint
 import csv
 from tabulate import tabulate
 
+class Web3Checker:
 
-RESULT = {}
+    def __init__(self) -> None:
+        self.file_name = 'web3_balances'
 
-def get_prices(datas):
+    def get_web3(self, chain):
+        return Web3(AsyncHTTPProvider(DATA[chain]['rpc']), modules={"eth": (AsyncEth)}, middlewares=[])
 
-    prices = {}
+    async def get_tokens_data(self):
+        logger.info('getting tokens data...')
+        list_decimals = {}
+        list_symbols = {}
+        for chain, coins in Value_Web3_Checker.datas.items():
+            web3 = self.get_web3(chain)
+            list_decimals[chain] = {}
+            list_symbols[chain] = {}
+            for coin in coins:
+                if coin != '':
+                    coin = Web3.to_checksum_address(coin)
+                    token_contract = web3.eth.contract(address=coin, abi=ERC20_ABI)
+                    decimals = await token_contract.functions.decimals().call()
+                    symbol = await token_contract.functions.symbol().call()
+                    list_decimals[chain][coin] = decimals 
+                    list_symbols[chain][coin] = symbol 
 
-    for data in datas.items():
+        logger.success('got tokens data')
+        return list_decimals, list_symbols
 
-        chain = data[0]
-        coins = data[1]
-
-        web3 = Web3(Web3.HTTPProvider(DATA[chain]['rpc']))
-
-        for address_contract in coins:
-
-            if address_contract == '': # eth
-                token_decimal   = 18
-                symbol          = DATA[chain]['token']
-            else:
-                token_contract  = web3.eth.contract(address=Web3.to_checksum_address(address_contract), abi=ERC20_ABI)
-                symbol          = token_contract.functions.symbol().call()
-
-            prices.update({symbol : 0})
-        
-    for symbol in prices:
-
-        if symbol == 'CORE':
-            url = f'https://min-api.cryptocompare.com/data/price?fsym=COREDAO&tsyms=USDT'
-        else:
-            url = f'https://min-api.cryptocompare.com/data/price?fsym={symbol}&tsyms=USDT'
-
-        response = requests.get(url)
-
+    async def fetch_price(self, session, symbol, url):
         try:
-            result  = [response.json()]
-            price   = result[0]['USDT']
-            prices[symbol] = float(price)
+            async with session.get(url) as response:
+                result = await response.json()
+                price = result['USDT']
+                self.prices[symbol] = float(price)
         except Exception as error:
-            logger.error(f'{error}. set price : 0')
-            prices[symbol] = 0
+            logger.error(f'{symbol}: error. Set price: 0')
+            self.prices[symbol] = 0
 
-    return prices
+    async def get_prices(self):
+        logger.info('getting prices...')
+        self.prices = {}
+        for chain, coins in Value_Web3_Checker.datas.items():
+            web3 = self.get_web3(chain)
+            for address_contract in coins:
+                if address_contract == '':  # eth
+                    symbol = DATA[chain]['token']
+                else:
+                    token_contract = web3.eth.contract(address=Web3.to_checksum_address(address_contract), abi=ERC20_ABI)
+                    symbol = await token_contract.functions.symbol().call()
 
-async def check_data_token(web3, token_address):
+                self.prices.update({symbol: 0})
 
-    try:
+        async with aiohttp.ClientSession() as session:
+            tasks = []
+            for symbol in self.prices:
+                if symbol == 'CORE':
+                    url = f'https://min-api.cryptocompare.com/data/price?fsym=COREDAO&tsyms=USDT'
+                else:
+                    url = f'https://min-api.cryptocompare.com/data/price?fsym={symbol}&tsyms=USDT'
+                
+                tasks.append(self.fetch_price(session, symbol, url))
 
-        token_contract  = web3.eth.contract(address=Web3.to_checksum_address(token_address), abi=ERC20_ABI)
-        decimals        = await token_contract.functions.decimals().call()
-        symbol          = await token_contract.functions.symbol().call()
+            await asyncio.gather(*tasks)
 
-        return token_contract, decimals, symbol
-    
-    except Exception as error:
+        logger.success('got prices')
 
-        logger.error(f'{error} : {token_address}')
-        await asyncio.sleep(2)
-        return await check_data_token(web3, token_address)
-
-async def check_balance(web3, wallet, chain, address_contract):
-    try:
-
-        try: 
-            wallet = web3.eth.account.from_key(wallet)
-            wallet = wallet.address
-        except Exception as error: 
-            wallet = wallet
-            
-        if address_contract == '': # eth
-            balance         = await web3.eth.get_balance(web3.to_checksum_address(wallet))
-            token_decimal   = 18
-            symbol          = DATA[chain]['token']
-        else:
-            token_contract, token_decimal, symbol = await check_data_token(web3, address_contract)
-            balance = await token_contract.functions.balanceOf(web3.to_checksum_address(wallet)).call()
-
-        human_readable = decimalToInt(balance, token_decimal) 
-
-        return human_readable, symbol
-
-    except Exception as error:
-        logger.error(f'{error}')
-        await asyncio.sleep(1)
-        return await check_balance(web3, wallet, chain, address_contract)
-
-async def worker(wallet, datas):
-
-    for data in datas.items():
-
-        chain = data[0]
-        coins = data[1]
-
-        while True:
-            try:
-                web3 = Web3(
-                    AsyncHTTPProvider(DATA[chain]['rpc']),
-                    modules={"eth": (AsyncEth,)},
-                    middlewares=[],
-                )
-                break
-            except Exception as error: 
-                cprint(error, 'red')
-                await asyncio.sleep(1)
-
-        for address_contract in coins:
-
-            balance, symbol = await check_balance(web3, wallet, chain, address_contract)
-
-            RESULT[wallet][chain].update({symbol : balance})
-
-async def main(datas, wallets):
-
-    tasks = [worker(wallet, datas) for wallet in wallets]
-    await asyncio.gather(*tasks)
-
-def send_result(min_balance, file_name, prices):
-
-    small_wallets = []
-
-    balances = {}
+    def combine_tokens_data(self, eth_coins: dict, erc20_balances: dict):
+        result = {}
         
-    headers = [['number', 'wallet'], [], ['TOTAL_AMOUNTS', ''], ['TOTAL_VALUE']]
-
-    number = 0
-    for data in RESULT.items():
-        number += 1
-
-        wallet = data[0]
-        chains = data[1]
-
-        h_ = [number, wallet]
-
-        for data in chains.items():
-
-            chain   = data[0]
-            coins   = data[1]
-
-            for data in coins.items():
-
-                coin    = data[0]
-                balance = round_to(data[1])
-
-                head = f'{coin}-{chain.lower()}'
-
-                if head not in headers[0]:
-                    headers[0].append(head)
-                h_.append(balance)
-
-                if head not in balances:
-                    balances.update({head : 0})
-                balances[head] += balance
-
-                if chain.lower() == min_balance['chain'].lower():
-                    if coin.lower() == min_balance['coin'].lower():
-                        if balance < min_balance['amount']:
-                            small_wallets.append(wallet)
-
-        headers[1].append(h_)
-
-    # записываем в csv
-    with open(f'{outfile}results/{file_name}.csv', 'w', newline='') as csvfile:
-        spamwriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-
-        spamwriter.writerow(headers[0])
-        for header in headers[1]:
-            spamwriter.writerow(header)
-
-        send_table = []
-        total_value = []
+        for chain, data in eth_coins.items():
+            if data:
+                for wallet, eth_balance in data.items():
+                    wallet = wallet.lower()
+                    if wallet not in result:
+                        result[wallet] = {}
+                    result[wallet][chain] = {DATA[chain]["token"]: eth_balance}
+            else:
+                logger.error(f'{chain} : {data}')
         
-        for data in balances.items():
+        for chain, balances in erc20_balances.items():
+            if balances:
+                for wallet, tokens in balances.items():
+                    wallet = wallet.lower()
+                    if wallet not in result:
+                        result[wallet] = {}
+                    if chain not in result[wallet]:
+                        result[wallet][chain] = {}
+                    for token, balance in tokens.items():
+                        result[wallet][chain][token] = balance
+            else:
+                logger.error(f'{chain} : {data}')
+        
+        return result
 
-            coin = data[0]
-            balance = round_to(data[1])
+    def transform_dict(self, input_dict):
+        result = {}
+        
+        for chain, wallets in input_dict.items():
+            for wallet, tokens in wallets.items():
+                if wallet not in result:
+                    result[wallet] = {}
+                result[wallet][chain] = tokens
+        
+        return result
 
+    async def main_balances(self):
+        erc20_coins = {chain: [] for chain in Value_Web3_Checker.datas}
+        decimals_list, symbols_list = await self.get_tokens_data()
+        tasks = [Multicall(chain).get_balances(WALLETS, tokens, symbols_list, decimals_list) for chain, tokens in Value_Web3_Checker.datas.items() if tokens]
+        results = await asyncio.gather(*tasks)
+        result = {chain: result for chain, result in zip(erc20_coins.keys(), results)}
+        result = self.transform_dict(result)
+        return result
+
+    def send_result(self, result):
+        small_wallets, small_wallets_value, balances, headers, send_table, total_value = [], [], {}, [[
+            'number', 'wallet', '$value'], [], ['TOTAL_AMOUNTS', '', ''], ['TOTAL_VALUE', '']], [], []
+
+        for number, (wallet, chains) in enumerate(result.items(), start=1):
+            h_ = [number, wallet]
+            wallet_value = 0
+
+            for chain, coins in chains.items():
+                for coin, balance in coins.items():
+                    balance = round_to(balance)
+                    symbol = coin.split('-')[0]
+                    price = self.prices.get(symbol, 1)
+                    value = int(balance * price)
+                    wallet_value += value
+
+                    head = f'{coin}-{chain.lower()}'
+
+                    if head not in headers[0]:
+                        headers[0].append(head)
+
+                    h_.append(balance)
+
+                    balances.setdefault(head, 0)
+                    balances[head] += balance
+
+                    if (
+                        chain.lower() == Value_Web3_Checker.min_token_balance['chain'].lower() and
+                        coin.lower() == Value_Web3_Checker.min_token_balance['coin'].lower() and
+                        balance < Value_Web3_Checker.min_token_balance['amount']
+                    ):
+                        small_wallets.append(wallet)
+
+            h_.insert(2, wallet_value)
+            headers[1].append(h_)
+
+            if wallet_value < Value_Web3_Checker.min_value_balance:
+                small_wallets_value.append(wallet)
+
+        for coin, balance in balances.items():
+            balance = round_to(balance)
             symbol = coin.split('-')[0]
-            price = prices[symbol]
-            if symbol == 'USDT': 
-                price = 1
-        
-            # value = round_to(balance * price)
+            price = self.prices.get(symbol, 1)
             value = int(balance * price)
             total_value.append(value)
-
-            # cprint(f'{coin} : {balance} | value : {value} $', 'white')
             send_table.append([coin, balance, f'{value} $'])
+            headers[2].append(round_to(balance)) # Record the total_amounts of each coin
 
-            headers[2].append(balance)
-            headers[3].append(f'{value} $')
+        tokens = self.generate_csv(headers, send_table, total_value, small_wallets, small_wallets_value)
 
-        headers[3].insert(1, f'{int(sum(total_value))} $')
+        cprint(f'\nAll balances :\n', 'blue')
+        cprint(tokens, 'white')
+        cprint(f'\nTOTAL_VALUE : {int(sum(total_value))} $', 'blue')
+        cprint(f'\nResults written to file: results/{self.file_name}.csv\n', 'blue')
 
-        spamwriter.writerow([])
-        spamwriter.writerow(headers[2])
-        spamwriter.writerow(headers[3])
+    def generate_csv(self, headers, send_table, total_value, small_wallets, small_wallets_value):
+        with open(f'results/{self.file_name}.csv', 'w', newline='') as csvfile:
+            spamwriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
 
-        table_type  = 'double_grid'
-        head_table  = ['token', 'amount', 'value']
-        tokens_     = tabulate(send_table, head_table, tablefmt=table_type)
+            spamwriter.writerow(headers[0])
+            spamwriter.writerows(headers[1])
 
-        if len(small_wallets) > 0:
-            small_text = f'{min_balance["coin"]} balance in {min_balance["chain"]} of these wallets < {min_balance["amount"]} :'
-            cprint(small_text, 'blue')
+            # send_table = [[coin, balance, f'{value} $'] for coin, balance, value in send_table]
+            total_value = [str(value) for value in total_value]
+
+            headers[3].insert(2, f'{int(sum(map(int, total_value)))} $')
+
             spamwriter.writerow([])
-            spamwriter.writerow(['', small_text])
-            zero = 0
-            for wallet in small_wallets:
-                zero += 1
+            spamwriter.writerows(headers[2:])
+
+            spamwriter.writerow([])
+            self.print_wallets(spamwriter, small_wallets, 'amount')
+            spamwriter.writerow([])
+            self.print_wallets(spamwriter, small_wallets_value, 'value')
+
+            table_type = 'double_grid'
+            head_table = ['token', 'amount', 'value']
+            tokens = tabulate(send_table, head_table, tablefmt=table_type)
+
+            return tokens
+
+    def print_wallets(self, spamwriter, wallets, _type):
+        if wallets:
+            if _type == 'amount':
+                small_text = f'{Value_Web3_Checker.min_token_balance["coin"]} [{Value_Web3_Checker.min_token_balance["chain"]}] balance on these wallets < {Value_Web3_Checker.min_token_balance["amount"]} :'
+                spamwriter.writerow([small_text])
+            elif _type == 'value':
+                small_text = f'Value balance on these wallets < ${Value_Web3_Checker.min_value_balance} :'
+                spamwriter.writerow([small_text])
+
+            cprint(f'\n{small_text}', 'blue')
+            for number, wallet in enumerate(wallets, start=1):
                 cprint(wallet, 'white')
-                spamwriter.writerow([zero, wallet])
+                spamwriter.writerow([number, wallet])
 
-        cprint(f'\nall balances :\n', 'blue')
-        cprint(tokens_, 'white')
-        cprint(f'\nTOTAL_VALUE : {int(sum(total_value))} $\n', 'blue')
-        cprint(f'\nРезультаты записаны в файл : {outfile}results/{file_name}.csv\n', 'blue')
-
-def web3_check():
-
-    datas, min_balance, file_name = value_web3_checker()
-
-    wallets = []
-    for key in WALLETS:
-        wallet = evm_wallet(key)
-        wallets.append(wallet)
-
-        RESULT.update({wallet : {}})
-
-        for data in datas.items():
-            chain = data[0]
-            RESULT[wallet].update({chain : {}})
-
-    prices = get_prices(datas)
-
-    asyncio.run(main(datas, wallets))
-    send_result(min_balance, file_name, prices)
+    async def start(self):
+        await self.get_prices()
+        result = await self.main_balances()
+        self.send_result(result)
 

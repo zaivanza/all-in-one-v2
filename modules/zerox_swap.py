@@ -1,15 +1,57 @@
-from data.data import DATA, API_0x
-from setting import value_0x_swap, RETRY
-from config import STR_DONE, STR_CANCEL
-from .helpers import get_web3, approve_, sign_tx, check_balance, check_data_token, check_status_tx, checker_total_fee, round_to, list_send, intToDecimal, sleeping
+from data.data import API_0x
+from setting import Value_0x_Swap
+from config import  STR_CANCEL
+from .utils.helpers import round_to, list_send, intToDecimal
+from .utils.manager_async import Web3ManagerAsync
 
 from loguru import logger
 from web3 import Web3
-import random, requests
+import aiohttp, asyncio
+import random
 
-def get_0x_quote(chain, from_token, to_token, value, slippage):
+class ZeroXswap:
 
-    try:
+    def __init__(self, key, number, params=None):
+        self.params = params
+        if self.params:
+            self.chain = self.params['chain']
+            self.from_token_address = self.params['from_token_address']
+            self.to_token_address = self.params['to_token_address']
+            self.amount_from = self.params['amount_from']
+            self.amount_to = self.params['amount_to']
+            self.swap_all_balance = self.params['swap_all_balance']
+            self.min_amount_swap = self.params['min_amount_swap']
+            self.keep_value_from = self.params['keep_value_from']
+            self.keep_value_to = self.params['keep_value_to']
+            self.slippage = self.params['slippage']
+        else:
+            self.chain = Value_0x_Swap.chain
+            self.from_token_address = Value_0x_Swap.from_token_address
+            self.to_token_address = Value_0x_Swap.to_token_address
+            self.amount_from = Value_0x_Swap.amount_from
+            self.amount_to = Value_0x_Swap.amount_to
+            self.swap_all_balance = Value_0x_Swap.swap_all_balance
+            self.min_amount_swap = Value_0x_Swap.min_amount_swap
+            self.keep_value_from = Value_0x_Swap.keep_value_from
+            self.keep_value_to = Value_0x_Swap.keep_value_to
+            self.slippage = Value_0x_Swap.slippage
+        self.key = key
+        self.number = number
+
+    async def setup(self):
+        self.from_token_address = random.choice(self.from_token_address)
+        self.to_token_address = random.choice(self.to_token_address)
+        self.manager = Web3ManagerAsync(self.key, self.chain)
+        self.address = self.manager.address
+        self.from_token_data = await self.manager.get_token_info(self.from_token_address)
+        self.to_token_data = await self.manager.get_token_info(self.to_token_address)
+        self.amount = await self.manager.get_amount_in(self.keep_value_from, self.keep_value_to, self.swap_all_balance, self.from_token_address, self.amount_from, self.amount_to, 0.999)
+        self.value = intToDecimal(self.amount, self.from_token_data['decimal']) 
+        self.module_str = f'{self.number} {self.manager.address} | 0x_swap ({self.chain}) : {round_to(self.amount)} {self.from_token_data["symbol"]} => {self.to_token_data["symbol"]}'
+
+    async def get_0x_quote(self):
+        from_token = self.from_token_data['address']
+        to_token = self.to_token_data['address']
 
         url_chains = {
             'ethereum'  : '',
@@ -22,135 +64,69 @@ def get_0x_quote(chain, from_token, to_token, value, slippage):
             'celo'      : 'celo.',
         }
 
-        url     = f'https://{url_chains[chain]}api.0x.org/swap/v1/quote?buyToken={to_token}&sellToken={from_token}&sellAmount={value}&slippagePercentage={slippage/100}'
-        header  = {'0x-api-key' : API_0x}
-        
-        response = requests.get(url, headers=header)
+        url = f'https://{url_chains[self.chain]}api.0x.org/swap/v1/quote?buyToken={to_token}&sellToken={from_token}&sellAmount={self.value}&slippagePercentage={self.slippage/100}'
+        headers = {'0x-api-key' : API_0x}
 
-        if response.status_code == 200:
-            result = [response.json()]
-            return result
-        
-        else:
-            logger.error(f'response.status_code : {response.status_code}')
-            return False
+        try:
+            max_attempts = 10 # Максимальное количество попыток
+
+            for attempt in range(max_attempts):
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(url, headers=headers) as response:
+                        if response.status == 200:
+                            result = await response.json()
+                            return result
+                        logger.info(f'attempt to get a response {attempt+1}/{max_attempts}')
+                        await asyncio.sleep(1)
+            logger.error("couldn't get a response")
+            return False # Если не удалось получить response после max_attempts попыток
     
-    except Exception as error:
-        logger.error(error)
-        return False
+        except Exception as error:
+            logger.error(error)
+            list_send.append(f'{STR_CANCEL}{self.module_str}')
+            return False
 
-def zeroX_swap(privatekey, params, retry=0):
-        
-    try:
+    async def get_txn(self):
 
-        module_str = '0x_swap'
-        logger.info(module_str)
+        try:
 
-        if params is not None:
-            chain = params['chain']
-            from_token_address = params['from_token_address']
-            to_token_address = params['to_token_address']
-            swap_all_balance = params['swap_all_balance']
-            amount_from = params['amount_from']
-            amount_to = params['amount_to']
-            min_amount_swap = params['min_amount_swap']
-            keep_value_from = params['keep_value_from']
-            keep_value_to = params['keep_value_to']
-            slippage = params['slippage']
-        else:
-            chain, swap_all_balance, min_amount_swap, keep_value_from, keep_value_to, amount_from, amount_to, from_token_address, to_token_address, slippage = value_0x_swap()
+            json_data = await self.get_0x_quote()
+            if json_data is False: return False
 
-        keep_value = round(random.uniform(keep_value_from, keep_value_to), 8)
-        if swap_all_balance == True: amount = check_balance(privatekey, chain, from_token_address) - keep_value
-        else: amount = round(random.uniform(amount_from, amount_to), 8)
-
-        web3 = get_web3(chain, privatekey)
-
-        if from_token_address == '': 
-            from_token = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
-            from_decimals = 18
-            from_symbol = DATA[chain]['token']
-        else:
-            from_token = from_token_address
-            from_token_contract, from_decimals, from_symbol = check_data_token(chain, from_token_address)
-
-        if to_token_address   == '': 
-            to_token_address   = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
-            to_symbol = DATA[chain]['token']
-        else:
-            to_token_contract, to_decimals, to_symbol = check_data_token(chain, to_token_address)
-
-        account = web3.eth.account.from_key(privatekey)
-        wallet  = account.address
-
-        amount = amount*0.999
-        amount_to_swap = intToDecimal(amount, from_decimals) 
-
-        json_data = get_0x_quote(chain, from_token, to_token_address, amount_to_swap, slippage)
-
-        if json_data != False:
-
-            spender = json_data[0]['allowanceTarget']
-
+            spender = json_data['allowanceTarget']
             # если токен не нативный, тогда проверяем апрув и если он меньше нужного, делаем апрув
-            if from_token != '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE':
-                approve_(amount_to_swap, privatekey, chain, from_token_address, spender)
+            if self.from_token_address != '':
+                await self.manager.approve(self.value, self.from_token_address, spender)
 
             contract_txn = {
-                'from'      : wallet,
-                'chainId'   : web3.eth.chain_id,
-                'gasPrice'  : int(json_data[0]['gasPrice']),
-                'nonce'     : web3.eth.get_transaction_count(wallet),
-                'gas'       : int(json_data[0]['gas']),
-                'to'        : Web3.to_checksum_address(json_data[0]['to']),
-                'data'      : json_data[0]['data'],
-                'value'     : int(json_data[0]['value']),
+                'from'      : self.address,
+                'chainId'   : self.manager.chain_id,
+                'gasPrice'  : int(json_data['gasPrice']),
+                'nonce'     : await self.manager.web3.eth.get_transaction_count(self.address),
+                'gas'       : int(json_data['gas']),
+                'to'        : Web3.to_checksum_address(json_data['to']),
+                'data'      : json_data['data'],
+                'value'     : int(json_data['value']),
             }
 
             contract_txn['gas'] = int(contract_txn['gas'] * 1.5)
 
-            if (from_token_address == '' and swap_all_balance == True):
+            if (self.from_token_address == '' and self.swap_all_balance):
                 gas_gas = int(contract_txn['gas'] * contract_txn['gasPrice'])
-                contract_txn['value'] = int(int(amount_to_swap - gas_gas) * 0.999)
+                contract_txn['value'] = int(int(self.value - gas_gas) * 0.999)
 
-            # смотрим газ, если выше выставленного значения : спим
-            total_fee   = int(contract_txn['gas'] * contract_txn['gasPrice'])
-            is_fee      = checker_total_fee(chain, total_fee)
-            if is_fee   == False: return zeroX_swap(privatekey, params, retry)
+            is_fee = self.manager.get_total_fee(contract_txn)
+            if is_fee is False: return False
 
-            if amount >= min_amount_swap:
-                    
-                tx_hash     = sign_tx(web3, contract_txn, privatekey)
-                tx_link     = f'{DATA[chain]["scan"]}/{tx_hash}'
-
-                module_str = f'0x_swap : {round_to(amount)} {from_symbol} => {to_symbol}'
-
-                status  = check_status_tx(chain, tx_hash)
-
-                if status == 1:
-                    logger.success(f'{module_str} | {tx_link}')
-                    list_send.append(f'{STR_DONE}{module_str}')
-                    return "success"
-                else:
-                    logger.error(f'{module_str} | tx is failed | {tx_link}')
-                    if retry < RETRY:
-                        logger.info(f'try again in 10 sec.')
-                        sleeping(10, 10)
-                        zeroX_swap(privatekey, params, retry+1)
-
+            if self.amount >= self.min_amount_swap:
+                return contract_txn
             else:
-                logger.error(f"{module_str} : can't swap : {amount} (amount) < {min_amount_swap} (min_amount_swap)")
-                list_send.append(f'{STR_CANCEL}{module_str} : {amount} less {min_amount_swap}')
+                logger.error(f"{self.module_str} | amount < {self.min_amount_swap} (min_amount_swap)")
+                list_send.append(f'{STR_CANCEL}{self.module_str} | amount less {self.min_amount_swap}')
+                return False
+            
+        except Exception as error:
+            logger.error(error)
+            list_send.append(f'{STR_CANCEL}{self.module_str} | {error}')
+            return False
 
-        else:
-            list_send.append(f'{STR_CANCEL}{module_str}')
-
-    except Exception as error:
-        module_str = f'0x_swap'
-        logger.error(f'{module_str} | error : {error}')
-        if retry < RETRY:
-            logger.info(f'try again in 10 sec.')
-            sleeping(10, 10)
-            zeroX_swap(privatekey, params, retry+1)
-        else:
-            list_send.append(f'{STR_CANCEL}{module_str}')

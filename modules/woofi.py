@@ -1,347 +1,253 @@
-from data.data import DATA
-from data.abi.abi import ABI_WOOFI_SWAP, ABI_WOOFI_BRIDGE
-from config import STR_DONE, STR_CANCEL, WOOFI_SWAP_CONTRACTS, WOOFI_PATH, LAYERZERO_CHAINS_ID, WOOFI_BRIDGE_CONTRACTS
-from setting import value_woofi_bridge, value_woofi_swap, RETRY
-from .helpers import get_web3, add_gas_limit, add_gas_price, sign_tx, check_balance, approve_, check_data_token, check_status_tx, checker_total_fee, list_send, add_gas_limit_layerzero, decimalToInt, intToDecimal, sleeping
+from .utils.contracts.abi import ABI_WOOFI_SWAP, ABI_WOOFI_BRIDGE
+from .utils.contracts.contract import WOOFI_SWAP_CONTRACTS, WOOFI_PATH, LAYERZERO_CHAINS_ID, WOOFI_BRIDGE_CONTRACTS
+from config import STR_CANCEL
+from setting import Value_Woofi_Bridge, Value_Woofi_Swap
+from .utils.helpers import list_send, decimalToInt, intToDecimal, round_to
 
 from loguru import logger
 from web3 import Web3
-import random, time
-from termcolor import cprint
+import random
+from .utils.manager_async import Web3ManagerAsync
 
-def woofi_get_min_amount(privatekey, chain, from_token, to_token, amount):
+async def woofi_get_min_amount(web3, chain, from_token, to_token, value):
+
+    slippage = 0.95
 
     try:
-
         if from_token.upper() != to_token.upper():
-
-            # cprint(f'{chain} : {from_token} => {to_token} | {amount}', 'blue')
-
-            slippage = 0.95
-
-            web3 = get_web3(chain, privatekey)
-            address_contract = web3.to_checksum_address(WOOFI_SWAP_CONTRACTS[chain])
-            contract = web3.eth.contract(address=address_contract, abi=ABI_WOOFI_SWAP)
-
-            from_token  = Web3.to_checksum_address(from_token)
-            to_token    = Web3.to_checksum_address(to_token)
-
-            minToAmount = contract.functions.tryQuerySwap(
-                from_token,
-                to_token,
-                amount
+            contract = web3.eth.contract(address=web3.to_checksum_address(WOOFI_SWAP_CONTRACTS[chain]), abi=ABI_WOOFI_SWAP)
+            minToAmount = await contract.functions.tryQuerySwap(
+                Web3.to_checksum_address(from_token),
+                Web3.to_checksum_address(to_token),
+                value
                 ).call()
 
             return int(minToAmount * slippage)
-        
         else:
-
-            return int(amount)
+            return int(value)
     
     except Exception as error:
         logger.error(f'error : {error}. return 0')
         return 0
 
-def woofi_bridge(privatekey, params, retry=0):
-
-    try:
-
-        if params is not None:
-            from_chain = params['from_chain']
-            to_chain = params['to_chain']
-            from_token = params['from_token']
-            to_token = params['to_token']
-            swap_all_balance = params['swap_all_balance']
-            amount_from = params['amount_from']
-            amount_to = params['amount_to']
-            min_amount_swap = params['min_amount_swap']
-            keep_value_from = params['keep_value_from']
-            keep_value_to = params['keep_value_to']
+class WoofiBridge:
+    
+    def __init__(self, key, number, params=None):
+        self.params = params
+        if self.params:
+            self.from_chain = self.params['from_chain']
+            self.to_chain = self.params['to_chain']
+            self.from_token = self.params['from_token']
+            self.to_token = self.params['to_token']
+            self.amount_from = self.params['amount_from']
+            self.amount_to = self.params['amount_to']
+            self.swap_all_balance = self.params['swap_all_balance']
+            self.min_amount_swap = self.params['min_amount_swap']
+            self.keep_value_from = self.params['keep_value_from']
+            self.keep_value_to = self.params['keep_value_to']
         else:
-            from_chain, to_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to = value_woofi_bridge()
+            self.from_chain = Value_Woofi_Bridge.from_chain
+            self.to_chain = Value_Woofi_Bridge.to_chain
+            self.from_token = Value_Woofi_Bridge.from_token
+            self.to_token = Value_Woofi_Bridge.to_token
+            self.amount_from = Value_Woofi_Bridge.amount_from
+            self.amount_to = Value_Woofi_Bridge.amount_to
+            self.swap_all_balance = Value_Woofi_Bridge.swap_all_balance
+            self.min_amount_swap = Value_Woofi_Bridge.min_amount_swap
+            self.keep_value_from = Value_Woofi_Bridge.keep_value_from
+            self.keep_value_to = Value_Woofi_Bridge.keep_value_to
+        self.key = key
+        self.number = number
 
-        def get_srcInfos(amount_, from_chain, from_token):
+    async def setup(self):
+        self.manager = Web3ManagerAsync(self.key, self.from_chain)
+        self.web3_to_chain = Web3ManagerAsync(self.key, self.to_chain).web3
+        self.amount = await self.manager.get_amount_in(self.keep_value_from, self.keep_value_to, self.swap_all_balance, self.from_token, self.amount_from, self.amount_to)
+        self.from_token_data = await self.manager.get_token_info(self.from_token)
+        self.to_token_data = await self.manager.get_token_info(self.to_token)
+        self.value = intToDecimal(self.amount, self.from_token_data['decimal']) 
+        self.module_str = f'{self.number} {self.manager.address} | woofi_bridge : {self.from_chain} => {self.to_chain}'
 
-            from_token = Web3.to_checksum_address(from_token)
+    async def get_srcInfos(self):
 
-            if from_token != '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE':
-                token_contract, decimals, symbol = check_data_token(from_chain, from_token)
-            else: decimals = 18
+        bridgeToken = WOOFI_PATH[self.from_chain]
+        minBridgeAmount = await woofi_get_min_amount(self.manager.web3, self.from_chain, self.from_token_data['address'], WOOFI_PATH[self.from_chain], self.value)
 
-            amount = intToDecimal(amount_, decimals)
-            bridgeToken = WOOFI_PATH[from_chain]
-            minBridgeAmount = woofi_get_min_amount(privatekey, from_chain, from_token, WOOFI_PATH[from_chain], amount)
+        srcInfos = [
+            self.from_token_data['address'], 
+            Web3.to_checksum_address(bridgeToken),    
+            self.value,        
+            minBridgeAmount
+        ]
 
-            from_token = Web3.to_checksum_address(from_token)
-            bridgeToken = Web3.to_checksum_address(bridgeToken)
+        return srcInfos
 
-            srcInfos = [
-                from_token, 
-                bridgeToken,    
-                amount,        
-                minBridgeAmount
-            ]
+    async def get_dstInfos(self, amount):
 
-            return srcInfos
+        minToAmount = int(await woofi_get_min_amount(self.web3_to_chain, self.to_chain, WOOFI_PATH[self.to_chain], self.to_token_data['address'], amount) * 0.99)
+        bridgeToken = Web3.to_checksum_address(WOOFI_PATH[self.to_chain])
 
-        def get_dstInfos(amount, to_chain, to_token):
+        dstInfos = [
+            LAYERZERO_CHAINS_ID[self.to_chain], # chainId
+            self.to_token_data['address'], # toToken
+            bridgeToken,    # bridgeToken
+            minToAmount,    # minToAmount
+            0               # airdropNativeAmount
+        ]
 
-            chainId     = LAYERZERO_CHAINS_ID[to_chain]
+        return dstInfos
 
-            minToAmount = int(woofi_get_min_amount(privatekey, to_chain, WOOFI_PATH[to_chain], to_token, amount) * 0.99)
-            bridgeToken = WOOFI_PATH[to_chain]
+    async def get_txn(self):
 
-            bridgeToken = Web3.to_checksum_address(bridgeToken)
-            to_token    = Web3.to_checksum_address(to_token)
+        try:
+            contract = self.manager.web3.eth.contract(address=Web3.to_checksum_address(WOOFI_BRIDGE_CONTRACTS[self.from_chain]), abi=ABI_WOOFI_BRIDGE)
 
-            dstInfos = [
-                chainId,
-                to_token,       # toToken
-                bridgeToken,    # bridgeToken
-                minToAmount,    # minToAmount
-                0               # airdropNativeAmount
-            ]
+            srcInfos = await self.get_srcInfos()
+            if self.from_chain == 'bsc':
+                amount_src = decimalToInt(srcInfos[3], 18)
+                amount_src = intToDecimal(amount_src, 6)
+            else:
+                amount_src = srcInfos[3]
+            dstInfos = await self.get_dstInfos(amount_src)
 
-            return dstInfos
+            if self.from_token != '':
+                await self.manager.approve(self.value, self.from_token_data['address'], WOOFI_BRIDGE_CONTRACTS[self.from_chain])
 
-        module_str = f'woofi_bridge : {from_chain} => {to_chain}'
-        logger.info(module_str)
-
-        keep_value = round(random.uniform(keep_value_from, keep_value_to), 8)
-        if swap_all_balance == True: amount_ = check_balance(privatekey, from_chain, from_token) - keep_value
-        else: amount_ = round(random.uniform(amount_from, amount_to), 8)
-            
-        web3 = get_web3(from_chain, privatekey)
-        address_contract = web3.to_checksum_address(
-            WOOFI_BRIDGE_CONTRACTS[from_chain]
-        )
-
-        if from_token != '':
-            token_contract, decimals, symbol = check_data_token(from_chain, from_token)
-        else:
-            decimals = 18
-
-        contract    = web3.eth.contract(address=address_contract, abi=ABI_WOOFI_BRIDGE)
-        wallet      = web3.eth.account.from_key(privatekey).address
-
-        if to_token     == '' : to_token    = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
-        if from_token   == '' : from_token  = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
-
-        amount      = intToDecimal(amount_, decimals)
-        srcInfos    = get_srcInfos(amount_, from_chain, from_token)
-
-        if from_chain == 'bsc':
-            amount_src = decimalToInt(srcInfos[3], 18)
-            amount_src = intToDecimal(amount_src, 6)
-        else:
-            amount_src = srcInfos[3]
-
-        dstInfos    = get_dstInfos(amount_src, to_chain, to_token)
-
-        # cprint(f'\nsrcInfos : {srcInfos}\ndstInfos : {dstInfos}', 'blue')
-
-        # если токен не нативный, тогда проверяем апрув и если он меньше нужного, делаем апруваем
-        if from_token != '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE':
-            approve_(amount, privatekey, from_chain, from_token, WOOFI_BRIDGE_CONTRACTS[from_chain])
-            sleeping(5, 10)
-
-        layerzero_fee = contract.functions.quoteLayerZeroFee(
-            random.randint(112101680502565000, 712101680502565000), # refId
-            wallet, # to
-            srcInfos, 
-            dstInfos
-            ).call()
-        layerzero_fee = int(layerzero_fee[0] * 1)
-
-        if from_token == '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE':
-            value = int(amount + layerzero_fee)
-        else:
-            value = int(layerzero_fee)
-
-        if amount_ >= min_amount_swap:
-            contract_txn = contract.functions.crossSwap(
+            layerzero_fee = await contract.functions.quoteLayerZeroFee(
                 random.randint(112101680502565000, 712101680502565000), # refId
-                wallet, # to
+                self.manager.address, # to
+                srcInfos, 
+                dstInfos
+                ).call()
+            layerzero_fee = int(layerzero_fee[0])
+
+            if self.from_token == '':
+                value = int(self.value + layerzero_fee)
+            else:
+                value = int(layerzero_fee)
+
+            contract_txn = await contract.functions.crossSwap(
+                random.randint(112101680502565000, 712101680502565000), # refId
+                self.manager.address, # to
                 srcInfos, 
                 dstInfos
                 ).build_transaction(
                 {
-                    'from': wallet,
-                    'nonce': web3.eth.get_transaction_count(wallet),
+                    'from': self.manager.address,
+                    'nonce': await self.manager.web3.eth.get_transaction_count(self.manager.address),
                     'value': value,
                     'gasPrice': 0,
                     'gas': 0,
                 }
             )
 
-            if from_chain == 'bsc':
-                contract_txn['gasPrice'] = random.randint(1000000000, 1050000000) # специально ставим 1 гвей, так транза будет дешевле
-            else:
-                contract_txn = add_gas_price(web3, contract_txn)
+            contract_txn = await self.manager.add_gas_price(contract_txn)
+            contract_txn = await self.manager.add_gas_limit_layerzero(contract_txn)
 
-            contract_txn = add_gas_limit_layerzero(web3, contract_txn)
+            if self.manager.get_total_fee(contract_txn) == False: return False
 
-            if (from_token == '' and swap_all_balance == True):
-                gas_gas = int(contract_txn['gas'] * contract_txn['gasPrice'])
-                contract_txn['value'] = int(contract_txn['value'] - gas_gas)
-
-            # смотрим газ, если выше выставленного значения : спим
-            total_fee   = int(contract_txn['gas'] * contract_txn['gasPrice'] + layerzero_fee)
-            is_fee      = checker_total_fee(from_chain, total_fee)
-            if is_fee   == False: return woofi_bridge(privatekey, params, retry)
-
-            tx_hash = sign_tx(web3, contract_txn, privatekey)
-            tx_link = f'{DATA[from_chain]["scan"]}/{tx_hash}'
-
-            status = check_status_tx(from_chain, tx_hash)
-            if status == 1:
-                logger.success(f'{module_str} | {tx_link}')
-                list_send.append(f'{STR_DONE}{module_str}')
-                return "success"
-
-            else:
-                logger.error(f'{module_str} | tx is failed | {tx_link}')
-
-                retry += 1
-                if retry < RETRY:
-                    logger.info(f'try again | {wallet}')
-                    time.sleep(3)
-                    woofi_bridge(privatekey, params, retry+1)
-                else:
-                    list_send.append(f'{STR_CANCEL}{module_str}')
-
-        else:
-            logger.error(f"{module_str} : can't bridge : {amount_} (amount) < {min_amount_swap} (min_amount_swap)")
-            list_send.append(f'{STR_CANCEL}{module_str} : {amount_} less {min_amount_swap}')
-
-    except Exception as error:
-        logger.error(f'{module_str} | error : {error}')
-        if retry < RETRY:
-            logger.info(f'try again in 10 sec.')
-            sleeping(10, 10)
-            woofi_bridge(privatekey, params, retry+1)
-        else:
-            list_send.append(f'{STR_CANCEL}{module_str}')
-
-def woofi_swap(privatekey, params, retry=0):
-
-    try:
-        if params is not None:
-            from_chain = params['chain']
-            from_token = params['from_token']
-            to_token = params['to_token']
-            swap_all_balance = params['swap_all_balance']
-            amount_from = params['amount_from']
-            amount_to = params['amount_to']
-            min_amount_swap = params['min_amount_swap']
-            keep_value_from = params['keep_value_from']
-            keep_value_to = params['keep_value_to']
-        else:
-            from_chain, from_token, to_token, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to = value_woofi_swap()
-
-        module_str = f'woofi_swap : {from_chain}'
-        logger.info(module_str)
-
-        keep_value = round(random.uniform(keep_value_from, keep_value_to), 8)
-        if swap_all_balance == True: amount_ = check_balance(privatekey, from_chain, from_token) - keep_value
-        else: amount_ = round(random.uniform(amount_from, amount_to), 8)
-            
-        web3 = get_web3(from_chain, privatekey)
-        address_contract = web3.to_checksum_address(
-            WOOFI_SWAP_CONTRACTS[from_chain]
-        )
-
-        if to_token     == '' : to_token    = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
-        if from_token   == '' : from_token  = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
-
-        from_token = Web3.to_checksum_address(from_token)
-        to_token    = Web3.to_checksum_address(to_token)
-
-        if from_token != '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE':
-            token_contract, decimals, symbol = check_data_token(from_chain, from_token)
-        else:
-            decimals = 18
-
-        contract = web3.eth.contract(address=address_contract, abi=ABI_WOOFI_SWAP)
-        wallet = web3.eth.account.from_key(privatekey).address
-
-        amount = intToDecimal(amount_, decimals)
-
-        # если токен не нативный, тогда проверяем апрув и если он меньше нужного, делаем апруваем
-        if from_token != '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE':
-            approve_(amount, privatekey, from_chain, from_token, WOOFI_SWAP_CONTRACTS[from_chain])
-            sleeping(5, 10)
-
-        if from_token == '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE': 
-            value = amount
-        else:
-            value = 0
-
-        minToAmount = woofi_get_min_amount(privatekey, from_chain, from_token, to_token, amount)
-
-        if amount_ >= min_amount_swap:
-            contract_txn = contract.functions.swap(
-                from_token, 
-                to_token, 
-                amount, 
-                minToAmount, 
-                wallet,
-                wallet
-                ).build_transaction(
-                {
-                    'from': wallet,
-                    'nonce': web3.eth.get_transaction_count(wallet),
-                    'value': value,
-                    'gasPrice': 0,
-                    'gas': 0,
-                }
-            )
-
-            if from_chain == 'bsc':
-                contract_txn['gasPrice'] = random.randint(1000000000, 1050000000) # специально ставим 1 гвей, так транза будет дешевле
-            else:
-                contract_txn = add_gas_price(web3, contract_txn)
-            contract_txn = add_gas_limit(web3, contract_txn)
-
-            if (from_token == '' and swap_all_balance == True):
+            if self.swap_all_balance and self.from_token == '':
                 gas_gas = int(contract_txn['gas'] * contract_txn['gasPrice'])
                 contract_txn['value'] = contract_txn['value'] - gas_gas
 
-            # смотрим газ, если выше выставленного значения : спим
-            total_fee   = int(contract_txn['gas'] * contract_txn['gasPrice'])
-            is_fee      = checker_total_fee(from_chain, total_fee)
-            if is_fee   == False: return woofi_swap(privatekey, params, retry)
-
-            tx_hash = sign_tx(web3, contract_txn, privatekey)
-            tx_link = f'{DATA[from_chain]["scan"]}/{tx_hash}'
-
-            status = check_status_tx(from_chain, tx_hash)
-            if status == 1:
-                logger.success(f'{module_str} | {tx_link}')
-                list_send.append(f'{STR_DONE}{module_str}')
-                return "success"
-
+            if self.amount >= self.min_amount_swap:
+                return contract_txn
             else:
-                logger.error(f'{module_str} | tx is failed | {tx_link}')
-                retry += 1
-                if retry < RETRY:
-                    logger.info(f'try again | {wallet}')
-                    time.sleep(3)
-                    woofi_swap(privatekey, params, retry+1)
-                else:
-                    list_send.append(f'{STR_CANCEL}{module_str}')
+                logger.error(f"{self.module_str} | {self.amount} (amount) < {self.min_amount_swap} (min_amount_swap)")
+                list_send.append(f'{STR_CANCEL}{self.module_str} | {round_to(self.amount)} less {self.min_amount_swap}')
+                return False
+            
+        except Exception as error:
+            logger.error(error)
+            list_send.append(f'{STR_CANCEL}{self.module_str} | {error}')
+            return False
 
+class WoofiSwap:
+    
+    def __init__(self, key, number, params=None):
+        self.key = key
+        self.number = number
+        self.params = params
+
+    async def setup(self):
+        if self.params:
+            self.chain = self.params['chain']
+            self.keep_value_from = self.params['keep_value_from']
+            self.keep_value_to = self.params['keep_value_to']
+            self.swap_all_balance = self.params['swap_all_balance']
+            self.from_token = self.params['from_token']
+            self.to_token = self.params['to_token']
+            self.amount_from = self.params['amount_from']
+            self.amount_to = self.params['amount_to']
+            self.min_amount_swap = self.params['min_amount_swap']
         else:
-            logger.error(f"{module_str} : can't swap : {amount_} (amount) < {min_amount_swap} (min_amount_swap)")
-            list_send.append(f'{STR_CANCEL}{module_str} : {amount_} less {min_amount_swap}')
+            self.chain = Value_Woofi_Swap.chain
+            self.keep_value_from = Value_Woofi_Swap.keep_value_from
+            self.keep_value_to = Value_Woofi_Swap.keep_value_to
+            self.swap_all_balance = Value_Woofi_Swap.swap_all_balance
+            self.from_token = Value_Woofi_Swap.from_token
+            self.to_token = Value_Woofi_Swap.to_token
+            self.amount_from = Value_Woofi_Swap.amount_from
+            self.amount_to = Value_Woofi_Swap.amount_to
+            self.min_amount_swap = Value_Woofi_Swap.min_amount_swap
 
-    except Exception as error:
-        logger.error(f'{module_str} | error : {error}')
-        if retry < RETRY:
-            logger.info(f'try again in 10 sec.')
-            sleeping(10, 10)
-            woofi_swap(privatekey, params, retry+1)
-        else:
-            list_send.append(f'{STR_CANCEL}{module_str}')
+        self.manager = Web3ManagerAsync(self.key, self.chain)
+        self.amount = await self.manager.get_amount_in(self.keep_value_from, self.keep_value_to, self.swap_all_balance, self.from_token, self.amount_from, self.amount_to)
+        self.from_token_data = await self.manager.get_token_info(self.from_token)
+        self.to_token_data = await self.manager.get_token_info(self.to_token)
+        self.value = intToDecimal(self.amount, self.from_token_data['decimal']) 
+        self.module_str = f'{self.number} {self.manager.address} | woofi_swap ({self.chain}) : {round_to(self.amount)} {self.from_token_data["symbol"]} => {self.to_token_data["symbol"]}'
+        self.minToAmount = await woofi_get_min_amount(self.manager.web3, self.chain, self.from_token_data['address'], self.to_token_data['address'], self.value)
 
+    async def get_txn(self):
+
+        try:
+
+            if self.from_token != '':
+                await self.manager.approve(self.value, self.from_token_data['address'], WOOFI_SWAP_CONTRACTS[self.chain])
+
+            if self.from_token == '':
+                value = self.value
+            else:
+                value = 0
+
+            contract = self.manager.web3.eth.contract(address=Web3.to_checksum_address(WOOFI_SWAP_CONTRACTS[self.chain]), abi=ABI_WOOFI_SWAP)
+
+            contract_txn = await contract.functions.swap(
+                self.from_token_data['address'], 
+                self.to_token_data['address'], 
+                int(self.value), 
+                self.minToAmount, 
+                self.manager.address,
+                self.manager.address
+            ).build_transaction(
+                {
+                    'from': self.manager.address,
+                    'nonce': await self.manager.web3.eth.get_transaction_count(self.manager.address),
+                    'value': value,
+                    'gasPrice': 0,
+                    'gas': 0,
+                }
+            )
+
+            contract_txn = await self.manager.add_gas_price(contract_txn)
+            contract_txn = await self.manager.add_gas_limit(contract_txn)
+
+            if self.manager.get_total_fee(contract_txn) == False: return False
+
+            if self.swap_all_balance and self.from_token == '':
+                gas_gas = int(contract_txn['gas'] * contract_txn['gasPrice'])
+                contract_txn['value'] = contract_txn['value'] - gas_gas
+
+            if self.amount >= self.min_amount_swap:
+                return contract_txn
+            else:
+                logger.error(f"{self.module_str} | {self.amount} (amount) < {self.min_amount_swap} (min_amount_swap)")
+                list_send.append(f'{STR_CANCEL}{self.module_str} | {round_to(self.amount)} less {self.min_amount_swap}')
+                return False
+            
+        except Exception as error:
+            logger.error(error)
+            list_send.append(f'{STR_CANCEL}{self.module_str} | {error}')
+            return False
 

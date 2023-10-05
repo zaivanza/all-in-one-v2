@@ -1,244 +1,163 @@
-from data.data import DATA
-from data.abi.abi import ABI_SUSHISWAP
-from config import STR_DONE, STR_CANCEL, SUSHISWAP_CONTRACTS, WETH_CONTRACTS
-from setting import value_sushiswap, RETRY
-from .helpers import get_web3, approve_, add_gas_price, sign_tx, check_balance, check_data_token, check_status_tx, checker_total_fee, round_to, list_send, intToDecimal, sleeping
+from .utils.contracts.abi import ABI_SUSHISWAP
+from .utils.contracts.contract import SUSHISWAP_CONTRACTS, WETH_CONTRACTS
+from config import STR_CANCEL
+from setting import Value_Sushiswap
+from .utils.helpers import round_to, list_send, intToDecimal
+from .utils.manager_async import Web3ManagerAsync
 
 from loguru import logger
 from web3 import Web3
-import random, requests, time
+import time, random
 
-def get_0x_quote(chain, from_token, to_token, value, slippage):
+class SushiSwap:
 
-    try:
-
-        url_chains = {
-            'ethereum'  : '',
-            'bsc'       : 'bsc.',
-            'arbitrum'  : 'arbitrum.',
-            'optimism'  : 'optimism.',
-            'polygon'   : 'polygon.',
-            'fantom'    : 'fantom.',
-            'avalanche' : 'avalanche.',
-            'celo'      : 'celo.',
-        }
-
-        url = f'https://{url_chains[chain]}api.0x.org/swap/v1/quote?buyToken={to_token}&sellToken={from_token}&sellAmount={value}&slippagePercentage={slippage/100}'
-        
-        response = requests.get(url)
-
-        if response.status_code == 200:
-            result = [response.json()]
-            return result
-        
+    def __init__(self, key, number, params=None):
+        self.params = params
+        if self.params:
+            self.chain = self.params['chain']
+            self.from_token_address = self.params['from_token']
+            self.to_token_address = self.params['to_token']
+            self.amount_from = self.params['amount_from']
+            self.amount_to = self.params['amount_to']
+            self.swap_all_balance = self.params['swap_all_balance']
+            self.min_amount_swap = self.params['min_amount_swap']
+            self.keep_value_from = self.params['keep_value_from']
+            self.keep_value_to = self.params['keep_value_to']
         else:
-            logger.error(f'response.status_code : {response.status_code}')
-            return False
-    
-    except Exception as error:
-        logger.error(error)
-        return False
+            self.chain = Value_Sushiswap.chain
+            self.from_token_address = Value_Sushiswap.from_token
+            self.to_token_address = Value_Sushiswap.to_token
+            self.amount_from = Value_Sushiswap.amount_from
+            self.amount_to = Value_Sushiswap.amount_to
+            self.swap_all_balance = Value_Sushiswap.swap_all_balance
+            self.min_amount_swap = Value_Sushiswap.min_amount_swap
+            self.keep_value_from = Value_Sushiswap.keep_value_from
+            self.keep_value_to = Value_Sushiswap.keep_value_to
+        self.key = key
+        self.number = number
 
-def get_sushi_amountOutMin(contract, value, from_token, to_token, slippage):
+    async def setup(self):
+        self.from_token_address = random.choice(self.from_token_address)
+        self.to_token_address = random.choice(self.to_token_address)
+        self.manager = Web3ManagerAsync(self.key, self.chain)
+        self.from_token_data = await self.manager.get_token_info(self.from_token_address)
+        self.to_token_data = await self.manager.get_token_info(self.to_token_address)
+        self.amount = await self.manager.get_amount_in(self.keep_value_from, self.keep_value_to, self.swap_all_balance, self.from_token_address, self.amount_from, self.amount_to)
+        self.value = intToDecimal(self.amount, self.from_token_data['decimal']) 
+        self.module_str = f'{self.number} {self.manager.address} | sushiswap ({self.chain}) : {round_to(self.amount)} {self.from_token_data["symbol"]} => {self.to_token_data["symbol"]}'
 
-    contract_txn = contract.functions.getAmountsOut(
-        value,
-        [from_token, to_token],
-        ).call()
+    async def get_amountOutMin(self, contract, from_token, to_token):
 
-    return int(contract_txn[1] * slippage)
+        contract_txn = await contract.functions.getAmountsOut(
+            self.value,
+            [from_token, to_token],
+            ).call()
 
-def get_amountOut(chain, contract, value, from_token, to_token, slippage_, from_token_address, to_token_address):
+        return int(contract_txn[1] * (1 - self.slippage / 100))
 
-    slippage = (1 - slippage_ / 100)
+    async def get_txn(self):
 
-    if chain in ['nova']:
-        amountOutMin    = get_sushi_amountOutMin(contract, value, from_token, to_token, slippage)
-    else:
+        try:
 
-        if from_token_address == '':
-            json_data = get_0x_quote(chain, '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', to_token, value, slippage_)
-        elif to_token_address == '':
-            json_data = get_0x_quote(chain, from_token, '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', value, slippage_)
-        elif (to_token_address != '' and from_token_address != ''):
-            json_data = get_0x_quote(chain, from_token, '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', value, slippage_)
+            if self.from_token_address != '':
+                await self.manager.approve(self.value, self.from_token_data['address'], SUSHISWAP_CONTRACTS[self.chain])
 
-        if json_data != False:
-            amountOutMin = int(int(json_data[0]['buyAmount']) * slippage)
-        else:
-            amountOutMin = get_sushi_amountOutMin(contract, value, from_token, to_token, slippage)
-
-    return amountOutMin
-
-def sushiswap(privatekey, params, retry=0):
-
-    try:
-
-        if params is not None:
-            chain = params['chain']
-            from_token_address = params['from_token_address']
-            to_token_address = params['to_token_address']
-            swap_all_balance = params['swap_all_balance']
-            amount_from = params['amount_from']
-            amount_to = params['amount_to']
-            min_amount_swap = params['min_amount_swap']
-            keep_value_from = params['keep_value_from']
-            keep_value_to = params['keep_value_to']
-            slippage_ = params['slippage']
-        else:
-            chain, from_token_address, to_token_address, swap_all_balance, amount_from, amount_to, min_amount_swap, keep_value_from, keep_value_to, slippage_ = value_sushiswap()
-
-        module_str = f'sushiswap ({chain})'
-        logger.info(module_str)
-
-        keep_value = round(random.uniform(keep_value_from, keep_value_to), 8)
-        if swap_all_balance == True: amount = check_balance(privatekey, chain, from_token_address) - keep_value
-        else: amount = round(random.uniform(amount_from, amount_to), 8)
-
-        web3        = get_web3(chain, privatekey)
-        account     = web3.eth.account.from_key(privatekey)
-        wallet      = account.address
-
-        contract = web3.eth.contract(address=Web3.to_checksum_address(SUSHISWAP_CONTRACTS[chain]), abi=ABI_SUSHISWAP)
-
-        # weth => token
-        if from_token_address == '':
-
-            from_token  = Web3.to_checksum_address(WETH_CONTRACTS[chain])
-            to_token    = Web3.to_checksum_address(to_token_address)
-
-            from_token_contract, from_token_decimal, from_symbol    = check_data_token(chain, from_token)
-            to_token_contract, to_token_decimal, to_symbol          = check_data_token(chain, to_token)
-            value = intToDecimal(amount, from_token_decimal)
-
-            amountOutMin = get_amountOut(chain, contract, value, from_token, to_token, slippage_, from_token_address, to_token_address)
-
-            contract_txn = contract.functions.swapExactETHForTokens(
-                amountOutMin,
-                [from_token, to_token],
-                wallet, # receiver
-                (int(time.time()) + 10000)  # deadline
-                ).build_transaction(
-                {
-                    "from": wallet,
-                    "value": value,
-                    "nonce": web3.eth.get_transaction_count(wallet),
-                    'gasPrice': 0,
-                    'gas': 0,
-                }
-            )
-
-        # token => weth
-        if to_token_address == '':
-
-            from_token  = Web3.to_checksum_address(from_token_address)
-            to_token    = Web3.to_checksum_address(WETH_CONTRACTS[chain])
-
-            from_token_contract, from_token_decimal, from_symbol    = check_data_token(chain, from_token)
-            to_token_contract, to_token_decimal, to_symbol          = check_data_token(chain, to_token)
-            value = intToDecimal(amount, from_token_decimal)
-
-            amountOutMin = get_amountOut(chain, contract, value, from_token, to_token, slippage_, from_token_address, to_token_address)
-
-            contract_txn = contract.functions.swapExactTokensForETH(
-                value, # amountIn
-                amountOutMin, # amountOutMin
-                [from_token, to_token], # path
-                wallet, # receiver
-                (int(time.time()) + 10000)  # deadline
-                ).build_transaction(
-                {
-                    "from": wallet,
-                    "value": 0,
-                    "nonce": web3.eth.get_transaction_count(wallet),
-                    'gasPrice': 0,
-                    'gas': 0,
-                }
-            )
-
-        # token => token
-        if (to_token_address != '' and from_token_address != ''):
-
-            from_token  = Web3.to_checksum_address(from_token_address)
-            to_token    = Web3.to_checksum_address(to_token_address)
-
-            from_token_contract, from_token_decimal, from_symbol    = check_data_token(chain, from_token)
-            to_token_contract, to_token_decimal, to_symbol          = check_data_token(chain, to_token)
-            value = intToDecimal(amount, from_token_decimal)
-
-            amountOutMin = get_amountOut(chain, contract, value, from_token, to_token, slippage_, from_token_address, to_token_address)
-
-            contract_txn = contract.functions.swapExactTokensForTokens(
-                value, # amountIn
-                amountOutMin, # amountOutMin
-                [from_token, to_token], # path
-                wallet, # receiver
-                (int(time.time()) + 10000)  # deadline
-                ).build_transaction(
-                {
-                    "from": wallet,
-                    "value": 0,
-                    "nonce": web3.eth.get_transaction_count(wallet),
-                    'gasPrice': 0,
-                    'gas': 0,
-                }
-            )
-
-
-        if from_token_address != '': 
-            approve_(value, privatekey, chain, from_token_address, SUSHISWAP_CONTRACTS[chain])
-
-        if (amount > 0 and amount > min_amount_swap):
-
-            contract_txn['nonce']   = web3.eth.get_transaction_count(wallet)
-            contract_txn            = add_gas_price(web3, contract_txn)
-            gasLimit                = web3.eth.estimate_gas(contract_txn)
-            contract_txn['gas']     = int(gasLimit * random.uniform(1.03, 1.05))
-            # contract_txn = add_gas_limit(web3, contract_txn)
-
-            if chain == 'bsc':
-                contract_txn['gasPrice'] = random.randint(1000000000, 1050000000) # специально ставим 1 гвей, так транза будет дешевле
-
-            if (from_token_address == '' and swap_all_balance == True):
-                gas_gas = int(contract_txn['gas'] * contract_txn['gasPrice'])
-                contract_txn['value'] = int(value) - int(gas_gas)
-
-            # смотрим газ, если выше выставленного значения : спим
-            total_fee   = int(contract_txn['gas'] * contract_txn['gasPrice'])
-            is_fee      = checker_total_fee(chain, total_fee)
-            if is_fee   == False: return sushiswap(privatekey, params, retry)
-
-            tx_hash = sign_tx(web3, contract_txn, privatekey)
-            tx_link = f'{DATA[chain]["scan"]}/{tx_hash}'
-
-            status = check_status_tx(chain, tx_hash)
-            if status == 1:
-                logger.success(f'{module_str} : {round_to(amount)} {from_symbol} => {to_symbol} | {tx_link}')
-                list_send.append(f'{STR_DONE}{module_str} : {round_to(amount)} {from_symbol} => {to_symbol}')
-                return "success"
-
+            if self.from_token_address == '':
+                value = self.value
             else:
-                if retry < RETRY:
-                    logger.info(f'{module_str} | tx is failed, try again in 10 sec | {tx_link}')
-                    sleeping(10, 10)
-                    sushiswap(privatekey, params, retry+1)
-                else:
-                    logger.error(f'{module_str} | tx is failed | {tx_link}')
-                    list_send.append(f'{STR_CANCEL}{module_str} | tx is failed | {tx_link}')
+                value = 0
 
-        else:
-            logger.error(f"{module_str} : can't swap : balance = {amount}")
-            list_send.append(f"{STR_CANCEL}{module_str} : can't swap : balance = {amount}")
+            contract = self.manager.web3.eth.contract(address=Web3.to_checksum_address(SUSHISWAP_CONTRACTS[self.chain]), abi=ABI_SUSHISWAP)
+
+            # weth => token
+            if self.from_token_address == '':
+
+                from_token  = Web3.to_checksum_address(WETH_CONTRACTS[self.chain])
+                to_token    = self.to_token_data["address"]
+                amountOut   = await self.get_amountOutMin(contract, from_token, to_token)
+
+                contract_txn = await contract.functions.swapExactETHForTokens(
+                    amountOut,
+                    [from_token, to_token],
+                    self.manager.address, # receiver
+                    (int(time.time()) + 10000)  # deadline
+                    ).build_transaction(
+                    {
+                        "from": self.manager.address,
+                        "value": value,
+                        "nonce": await self.manager.web3.eth.get_transaction_count(self.manager.address),
+                        'gasPrice': 0,
+                        'gas': 0,
+                    }
+                )
+
+            # token => weth
+            if self.to_token_address == '':
+
+                from_token  = self.from_token_data["address"]
+                to_token    = Web3.to_checksum_address(WETH_CONTRACTS[self.chain])
+                amountOut   = await self.get_amountOutMin(contract, from_token, to_token)
+
+                contract_txn = await contract.functions.swapExactTokensForETH(
+                    value, # amountIn
+                    amountOut, # amountOutMin
+                    [from_token, to_token], # path
+                    self.manager.address, # receiver
+                    (int(time.time()) + 10000)  # deadline
+                    ).build_transaction(
+                    {
+                        "from": self.manager.address,
+                        "value": 0,
+                        "nonce": await self.manager.web3.eth.get_transaction_count(self.manager.address),
+                        'gasPrice': 0,
+                        'gas': 0,
+                    }
+                )
+
+            # token => token
+            if (self.to_token_address != '' and self.from_token_address != ''):
+
+                from_token  = self.from_token_data["address"]
+                to_token    = self.to_token_data["address"]
+                amountOut   = await self.get_amountOutMin(contract, from_token, to_token)
+
+                contract_txn = await contract.functions.swapExactTokensForTokens(
+                    value, # amountIn
+                    amountOut, # amountOutMin
+                    [from_token, to_token], # path
+                    self.manager.address, # receiver
+                    (int(time.time()) + 10000)  # deadline
+                    ).build_transaction(
+                    {
+                        "from": self.manager.address,
+                        "value": 0,
+                        "nonce": await self.manager.web3.eth.get_transaction_count(self.manager.address),
+                        'gasPrice': 0,
+                        'gas': 0,
+                    }
+                )
+
+            contract_txn = await self.manager.add_gas_price(contract_txn)
+            contract_txn = await self.manager.add_gas_limit_layerzero(contract_txn)
+
+            if self.manager.get_total_fee(contract_txn) == False: return False
+
+            if self.swap_all_balance and self.from_token_address == '':
+                gas_gas = int(contract_txn['gas'] * contract_txn['gasPrice'])
+                contract_txn['value'] = contract_txn['value'] - gas_gas
+
+            if self.amount >= self.min_amount_swap:
+                return contract_txn
+            else:
+                logger.error(f"{self.module_str} | {self.amount} (amount) < {self.min_amount_swap} (min_amount_swap)")
+                list_send.append(f'{STR_CANCEL}{self.module_str} | {round_to(self.amount)} less {self.min_amount_swap}')
+                return False
+            
+        except Exception as error:
+            logger.error(error)
+            list_send.append(f'{STR_CANCEL}{self.module_str} | {error}')
+            return False
 
 
-    except Exception as error:
-        logger.error(f'{module_str} | {error}')
-
-        if retry < RETRY:
-            logger.info(f'try again | {wallet}')
-            sleeping(10, 10)
-            sushiswap(privatekey, params, retry+1)
-        else:
-            list_send.append(f'{STR_CANCEL}{module_str}')
 
 
