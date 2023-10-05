@@ -2,6 +2,7 @@ TG_TOKEN = 'your_tgbot_token' # создать можешь здесь : https:/
 TG_ID = 0 # узнать можешь здесь : https://t.me/getmyid_bot
 
 API_0x = 'your_0x_api_key' # получить api key от 0x здесь : https://dashboard.0x.org/apps
+API_1inch = 'your_0x_api_key'
 
 # меняем рпс на свои
 DATA = {
