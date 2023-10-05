@@ -182,13 +182,13 @@ DEBANK_ACTIVATE_CHAINS = [
 STR_DONE = '✅ '
 STR_CANCEL = '❌ '
 
-ERC20_ABI = load_json("data/contracts/erc20.json")
-MULTICALL_ABI = load_json("data/contracts/multicall_abi.json")
+ERC20_ABI = load_json("modules/utils/contracts/erc20.json")
+MULTICALL_ABI = load_json("modules/utils/contracts/multicall_abi.json")
 WALLETS = read_txt("data/wallets.txt")
 RECIPIENTS = read_txt("data/recipients.txt")
 STARKNET_ADDRESS = read_txt("data/starknet_address.txt")
 PROXIES = read_txt("data/proxies.txt")
-ORBITER_MAKER = load_json("data/contracts/orbiter_maker.json")
+ORBITER_MAKER = load_json("modules/utils/contracts/orbiter_maker.json")
 
 RECIPIENTS_WALLETS = dict(zip(WALLETS, RECIPIENTS))
 STARKNET_WALLETS = dict(zip(WALLETS, STARKNET_ADDRESS))
