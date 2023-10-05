@@ -198,33 +198,37 @@ class Multicall():
         balances_dict = {}
         zero = 0
         for wallets_list in wallets_batches:
-            try:
-                abi = '[{"constant":true,"inputs":[{"name":"user","type":"address"},{"name":"token","type":"address"}],"name":"tokenBalance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"users","type":"address[]"},{"name":"tokens","type":"address[]"}],"name":"balances","outputs":[{"name":"","type":"uint256[]"}],"payable":false,"stateMutability":"view","type":"function"},{"payable":true,"stateMutability":"payable","type":"fallback"}]'
-                multicall_contract = self.web3.eth.contract(address=Web3.to_checksum_address(MULTICALL_ETH_CONTRACTS[self.chain]), abi=abi)
-                multicall_result = await multicall_contract.functions.balances(
-                    wallets_list, tokens_list
-                ).call()
+            max_attempts = 10
+            for attempt in range(max_attempts):
+                try:
+                    abi = '[{"constant":true,"inputs":[{"name":"user","type":"address"},{"name":"token","type":"address"}],"name":"tokenBalance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"users","type":"address[]"},{"name":"tokens","type":"address[]"}],"name":"balances","outputs":[{"name":"","type":"uint256[]"}],"payable":false,"stateMutability":"view","type":"function"},{"payable":true,"stateMutability":"payable","type":"fallback"}]'
+                    multicall_contract = self.web3.eth.contract(address=Web3.to_checksum_address(MULTICALL_ETH_CONTRACTS[self.chain]), abi=abi)
+                    multicall_result = await multicall_contract.functions.balances(
+                        wallets_list, tokens_list
+                    ).call()
 
-                zero += len(wallets_list)
-                logger.info(f'{zero} / {len(wallets_)} wallets [{self.chain}]')
-                multicall_result = [multicall_result[i:i + len(tokens_list)] for i in range(0, len(multicall_result), len(tokens_list))]     
+                    zero += len(wallets_list)
+                    logger.info(f'{zero} / {len(wallets_)} wallets [{self.chain}]')
+                    multicall_result = [multicall_result[i:i + len(tokens_list)] for i in range(0, len(multicall_result), len(tokens_list))]     
 
-                for number, wallet in enumerate(wallets_list):
-                    balances = multicall_result[number]
-                    balances_dict[wallet] = {}
+                    for number, wallet in enumerate(wallets_list):
+                        balances = multicall_result[number]
+                        balances_dict[wallet] = {}
+                    
+                        for i, balance in enumerate(balances):
+                            token = tokens_list[i]
+                            if token == '0x0000000000000000000000000000000000000000':
+                                symbol = DATA[self.chain]['token']
+                                decimal = 18
+                            else:
+                                symbol  = symbols_list[self.chain][token]
+                                decimal = decimals_list[self.chain][token]
+                            balances_dict[wallet][symbol] = decimalToInt(balance, decimal)
+                    break
                 
-                    for i, balance in enumerate(balances):
-                        token = tokens_list[i]
-                        if token == '0x0000000000000000000000000000000000000000':
-                            symbol = DATA[self.chain]['token']
-                            decimal = 18
-                        else:
-                            symbol  = symbols_list[self.chain][token]
-                            decimal = decimals_list[self.chain][token]
-                        balances_dict[wallet][symbol] = decimalToInt(balance, decimal)
-            
-            except Exception as e:
-                logger.error(f"[{self.chain}] Multicall error : {e} | wallets_lust : {wallets_list} | tokens_list : {tokens_list}")
+                except Exception as e:
+                    logger.info(f'[{self.chain}] Multicall error : {e} | attempt {attempt+1}/{max_attempts}')
+                    await asyncio.sleep(1)
 
         return balances_dict
     
