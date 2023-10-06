@@ -26,7 +26,7 @@ class Web3ManagerAsync:
         if (USE_PROXY and WALLET_PROXIES):
             try:
                 proxy = WALLET_PROXIES[self.key]
-                web3 = Web3(AsyncHTTPProvider(rpc, request_kwargs={"proxies":{'https' : proxy, 'http' : proxy}}), modules={"eth": (AsyncEth)}, middlewares=[])
+                web3 = Web3(AsyncHTTPProvider(rpc, request_kwargs={"proxy": proxy}), modules={"eth": (AsyncEth)}, middlewares=[])
             except Exception as error:
                 logger.error(f'{error}. Use web3 without proxy')
 
