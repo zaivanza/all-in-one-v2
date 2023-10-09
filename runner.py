@@ -10,8 +10,7 @@ from loguru import logger
 from termcolor import cprint
 import random
 import asyncio
-from web3 import Web3, AsyncHTTPProvider
-from web3.eth import AsyncEth
+from eth_account import Account
 
 MODULES = {
     1: ("web3_checker", Web3Checker),
@@ -40,11 +39,9 @@ def get_module(module):
     else:
         raise ValueError(f"Unsupported module: {module}")
 
-async def is_private_key(key):
-    web3 = Web3(AsyncHTTPProvider(DATA['ethereum']['rpc']), modules={"eth": (AsyncEth)}, middlewares=[])
+def is_private_key(key):
     try:
-        address = web3.eth.account.from_key(key).address
-        return True
+        return Account().from_key(key).address
     except:
         return False
 
@@ -100,7 +97,7 @@ async def process_batches(func, wallets):
         tasks = []
         for key in batch:
             number += 1
-            if await is_private_key(key):
+            if is_private_key(key):
                 tasks.append(asyncio.create_task(worker(func, key, f'[{number}/{len(wallets)}]')))
             else:
                 logger.error(f"{key} isn't private key")
@@ -173,7 +170,7 @@ async def main_tracks():
 
         tasks = []
         for key in batch:
-            if await is_private_key(key):
+            if is_private_key(key):
                 number += 1
                 tasks.append(asyncio.create_task(worker_tracks(key, f'[{number}/{len(WALLETS)}]')))
             else:
