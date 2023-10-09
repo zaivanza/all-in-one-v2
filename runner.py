@@ -1,6 +1,7 @@
 from config import WALLETS, STR_DONE, STR_CANCEL
 from setting import RANDOMIZER, CHECK_GWEI, TG_BOT_SEND , IS_SLEEP, DELAY_SLEEP, RETRY, WALLETS_IN_BATCH, TRACK
 
+from data.data import DATA
 from modules.utils.helpers import list_send, wait_gas, send_msg, async_sleeping
 from modules.utils.manager_async import Web3ManagerAsync
 from modules import *
@@ -9,6 +10,8 @@ from loguru import logger
 from termcolor import cprint
 import random
 import asyncio
+from web3 import Web3, AsyncHTTPProvider
+from web3.eth import AsyncEth
 
 MODULES = {
     1: ("web3_checker", Web3Checker),
@@ -37,8 +40,14 @@ def get_module(module):
     else:
         raise ValueError(f"Unsupported module: {module}")
 
-def is_private_key(value):
-    return len(value) == 66 and value.startswith('0x')
+async def is_private_key(key):
+    web3 = Web3(AsyncHTTPProvider(DATA['ethereum']['rpc']), modules={"eth": (AsyncEth)}, middlewares=[])
+    try:
+        address = web3.eth.account.from_key(key).address
+        return True
+    except:
+        return False
+
 
 async def worker(func, key, number):
     func_instance = func(key, number)
@@ -91,7 +100,7 @@ async def process_batches(func, wallets):
         tasks = []
         for key in batch:
             number += 1
-            if is_private_key(key):
+            if await is_private_key(key):
                 tasks.append(asyncio.create_task(worker(func, key, f'[{number}/{len(wallets)}]')))
             else:
                 logger.error(f"{key} isn't private key")
@@ -164,7 +173,7 @@ async def main_tracks():
 
         tasks = []
         for key in batch:
-            if is_private_key(key):
+            if await is_private_key(key):
                 number += 1
                 tasks.append(asyncio.create_task(worker_tracks(key, f'[{number}/{len(WALLETS)}]')))
             else:
