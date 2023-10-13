@@ -62,7 +62,7 @@ def intToDecimal(qty, decimal):
     return int(qty * 10**decimal)
 
 def decimalToInt(qty, decimal):
-    return int(qty / 10**decimal)
+    return float(qty / 10**decimal)
 
 def sleeping(from_sleep, to_sleep):
     x = random.randint(from_sleep, to_sleep)
