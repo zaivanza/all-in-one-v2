@@ -33,7 +33,7 @@
 
 1. Вся настройка делается в файле `setting.py`, описание там же. 
 2. Если хочешь запускать несколько модулей в одной цепочке, их нужно настраивать в `tracks.py`.
-3. В папке `data` переименуй файлы `wallets_EXAMPLE.txt` => `wallets.txt`, `proxies_EXAMPLE.txt` => `proxies.txt`,  `data_EXAMPLE.py` => `data.txt`
+3. В папке `data` переименуй файлы `wallets_EXAMPLE.txt` => `wallets.txt`, `proxies_EXAMPLE.txt` => `proxies.txt`,  `data_EXAMPLE.py` => `data.py`
 4. В папке `data` есть 5 файлов :
 - `wallets.txt` - сюда записываем кошельки (приватники / адреса).
 - `recipients.txt` - сюда записываем адреса для трансфера, используется только в модуле transfer когда выводим с кошелька на адрес. 1 кошелек = 1 адрес.
