@@ -79,6 +79,7 @@ class InchSwap:
         if json_data is False: return False
 
         contract_txn  = json_data['tx']
+        contract_txn['from']      = Web3.to_checksum_address(contract_txn['from'])
         contract_txn['chainId']   = self.manager.chain_id
         contract_txn['nonce']     = await self.manager.web3.eth.get_transaction_count(self.manager.address)
         contract_txn['to']        = Web3.to_checksum_address(contract_txn['to'])
