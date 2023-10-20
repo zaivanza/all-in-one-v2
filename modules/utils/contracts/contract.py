@@ -12,6 +12,7 @@ ORBITER_AMOUNT = {
     'linea'         : 0.000000000000009023,
     'base'          : 0.000000000000009021,
     'mantle'        : 0.000000000000009024,
+    'scroll'        : 0.000000000000009019,
 }
 
 ORBITER_AMOUNT_STR = {
@@ -28,6 +29,7 @@ ORBITER_AMOUNT_STR = {
     'linea'         : '9023',
     'base'          : '9021',
     'mantle'        : '9024',
+    'scroll'        : '9019',
 }
 
 # контракт с X сети в starknet
@@ -68,6 +70,9 @@ LAYERZERO_CHAINS_ID = {
     'nova'      : 175,
     'kava'      : 177,
     'meter'     : 176,
+    'base'      : 184,
+    'zora'      : 195,
+    'scroll'    : 214,
 }
 
 # контракты бриджа
@@ -142,6 +147,7 @@ BUNGEE_REFUEL_CONTRACTS = {
     'avalanche'     : '0x040993fbf458b95871cd2d73ee2e09f4af6d56bb',
     'gnosis'        : '0xBE51D38547992293c89CC589105784ab60b004A9',
     'fantom'        : '0x040993fbF458b95871Cd2D73Ee2E09F4AF6d56bB',
+    'base'          : '0xe8c5b8488feafb5df316be73ede3bdc26571a773'
 }
 
 MERKLY_CONTRACTS = {
@@ -160,6 +166,9 @@ MERKLY_CONTRACTS = {
     'celo'          : '0xe33519c400b8f040e73aeda2f45dfdd4634a7ca0',
     'moonbeam'      : '0x766b7aC73b0B33fc282BdE1929db023da1fe6458',
     'moonriver'     : '0x97337A9710BEB17b8D77cA9175dEFBA5e9AFE62e',
+    'base'          : '0x6bf98654205B1AC38645880Ae20fc00B0bB9FFCA',
+    'scroll'        : '0x7dfb5e7808b5eb4fb8b9e7169537575f6ff1a218',
+    'zora'          : '',
 }
 
 MULTICALL_ETH_CONTRACTS = {

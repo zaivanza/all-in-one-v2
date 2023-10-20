@@ -41,6 +41,10 @@ DATA = {
     'linea'         : {'rpc': 'https://rpc.linea.build', 'scan': 'https://lineascan.build/tx', 'token': 'ETH', 'chain_id': 59144},
 
     'base'          : {'rpc': 'https://mainnet.base.org', 'scan': 'https://basescan.org/tx', 'token': 'ETH', 'chain_id': 8453},
+
+    'zora'          : {'rpc': 'https://rpc.zora.energy', 'scan': 'https://zora.superscan.network/tx', 'token': 'ETH', 'chain_id': 7777777},
+
+    'scroll'        : {'rpc': 'https://scroll.blockpi.network/v1/rpc/public', 'scan': 'https://scrollscan.com/tx', 'token': 'ETH', 'chain_id': 534352}
 }
 
 # апи ключи от бирж. если биржей не пользуешься, можно не вставлять

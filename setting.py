@@ -32,6 +32,9 @@ MAX_GAS_CHARGE = {
     'polygon_zkevm' : 0.5,
     'core'          : 0.1,
     'harmony'       : 0.1,
+    'base'          : 0.5,
+    'scroll'        : 0.5,
+    'zora'          : 0.5,
 }
 
 class Value_Web3_Checker:
@@ -82,30 +85,30 @@ class Value_Web3_Checker:
         'nova': [
             '', # ETH
             ],
-        # 'fantom': [
-        #     '', # FTM
-        #     ],
-        # 'polygon_zkevm': [
-        #     '', # ETH
-        #     ],
-        # 'celo': [
-        #     '', # CELO
-        #     ],
-        # 'gnosis': [
-        #     '', # xDAI
-        #     ],
-        # 'harmony': [
-        #     '', # ONE
-        #     ],
-        # 'core': [
-        #     '', # CORE
-        #     ],
-        # 'linea': [
-        #     '', # ETH
-        #     ],
-        # 'base': [
-        #     '', # ETH
-        #     ],
+        'fantom': [
+            '', # FTM
+            ],
+        'polygon_zkevm': [
+            '', # ETH
+            ],
+        'celo': [
+            '', # CELO
+            ],
+        'gnosis': [
+            '', # xDAI
+            ],
+        'harmony': [
+            '', # ONE
+            ],
+        'core': [
+            '', # CORE
+            ],
+        'linea': [
+            '', # ETH
+            ],
+        'base': [
+            '', # ETH
+            ],
     }
 
     min_token_balance = {
@@ -116,7 +119,7 @@ class Value_Web3_Checker:
 
     min_value_balance = 5 # если баланс кошелька в $ меньше этого числа, кошелек будет выделен
     
-class Value_DeBank():
+class Value_DeBank:
 
     '''
     чекер баланса через debank, смотрит все сети, протоколы и нфт.
@@ -148,7 +151,7 @@ class Value_DeBank():
     check_chain         = '' # в какой сети ищем монету (отдельно выделит ее баланс)
     check_coin          = '' # какую монету ищем (отдельно выделит ее баланс)    
 
-class Value_Exchange():
+class Value_Exchange:
 
     '''
     withdraw coins from exchange.
@@ -165,15 +168,15 @@ class Value_Exchange():
 
     exchange    = 'binance' # запиши сюда биржу
 
-    chain       = 'BUSD' # в какой сети выводим
-    symbol      = 'BEP20' # какой токен выводим
+    chain       = 'APT' # в какой сети выводим
+    symbol      = 'APT' # какой токен выводим
 
-    amount_from = 10 # от какого кол-ва монет выводим
-    amount_to   = 15 # до какого кол-ва монет выводим
+    amount_from = 0.05 # от какого кол-ва монет выводим
+    amount_to   = 0.05 # до какого кол-ва монет выводим
 
     is_private_key = False # True если в wallets.txt вставил evm приватники. False если адреса (evm / не evm)
 
-class Value_OKX():
+class Value_OKX:
 
     '''
     OKX
@@ -203,25 +206,25 @@ class Value_OKX():
 
     is_private_key = False # True если в wallets.txt вставил evm приватники. False если адреса (evm / не evm)
 
-class Value_Transfer():
+class Value_Transfer:
 
     '''
     вывод (трансфер) монет с кошельков
-    chains : ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | nova | zksync | celo | gnosis | core | harmony | base | linea
+    chains : ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | nova | zksync | celo | gnosis | core | harmony | base | linea | polygon_zkevm
     '''
 
-    chain                = 'bsc' # в какой сети выводить
-    token_address        = '0x55d398326f99059ff775485246999027b3197955' # пусто если нативный токен сети
+    chain                = 'polygon_zkevm' # в какой сети выводить
+    token_address        = '' # пусто если нативный токен сети
 
     amount_from          = 1 # от какого кол-ва монет делаем трансфер
     amount_to            = 2 # до какого кол-ва монет делаем трансфер  
 
-    transfer_all_balance = False # True / False. если True, тогда выводим весь баланс
+    transfer_all_balance = True # True / False. если True, тогда выводим весь баланс
     min_amount_transfer  = 0 # если баланс будет меньше этого числа, выводить не будет
     keep_value_from      = 0 # от скольки монет оставляем на кошельке (работает только при : transfer_all_balance = True)
     keep_value_to        = 0 # до скольки монет оставляем на кошельке (работает только при : transfer_all_balance = True)
     
-class Value_0x_Swap():
+class Value_0x_Swap:
 
     '''
     свапы через апи 0x (агрегатор)
@@ -243,26 +246,26 @@ class Value_0x_Swap():
 
     slippage = 3 # слиппейдж, дефолт от 1 до 3
 
-class Value_Orbiter():
+class Value_Orbiter:
 
     '''
     бридж нативных токенов через https://www.orbiter.finance/
-    chains : zksync | ethereum | bsc | arbitrum | optimism | polygon_zkevm | nova | starknet | linea | base
+    chains : zksync | ethereum | bsc | arbitrum | optimism | polygon_zkevm | nova | starknet | linea | base | scroll
     минимальный бридж : 0.005
     '''
 
     from_chain          = ['arbitrum'] # с какой сети 
-    to_chain            = ['linea'] # в какую сеть 
+    to_chain            = ['base'] # в какую сеть 
 
     amount_from         = 0.006 # от какого кол-ва монет делаем бридж
-    amount_to           = 0.0065 # до какого кол-ва монет делаем бридж
+    amount_to           = 0.008 # до какого кол-ва монет делаем бридж
 
     bridge_all_balance  = False # True / False. если True, тогда бриджим весь баланс
     min_amount_bridge   = 0 # если баланс будет меньше этого числа, выводить не будет
     keep_value_from     = 0 # от скольки монет оставляем на кошельке (работает только при : bridge_all_balance = True)
     keep_value_to       = 0 # до скольки монет оставляем на кошельке (работает только при : bridge_all_balance = True)
 
-class Value_Woofi_Bridge():
+class Value_Woofi_Bridge:
 
     '''
     бридж на https://fi.woo.org/ (бриджи идут через layerzero)
@@ -283,7 +286,7 @@ class Value_Woofi_Bridge():
     keep_value_from     = 0 # от скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
     keep_value_to       = 0 # до скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
 
-class Value_Woofi_Swap():
+class Value_Woofi_Swap:
 
     '''
     свап на https://fi.woo.org/ 
@@ -303,7 +306,7 @@ class Value_Woofi_Swap():
     keep_value_from     = 0 # от скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
     keep_value_to       = 0 # до скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
 
-class Value_Sushiswap():
+class Value_Sushiswap:
 
     '''
     внимание! большие сайзы лучше свапать через 1inch или 0x
@@ -327,25 +330,25 @@ class Value_Sushiswap():
 
     slippage = 5 # советую ставить 1-5. если ошибка INSUFFICIENT_OUTPUT_AMOUNT , тогда увеличивай slippage
 
-class Value_Bungee():
+class Value_Bungee:
 
     '''
     refuel нативных токенов через https://www.bungee.exchange/
-    chains : zksync | polygon | ethereum | bsc | arbitrum | optimism | fantom | polygon_zkevm | avalanche | gnosis
+    chains : zksync | polygon | ethereum | bsc | arbitrum | optimism | fantom | polygon_zkevm | avalanche | gnosis | base
     '''
 
-    from_chain          = ['arbitrum'] # с какой сети 
-    to_chain            = ['polygon_zkevm'] # в какую сеть 
+    from_chain          = ['base'] # с какой сети 
+    to_chain            = ['zksync'] # в какую сеть 
 
-    amount_from         = 0.001 # от какого кол-ва монет делаем бридж
-    amount_to           = 0.0015 # до какого кол-ва монет делаем бридж
+    amount_from         = 0.0013 # от какого кол-ва монет делаем бридж
+    amount_to           = 0.002 # до какого кол-ва монет делаем бридж
 
     bridge_all_balance  = False # True / False. если True, тогда бриджим весь баланс
-    min_amount_bridge   = 1 # если баланс будет меньше этого числа, выводить не будет
+    min_amount_bridge   = 0 # если баланс будет меньше этого числа, выводить не будет
     keep_value_from     = 0 # от скольки монет оставляем на кошельке (работает только при : bridge_all_balance = True)
     keep_value_to       = 0 # до скольки монет оставляем на кошельке (работает только при : bridge_all_balance = True)
 
-class Value_Txn_Checker():
+class Value_Txn_Checker:
 
     '''
     чекер кол-ва транзакций (nonce) в каждой сети.
@@ -370,7 +373,7 @@ class Value_Txn_Checker():
         'harmony'       : 1,
     }
 
-class Value_1inch_Swap():
+class Value_1inch_Swap:
 
     '''
     свапы через 1inch
@@ -391,18 +394,18 @@ class Value_1inch_Swap():
 
     slippage = 1 # слиппейдж, дефолт от 1 до 3
 
-class Value_Merkly_Refuel():
+class Value_Merkly_Refuel:
 
     '''
     gas refuel через https://minter.merkly.com/gas
     внимание! сначала посмотри максималку руками, только потом запускай скрипт, иначе можешь потерять свои $.
 
-    from_chains : optimism | bsc | polygon | arbitrum | avalanche | fantom | celo | zksync | polygon_zkevm | nova | harmony | gnosis | core
-    to_chains   : avalanche | ethereum | bsc | arbitrum | optimism | fantom | harmony | celo | moonbeam | fuse | gnosis | klaytn | metis | core | polygon_zkevm | canto | zksync | moonriver | tenet | nova | kava | meter
+    from_chains : optimism | bsc | polygon | arbitrum | avalanche | fantom | celo | zksync | polygon_zkevm | nova | harmony | gnosis | core | base 
+    to_chains   : avalanche | ethereum | bsc | arbitrum | optimism | fantom | harmony | celo | moonbeam | fuse | gnosis | klaytn | metis | core | polygon_zkevm | canto | zksync | moonriver | tenet | nova | kava | meter | zora | base | scroll
     '''
 
-    from_chain = ['polygon'] # сети, с которых хочешь делать refuel (>= 1 сети)
-    to_chain   = ['kava', 'nova', 'tenet', 'moonriver', 'moonbeam'] # сети, на которые хочешь делать refuel (>= 1 сети)
+    from_chain = ['scroll'] # сети, с которых хочешь делать refuel (>= 1 сети)
+    to_chain   = ['base'] # сети, на которые хочешь делать refuel (>= 1 сети)
 
     amount_from         = 0.000001 # от какого кол-ва нативного токена сети to_chain получаем
     amount_to           = 0.00001 # до какого кол-ва нативного токена сети to_chain получаем
@@ -414,7 +417,7 @@ class Value_Merkly_Refuel():
 
     get_layerzero_fee   = False # True если хочешь посмотреть газ. False если хочешь делать refuel
     
-class Value_NFT_Checker():
+class Value_NFT_Checker:
 
     '''
     чекер nft

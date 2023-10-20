@@ -112,6 +112,8 @@ async def get_chain_prices():
         'moonriver': 'MOVR',
         'linea': 'ETH',
         'base': 'ETH',
+        'scroll': 'ETH',
+        'zora': 'ETH'
     }
 
     prices = {chain: 0 for chain in chains.keys()}

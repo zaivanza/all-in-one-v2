@@ -63,7 +63,7 @@ async def worker(func, key, number):
         return True
     else:
         logger.error(f'{number} {func_instance.manager.address} | tx is failed | {tx_link}')
-        return await retry_worker(func, key, number, retry=0)
+        return await retry_worker(func_instance, key, number, retry=0)
 
 async def retry_worker(func, key, number, retry):
     if retry < RETRY:

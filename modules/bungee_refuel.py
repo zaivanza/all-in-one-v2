@@ -70,9 +70,7 @@ class BungeeRefuel:
                     logger.error(error)
 
     async def get_txn(self):
-
         try:
-
             limits      = self.get_bungee_limits()
             min_limit   = round_to(decimalToInt(limits[0], 18))
             max_limit   = round_to(decimalToInt(limits[1], 18))
@@ -89,7 +87,7 @@ class BungeeRefuel:
                 self.manager.address # _to
                 ).build_transaction(
                 {
-                    # "chainId": web3.eth.chain_id,
+                    "chainId": self.manager.chain_id,
                     "from": self.manager.address,
                     "nonce": await self.manager.web3.eth.get_transaction_count(self.manager.address),
                     "value": self.value,
