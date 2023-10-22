@@ -1,5 +1,80 @@
 [![Typing SVG](https://readme-typing-svg.herokuapp.com?color=%2336BCF7&lines=All-in-one+V2)](https://git.io/typing-svg)
 
+# Perfect Script-V2 for Farming Management
+
+The perfect script for running a wallet farm.
+
+## Modules:
+
+1. **web3_checker**: Quickly (asynchronously) checks the balance of any token on any EVM network.
+2. **debank_checker**: Swiftly (asynchronously) inspects tokens, NFTs, and protocols across multiple EVM networks (available on [DeBank](https://debank.com/)).
+3. **exchange_withdraw**: Withdraws assets from exchanges like Binance, MEXC, KuCoin, Bybit, Huobi, and Bitget.
+4. **okx_withdraw**: Withdraws assets from the OKX exchange, including sub-account withdrawals (handled as a separate module due to sub-account functionality).
+5. **transfer**: Transfers assets from wallets to EVM networks.
+6. **0x_swap**: Utilizes an aggregator as an alternative to 1inch for token swaps.
+7. **[orbiter](https://www.orbiter.finance/)**: Bridges Ethereum assets to various networks, including ZKSync Era and StarkNet. To bridge to StarkNet, add StarkNet wallet addresses to the `starknet_address.txt` file.
+8. **[woofi](https://fi.woo.org/)**: Bridges assets using the WooFi bridge via Stargate (LayerZero), supporting a wide range of tokens and networks.
+9. **[woofi](https://fi.woo.org/)**: Swaps tokens using the WooFi swap feature, which is versatile and supports numerous tokens and networks.
+10. **sushiswap**: Executes swaps on SushiSwap, accessible on major networks except for Optimism (currently).
+11. **bungee_refuel**: Cost-effective bridge for transferring native tokens between networks.
+12. **tx_checker**: Monitors nonces across nearly all EVM networks.
+13. **1inch_swap**: Leverages the 1inch aggregator for token swaps.
+14. **merkly_refuel**: Transfers gas from one network to another via LayerZero.
+15. **nft_checker**: Swiftly (asynchronously) checks the balance of specific NFTs.
+
+## Additional Information:
+
+1. All results are logged not only in the terminal but also sent to a Telegram bot.
+2. **web3_checker** and **nft_checker** use multicall for fast tracking.
+3. You can enable proxies in **web3_checker**: It balances the distribution of wallets among specified proxies. For example, if you have 10 wallets and 3 proxies, it distributes as Proxy 1 = 4 wallets, Proxy 2 = 3 wallets, Proxy 3 = 3 wallets.
+4. There's a maximum gas fee setting in $ for each network, and the script will sleep if gas prices exceed this threshold (`setting.py => MAX_GAS_CHARGE`).
+5. Transactions pending for longer than the specified time (`config.py => max_time_check_tx_status`) are considered executed.
+6. For **0x_swap**, an API key is required, which can be obtained [here](https://dashboard.0x.org/apps). Detailed instructions are available [here](https://t.me/never_broke_again_v1/315).
+7. You can run one or multiple modules simultaneously. Configuration for running multiple modules is found in `tracks.py`.
+8. For **1inch_swap**, an API key is required, which can be obtained [here](https://portal.1inch.dev/dashboard).
+9. Asynchronous execution allows you to run multiple wallets concurrently.
+
+# Configuration
+
+To configure the script:
+
+1. Adjust settings in the `setting.py` file, following the descriptions within.
+2. If you plan to run multiple modules sequentially, configure them in the `tracks.py` file.
+3. In the `data` folder, rename files as follows: `wallets_EXAMPLE.txt` to `wallets.txt`, `proxies_EXAMPLE.txt` to `proxies.txt`, `data_EXAMPLE.py` to `data.py`.
+4. Within the `data` folder, you'll find five files:
+   - `wallets.txt`: Add wallets (private keys/addresses) here.
+   - `recipients.txt`: Add recipient addresses for transfers, used in the transfer module when transferring from a wallet to an address. One wallet corresponds to one address.
+   - `proxies.txt`: Add proxies for use in the debank checker. They are also used in web3 if `USE_PROXY = True` (in the config). The format is: `http://login:password@ip:port`.
+   - `starknet_address.txt`: Add StarkNet wallet addresses here. Skip this step if you're not bridging from Orbiter to StarkNet.
+   - `data.py`: Contains all the private information, such as RPC, tg_token, tg_id, API keys for exchanges.
+5. Configure the modules in the `value` classes in the `setting.py` file.
+6. Execute the `main.py` file. If `USE_TRACKS = False`, a list of modules will appear in the terminal, and you can select one.
+
+# Using Tracks (Running Multiple Modules)
+
+To enable track mode:
+
+1. Set `USE_TRACKS = True` in `setting.py`.
+2. In `tracks.py`, configure tracks with modules. You can create multiple tracks and select them in `setting.py` using the `TRACK` variable.
+3. The `wait_balance` function works only in track mode: Select a network where you want to wait for a coin and set the minimum balance. When the coin's balance exceeds `min_balance`, the script advances to the next module, with balance checks every 10 seconds.
+
+# Installation
+
+Install the required libraries by running: `pip install -r requirements.txt`
+
+Please exercise caution when using the code, as it may contain errors. We are not responsible for any losses. It is advisable to conduct thorough testing with small amounts before proceeding.
+
+We kindly request that you read the instructions carefully, perform testing, and conduct online research before reaching out with questions in the code chat. Please refrain from sending code-related queries to admins privately, as they will not respond.
+
+# Donations
+
+Donations (EVM): `0xb7415DB78c886c67DBfB25D3Eb7fcd496dAf9021` or `donates-for-hodlmod.eth`
+
+For updates and entertaining content, join our public chat: [hodlmodeth](https://t.me/hodlmodeth) and our [[ code ]](https://t.me/code_hodlmodeth) chat. You can also follow our channel for updates and fun content: [never_broke_again_v1](https://t.me/never_broke_again_v1).
+
+
+# Reamde на русском.
+
 Идеальный скрипт-V2 для ведения фермы. Освоив его, ты сможешь (идет перечисление модулей) :
 
 1. web3_checker : очень быстро (асинка) смотрит баланс монеты в любой evm сети.
@@ -57,4 +132,4 @@
 
 Donate (evm) : `0xb7415DB78c886c67DBfB25D3Eb7fcd496dAf9021` or `donates-for-hodlmod.eth`
 
-Паблик : https://t.me/hodlmodeth. [ code ] чат : https://t.me/code_hodlmodeth. Канал с обновлениями и лайф-рофл-контентом : https://t.me/never_broke_again_v1
+Паблик : https://t.me/hodlmodeth. [[ code ]](https://t.me/code_hodlmodeth) чат. Канал с обновлениями и лайф-рофл-контентом : https://t.me/never_broke_again_v1

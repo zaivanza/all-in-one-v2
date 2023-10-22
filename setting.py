@@ -1,22 +1,22 @@
 from tracks import *
 
-# --- Настройки ---
-WALLETS_IN_BATCH = 1    # Сколько кошельков запускаем в одном потоке (одновременно)
+# --- Settings ---
+WALLETS_IN_BATCH = 1    # How many wallets to run in one thread (simultaneously)
 
-USE_TRACKS = False      # Включить/выключить треки
-TRACK = track_1         # Меняется на переменную трека из routes.py
+USE_TRACKS = False      # Enable/disable tracks
+TRACK = track_1         # Change to the track variable from routes.py
 
-IS_SLEEP = True         # Включить/выключить задержку между кошельками
-DELAY_SLEEP = [10, 30]  # Диапазон задержки между кошельками (секунды)
-RANDOMIZER = False      # Включить/выключить случайное перемешивание кошельков
-RETRY = 0               # Количество попыток при ошибках/фейлах
-TG_BOT_SEND = True      # Включить/выключить отправку результатов в Telegram-бота
+IS_SLEEP = True         # Enable/disable delay between wallets
+DELAY_SLEEP = [10, 30]  # Delay range between wallets (seconds)
+RANDOMIZER = False      # Enable/disable random wallet shuffling
+RETRY = 0               # Number of retries on errors/failures
+TG_BOT_SEND = True      # Enable/disable sending results to a Telegram bot
 
-USE_PROXY = False       # Включить/выключить использование прокси в запросах к web3
-CHECK_GWEI = True       # Включить/выключить проверку base Gwei
-MAX_GWEI = 25           # Максимальный Gwei (см. https://etherscan.io/gastracker)
+USE_PROXY = False       # Enable/disable proxy usage in web3 requests
+CHECK_GWEI = True       # Enable/disable base Gwei checking
+MAX_GWEI = 25           # Maximum Gwei (see https://etherscan.io/gastracker)
 
-# Максимальная комиссия для транзакции в USD, при которой скрипт будет спать 30 секунд и пытаться снова
+# Maximum transaction fee in USD, at which the script will sleep for 30 seconds and retry
 MAX_GAS_CHARGE = {
     'avalanche'     : 1,
     'polygon'       : 0.5,
@@ -40,8 +40,8 @@ MAX_GAS_CHARGE = {
 class Value_Web3_Checker:
 
     '''
-    чекер монет через web3
-    chains : ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | nova | zksync | polygon_zkevm | celo | gnosis | core | harmony | linea | base
+    Coin checker using web3
+    Chains : ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | nova | zksync | polygon_zkevm | celo | gnosis | core | harmony | linea | base
     '''
 
     datas = {
@@ -112,32 +112,32 @@ class Value_Web3_Checker:
     }
 
     min_token_balance = {
-        'chain'     : 'bsc',
-        'coin'      : 'BNB',
-        'amount'    : 0 # если баланс меньше этого числа, кошелек будет выделен
-    }
+    'chain'     : 'bsc',
+    'coin'      : 'BNB',
+    'amount'    : 0 # If the balance is less than this amount, the wallet will be highlighted
+}
 
-    min_value_balance = 5 # если баланс кошелька в $ меньше этого числа, кошелек будет выделен
+    min_value_balance = 5 # If the wallet balance in $ is less than this amount, the wallet will be highlighted    
     
 class Value_DeBank:
 
     '''
-    чекер баланса через debank, смотрит все сети, протоколы и нфт.
+    Balance checker using DeBank, which looks at all networks, protocols, and NFTs.
 
-    если кошельки ни разу не прогонял этим чекером, тогда сначала нужно их активировать : activate_wallets = True.
-    сети, которые мы активируем, записаны в config.py => DEBANK_ACTIVATE_CHAINS. ненужные (как по мне) сети я закомментировал. если нужно, можешь их раскомментировать
+    If you haven't run this checker on your wallets before, you can activate them first by setting activate_wallets = True.
+    The networks to activate are defined in config.py => DEBANK_ACTIVATE_CHAINS. I have commented out unnecessary networks. If needed, you can uncomment them.
     '''
 
-    activate_wallets = True # True если нужно активировать кошельки (при первом запуске). False чтобы отключить
+    activate_wallets = True  # Set to True if you need to activate wallets (for the first run). Set to False to deactivate.
 
-    # какие модули включены. если какой-то модуль не нужен, закомментируй (#) его. модуль nft самый долгий, по ненадобности лучше его отключать
+    # Enable/disable modules. If a module is not needed, comment it out (#). The NFT module is the slowest, so it's better to disable it if not needed.
     modules = [
-        'token', # смотрит монеты
-        # 'nft', # смотрит нфт
-        'protocol' # смотрит протоколы
+        'token',    # Check tokens
+        # 'nft',    # Check NFTs
+        'protocol'  # Check protocols
     ]
 
-    # в каких сетях смотрим нфт. если какая-то сеть не нужна, закомментируй (#) ее
+    # Specify the networks to check for NFTs. If a network is not needed, comment it out (#).
     nft_chains = [
         'op', 
         'eth', 
@@ -145,36 +145,36 @@ class Value_DeBank:
         # 'matic', 
         # 'bsc',
         'base'
-        ]
+    ]
 
-    check_min_value     = 1 # $. если баланс монеты / протокола будет меньше этого числа, монета / протокол не будут записаны в файл
-    check_chain         = '' # в какой сети ищем монету (отдельно выделит ее баланс)
-    check_coin          = '' # какую монету ищем (отдельно выделит ее баланс)    
+    check_min_value = 1  # $. If the balance of a token / protocol is less than this amount, it won't be recorded in the file.
+    check_chain = ''     # Network in which to look for the token (will highlight its balance separately).
+    check_coin = ''      # Which coin to look for (will highlight its balance separately).
 
 class Value_Exchange:
 
     '''
-    withdraw coins from exchange.
-    exchanges : binance | bybit | kucoin | mexc | huobi | bitget
+    Withdraw coins from an exchange.
+    Exchanges: binance | bybit | kucoin | mexc | huobi | bitget
 
-    chains : 
-    - binance : ETH | BEP20 | AVAXC | MATIC | ARBITRUM | OPTIMISM | APT
+    Chains:
+    - binance: ETH | BEP20 | AVAXC | MATIC | ARBITRUM | OPTIMISM | APT
     - bybit
     - kucoin
     - mexc
     - huobi
-    - bitget : zkSyncEra | ArbitrumNova | ArbitrumOne | ETH / ERC20 | Optimism | BEP20 | TRC20 | Polygon | Aptos | CELO | CoreDAO | Harmony
+    - bitget: zkSyncEra | ArbitrumNova | ArbitrumOne | ETH / ERC20 | Optimism | BEP20 | TRC20 | Polygon | Aptos | CELO | CoreDAO | Harmony
     '''
 
-    exchange    = 'binance' # запиши сюда биржу
+    exchange    = 'binance' # Specify the exchange here
 
-    chain       = 'APT' # в какой сети выводим
-    symbol      = 'APT' # какой токен выводим
+    chain       = 'APT' # In which network to withdraw
+    symbol      = 'APT' # Which token to withdraw
 
-    amount_from = 0.05 # от какого кол-ва монет выводим
-    amount_to   = 0.05 # до какого кол-ва монет выводим
+    amount_from = 0.05 # Withdrawal from a certain amount of coins
+    amount_to   = 0.05 # Withdrawal up to a certain amount of coins
 
-    is_private_key = False # True если в wallets.txt вставил evm приватники. False если адреса (evm / не evm)
+    is_private_key = False # Set to True if you have inserted EVM private keys in wallets.txt. Set to False if you have addresses (EVM / non-EVM).
 
 class Value_OKX:
 
@@ -193,167 +193,167 @@ class Value_OKX:
     StarkNet
     '''
 
-    chain       = 'Polygon'
-    symbol      = 'MATIC'
+    chain   = 'Polygon'
+    symbol  = 'MATIC'
 
     amount_from = 1
     amount_to   = 2
 
-    account = 'yanashulman'
+    account = 'account_1'
 
-    fee         = 0.1 # комса на вывод
-    sub_acc     = False # True / False. True если хочешь проверять субаккаунты и сначала делать с них перевод на основной счет
+    fee     = 0.1 # Withdrawal fee
+    sub_acc = False # True / False. True if you want to check sub-accounts and first transfer from them to the main account
 
-    is_private_key = False # True если в wallets.txt вставил evm приватники. False если адреса (evm / не evm)
+    is_private_key = False # Set to True if you have inserted EVM private keys in wallets.txt. Set to False if you have addresses (EVM / non-EVM).
 
 class Value_Transfer:
 
     '''
-    вывод (трансфер) монет с кошельков
-    chains : ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | nova | zksync | celo | gnosis | core | harmony | base | linea | polygon_zkevm
+    Withdraw (transfer) coins from wallets
+    Chains: ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | nova | zksync | celo | gnosis | core | harmony | base | linea | polygon_zkevm
     '''
 
-    chain                = 'polygon_zkevm' # в какой сети выводить
-    token_address        = '' # пусто если нативный токен сети
+    chain                = 'polygon_zkevm' # Network to withdraw to
+    token_address        = '' # Leave empty if it's the native token of the network
 
-    amount_from          = 1 # от какого кол-ва монет делаем трансфер
-    amount_to            = 2 # до какого кол-ва монет делаем трансфер  
+    amount_from          = 1 # Transfer from a certain amount of coins
+    amount_to            = 2 # Transfer up to a certain amount of coins
 
-    transfer_all_balance = True # True / False. если True, тогда выводим весь баланс
-    min_amount_transfer  = 0 # если баланс будет меньше этого числа, выводить не будет
-    keep_value_from      = 0 # от скольки монет оставляем на кошельке (работает только при : transfer_all_balance = True)
-    keep_value_to        = 0 # до скольки монет оставляем на кошельке (работает только при : transfer_all_balance = True)
-    
+    transfer_all_balance = False # True / False. If True, then transfer the entire balance
+    min_amount_transfer  = 0 # If the balance is less than this amount, no transfer will be made
+    keep_value_from      = 0 # How many coins to keep on the wallet (only works when: transfer_all_balance = True)
+    keep_value_to        = 0 # Up to how many coins to keep on the wallet (only works when: transfer_all_balance = True)
+
 class Value_0x_Swap:
 
     '''
-    свапы через апи 0x (агрегатор)
-    docs : https://0x.org/docs/introduction/0x-cheat-sheet
-    chains : ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | celo
+    Swaps via the 0x API (aggregator)
+    Docs: https://0x.org/docs/introduction/0x-cheat-sheet
+    Chains: ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | celo
     '''
 
-    chain               = 'bsc' # в какой сети свапаем
-    from_token_address  = [''] # пусто если нативный токен сети
-    to_token_address    = ['0x55d398326f99059ff775485246999027b3197955'] # пусто если нативный токен сети
+    chain               = 'bsc' # Network to perform swaps on
+    from_token_address  = [''] # Leave empty if it's the native token of the network
+    to_token_address    = ['0x55d398326f99059ff775485246999027b3197955'] # Leave empty if it's the native token of the network
 
-    amount_from         = 0.0001 # от какого кол-ва монет свапаем
-    amount_to           = 0.0002 # до какого кол-ва монет свапаем
+    amount_from         = 0.0001 # Swap from a certain amount of coins
+    amount_to           = 0.0002 # Swap up to a certain amount of coins
 
-    swap_all_balance    = False # True / False. если True, тогда свапаем весь баланс
-    min_amount_swap     = 0 # если баланс будет меньше этого числа, свапать не будет
-    keep_value_from     = 0 # от скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
-    keep_value_to       = 0 # до скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
+    swap_all_balance    = False # True / False. If True, then swap the entire balance
+    min_amount_swap     = 0 # If the balance is less than this amount, no swap will be made
+    keep_value_from     = 0 # How many coins to keep on the wallet (only works when: swap_all_balance = True)
+    keep_value_to       = 0 # Up to how many coins to keep on the wallet (only works when: swap_all_balance = True)
 
-    slippage = 3 # слиппейдж, дефолт от 1 до 3
+    slippage = 3 # Slippage, default is from 1 to 3
 
 class Value_Orbiter:
 
     '''
-    бридж нативных токенов через https://www.orbiter.finance/
-    chains : zksync | ethereum | bsc | arbitrum | optimism | polygon_zkevm | nova | starknet | linea | base | scroll
-    минимальный бридж : 0.005
+    Bridge native tokens via https://www.orbiter.finance/
+    Chains: zksync | ethereum | bsc | arbitrum | optimism | polygon_zkevm | nova | starknet | linea | base | scroll
+    Minimum bridge amount: 0.005
     '''
 
-    from_chain          = ['arbitrum'] # с какой сети 
-    to_chain            = ['base'] # в какую сеть 
+    from_chain          = ['arbitrum'] # From which network
+    to_chain            = ['base'] # To which network
 
-    amount_from         = 0.006 # от какого кол-ва монет делаем бридж
-    amount_to           = 0.008 # до какого кол-ва монет делаем бридж
+    amount_from         = 0.006 # Bridge from a certain amount of coins
+    amount_to           = 0.008 # Bridge up to a certain amount of coins
 
-    bridge_all_balance  = False # True / False. если True, тогда бриджим весь баланс
-    min_amount_bridge   = 0 # если баланс будет меньше этого числа, выводить не будет
-    keep_value_from     = 0 # от скольки монет оставляем на кошельке (работает только при : bridge_all_balance = True)
-    keep_value_to       = 0 # до скольки монет оставляем на кошельке (работает только при : bridge_all_balance = True)
+    bridge_all_balance  = False # True / False. If True, then bridge the entire balance
+    min_amount_bridge   = 0 # If the balance is less than this amount, no bridge will be made
+    keep_value_from     = 0 # How many coins to keep on the wallet (only works when: bridge_all_balance = True)
+    keep_value_to       = 0 # Up to how many coins to keep on the wallet (only works when: bridge_all_balance = True)
 
 class Value_Woofi_Bridge:
 
     '''
-    бридж на https://fi.woo.org/ (бриджи идут через layerzero)
-    chains : avalanche | polygon | ethereum | bsc | arbitrum | optimism | fantom
+    Bridge on https://fi.woo.org/ (bridges go through layerzero)
+    Chains: avalanche | polygon | ethereum | bsc | arbitrum | optimism | fantom
     '''
-    
+
     from_chain          = 'bsc'
     to_chain            = 'polygon'
 
-    from_token          = '' # пусто если нативный токен сети
-    to_token            = '' # пусто если нативный токен сети
+    from_token          = '' # Leave empty if it's the native token of the from_chain
+    to_token            = '' # Leave empty if it's the native token of the to_chain
 
-    amount_from         = 0.0001 # от какого кол-ва from_token свапаем
-    amount_to           = 0.0002 # до какого кол-ва from_token свапаем
+    amount_from         = 0.0001 # Swap from a certain amount of from_token
+    amount_to           = 0.0002 # Swap up to a certain amount of from_token
 
-    swap_all_balance    = False # True / False. если True, тогда свапаем весь баланс
-    min_amount_swap     = 0 # если баланс будет меньше этого числа, свапать не будет
-    keep_value_from     = 0 # от скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
-    keep_value_to       = 0 # до скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
+    swap_all_balance    = False # True / False. If True, then swap the entire balance
+    min_amount_swap     = 0 # If the balance is less than this amount, no swap will be made
+    keep_value_from     = 0 # How many coins to keep on the wallet (only works when: swap_all_balance = True)
+    keep_value_to       = 0 # Up to how many coins to keep on the wallet (only works when: swap_all_balance = True)
 
 class Value_Woofi_Swap:
 
     '''
-    свап на https://fi.woo.org/ 
-    chains : avalanche | polygon | ethereum | bsc | arbitrum | optimism | fantom | zksync
+    Swap on https://fi.woo.org/ 
+    Chains: avalanche | polygon | ethereum | bsc | arbitrum | optimism | fantom | zksync
     '''
-    
+
     chain = 'arbitrum'
 
-    from_token          = '0x6694340fc020c5e6b96567843da2df01b2ce1eb6' # пусто если нативный токен сети
-    to_token            = '' # пусто если нативный токен сети
+    from_token          = '0x6694340fc020c5e6b96567843da2df01b2ce1eb6' # Leave empty if it's the native token of the chain
+    to_token            = '' # Leave empty if it's the native token of the chain
 
-    amount_from         = 0.01 # от какого кол-ва from_token свапаем
-    amount_to           = 0.1 # до какого кол-ва from_token свапаем
+    amount_from         = 0.01 # Swap from a certain amount of from_token
+    amount_to           = 0.1 # Swap up to a certain amount of from_token
 
-    swap_all_balance    = False # True / False. если True, тогда свапаем весь баланс
-    min_amount_swap     = 0 # если баланс будет меньше этого числа, свапать не будет
-    keep_value_from     = 0 # от скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
-    keep_value_to       = 0 # до скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
+    swap_all_balance    = False # True / False. If True, then swap the entire balance
+    min_amount_swap     = 0 # If the balance is less than this amount, no swap will be made
+    keep_value_from     = 0 # How many coins to keep on the wallet (only works when: swap_all_balance = True)
+    keep_value_to       = 0 # Up to how many coins to keep on the wallet (only works when: swap_all_balance = True)
 
 class Value_Sushiswap:
 
     '''
-    внимание! большие сайзы лучше свапать через 1inch или 0x
+    Attention! It's better to swap large sizes through 1inch or 0x.
 
-    свап на https://www.sushi.com/swap
-    chains :  arbitrum | nova | bsc | polygon | fantom
+    Swap on https://www.sushi.com/swap
+    Chains: arbitrum | nova | bsc | polygon | fantom
     '''
     
     chain = 'nova'
 
-    from_token          = [''] # пусто если нативный токен сети
-    to_token            = ['0x750ba8b76187092B0D1E87E28daaf484d1b5273b'] # пусто если нативный токен сети
+    from_token          = [''] # Leave empty if it's the native token of the chain
+    to_token            = ['0x750ba8b76187092B0D1E87E28daaf484d1b5273b'] # Leave empty if it's the native token of the chain
 
-    amount_from         = 1 # от какого кол-ва from_token свапаем
-    amount_to           = 1 # до какого кол-ва from_token свапаем
+    amount_from         = 1 # Swap from a certain amount of from_token
+    amount_to           = 1 # Swap up to a certain amount of from_token
 
-    swap_all_balance    = False # True / False. если True, тогда свапаем весь баланс
-    min_amount_swap     = 0 # если баланс будет меньше этого числа, свапать не будет
-    keep_value_from     = 0 # от скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
-    keep_value_to       = 0 # до скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
+    swap_all_balance    = False # True / False. If True, then swap the entire balance
+    min_amount_swap     = 0 # If the balance is less than this amount, no swap will be made
+    keep_value_from     = 0 # How many coins to keep on the wallet (only works when: swap_all_balance = True)
+    keep_value_to       = 0 # Up to how many coins to keep on the wallet (only works when: swap_all_balance = True)
 
-    slippage = 5 # советую ставить 1-5. если ошибка INSUFFICIENT_OUTPUT_AMOUNT , тогда увеличивай slippage
+    slippage = 5 # I recommend setting it to 1-5. If you get the error INSUFFICIENT_OUTPUT_AMOUNT, then increase the slippage.
 
 class Value_Bungee:
 
     '''
-    refuel нативных токенов через https://www.bungee.exchange/
-    chains : zksync | polygon | ethereum | bsc | arbitrum | optimism | fantom | polygon_zkevm | avalanche | gnosis | base
+    Refuel native tokens via https://www.bungee.exchange/
+    Chains: zksync | polygon | ethereum | bsc | arbitrum | optimism | fantom | polygon_zkevm | avalanche | gnosis | base
     '''
 
-    from_chain          = ['base'] # с какой сети 
-    to_chain            = ['zksync'] # в какую сеть 
+    from_chain          = ['base'] # From which network
+    to_chain            = ['zksync'] # To which network
 
-    amount_from         = 0.0013 # от какого кол-ва монет делаем бридж
-    amount_to           = 0.002 # до какого кол-ва монет делаем бридж
+    amount_from         = 0.0013 # Refuel from a certain amount of coins
+    amount_to           = 0.002 # Refuel up to a certain amount of coins
 
-    bridge_all_balance  = False # True / False. если True, тогда бриджим весь баланс
-    min_amount_bridge   = 0 # если баланс будет меньше этого числа, выводить не будет
-    keep_value_from     = 0 # от скольки монет оставляем на кошельке (работает только при : bridge_all_balance = True)
-    keep_value_to       = 0 # до скольки монет оставляем на кошельке (работает только при : bridge_all_balance = True)
+    bridge_all_balance  = False # True / False. If True, then refuel the entire balance
+    min_amount_bridge   = 0 # If the balance is less than this amount, no refuel will be made
+    keep_value_from     = 0 # How many coins to keep on the wallet (only works when: bridge_all_balance = True)
+    keep_value_to       = 0 # Up to how many coins to keep on the wallet (only works when: bridge_all_balance = True)
 
 class Value_Txn_Checker:
 
     '''
-    чекер кол-ва транзакций (nonce) в каждой сети.
-    1. если nonce < заданного числа, кошелек выделяется.
-    2. закомментируй сеть, чтобы отключить ее.
+    Transaction count (nonce) checker for each network.
+    1. If nonce < the specified number, the wallet is flagged.
+    2. Comment out a network to disable it.
     '''
 
     chains = {
@@ -376,54 +376,54 @@ class Value_Txn_Checker:
 class Value_1inch_Swap:
 
     '''
-    свапы через 1inch
-    chains : ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | zksync
+    Swaps via 1inch
+    Chains: ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | zksync
     '''
 
-    chain               = 'bsc' # в какой сети свапаем
-    from_token_address  = [''] # пусто если нативный токен сети
-    to_token_address    = ['0x55d398326f99059ff775485246999027b3197955'] # пусто если нативный токен сети
+    chain               = 'bsc' # Network to perform swaps on
+    from_token_address  = [''] # Leave empty if it's the native token of the network
+    to_token_address    = ['0x55d398326f99059ff775485246999027b3197955'] # Leave empty if it's the native token of the network
 
-    amount_from         = 0.0001 # от какого кол-ва монет свапаем
-    amount_to           = 0.0002 # до какого кол-ва монет свапаем
+    amount_from         = 0.0001 # Swap from a certain amount of coins
+    amount_to           = 0.0002 # Swap up to a certain amount of coins
 
-    swap_all_balance    = False # True / False. если True, тогда свапаем весь баланс
-    min_amount_swap     = 0 # если баланс будет меньше этого числа, свапать не будет
-    keep_value_from     = 0 # от скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
-    keep_value_to       = 0 # до скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
+    swap_all_balance    = False # True / False. If True, then swap the entire balance
+    min_amount_swap     = 0 # If the balance is less than this amount, no swap will be made
+    keep_value_from     = 0 # How many coins to keep on the wallet (only works when: swap_all_balance = True)
+    keep_value_to       = 0 # Up to how many coins to keep on the wallet (only works when: swap_all_balance = True)
 
-    slippage = 1 # слиппейдж, дефолт от 1 до 3
+    slippage = 1 # Slippage, default is from 1 to 3
 
 class Value_Merkly_Refuel:
 
     '''
-    gas refuel через https://minter.merkly.com/gas
-    внимание! сначала посмотри максималку руками, только потом запускай скрипт, иначе можешь потерять свои $.
+    Gas refuel via https://minter.merkly.com/gas
+    Attention! First check the gas limit manually, only then run the script, otherwise you may lose your funds.
 
     from_chains : optimism | bsc | polygon | arbitrum | avalanche | fantom | celo | zksync | polygon_zkevm | nova | harmony | gnosis | core | base 
     to_chains   : avalanche | ethereum | bsc | arbitrum | optimism | fantom | harmony | celo | moonbeam | fuse | gnosis | klaytn | metis | core | polygon_zkevm | canto | zksync | moonriver | tenet | nova | kava | meter | zora | base | scroll
     '''
 
-    from_chain = ['scroll'] # сети, с которых хочешь делать refuel (>= 1 сети)
-    to_chain   = ['base'] # сети, на которые хочешь делать refuel (>= 1 сети)
+    from_chain = ['scroll'] # Networks from which you want to perform refuel (>= 1 network)
+    to_chain   = ['base'] # Networks to which you want to perform refuel (>= 1 network)
 
-    amount_from         = 0.000001 # от какого кол-ва нативного токена сети to_chain получаем
-    amount_to           = 0.00001 # до какого кол-ва нативного токена сети to_chain получаем
+    amount_from         = 0.000001 # Obtain from a certain amount of native token of the to_chain network
+    amount_to           = 0.00001 # Obtain up to a certain amount of native token of the to_chain network
 
-    swap_all_balance    = False # True / False. если True, тогда свапаем весь баланс
-    min_amount_swap     = 0 # если баланс будет меньше этого числа, свапать не будет
-    keep_value_from     = 0 # от скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
-    keep_value_to       = 0 # до скольки монет оставляем на кошельке (работает только при : swap_all_balance = True)
+    swap_all_balance    = False # True / False. If True, then refuel the entire balance
+    min_amount_swap     = 0 # If the balance is less than this amount, no refuel will be made
+    keep_value_from     = 0 # How many coins to keep on the wallet (only works when: swap_all_balance = True)
+    keep_value_to       = 0 # Up to how many coins to keep on the wallet (only works when: swap_all_balance = True)
 
-    get_layerzero_fee   = False # True если хочешь посмотреть газ. False если хочешь делать refuel
-    
+    get_layerzero_fee   = False # True if you want to check the gas. False if you want to perform refuel
+
 class Value_NFT_Checker:
-
+    
     '''
-    чекер nft
-    chains : ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | nova | zksync | polygon_zkevm | celo | gnosis | core | harmony | linea | base
+    NFT checker
+    Chains: ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | nova | zksync | polygon_zkevm | celo | gnosis | core | harmony | linea | base
     '''
 
-    chain       = 'bsc'
-    contract    = '0x6848dbcb498b32675a83e88841facfcd43ef8e32' # nft contract
-    min_balance = 1 # если баланс nft меньше этого числа, кошелек выделяется
+    chain       = 'bsc' # Network to check NFTs
+    contract    = '0x6848dbcb498b32675a83e88841facfcd43ef8e32' # NFT contract address
+    min_balance = 1 # If the NFT balance is less than this amount, the wallet is flagged

@@ -2,9 +2,9 @@ import asyncio
 from modules.utils.files import read_txt, load_json
 from modules.utils.helpers import get_chain_prices, get_wallet_proxies, get_bungee_data
 
-max_time_check_tx_status = 100 # секунды. если транзакция не выдает статус за это время, она считается исполненной
+max_time_check_tx_status = 100  # seconds. If a transaction does not return a status within this time, it is considered executed
 
-# какие сети активируем в дебанке
+# Which networks to enable in DeBank
 DEBANK_ACTIVATE_CHAINS = [
     {
         "eth": "Ethereum"

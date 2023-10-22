@@ -1,10 +1,10 @@
-TG_TOKEN = 'your_tgbot_token' # создать можешь здесь : https://t.me/BotFather
-TG_ID = 0 # узнать можешь здесь : https://t.me/getmyid_bot
+TG_TOKEN = 'your_tgbot_token' # You can create one here: https://t.me/BotFather
+TG_ID = 0 # You can find your Telegram User ID here: https://t.me/getmyid_bot
 
-API_0x = 'your_0x_api_key' # получить api key от 0x здесь : https://dashboard.0x.org/apps
-API_1inch = 'your_0x_api_key'
+API_0x = 'your_0x_api_key' # Get your API key from 0x here: https://dashboard.0x.org/apps
+API_1inch = 'your_0x_api_key' # Get your API key from 1inch here: https://portal.1inch.dev/login
 
-# меняем рпс на свои
+# Replace RPC endpoints with your own
 DATA = {
     'ethereum'      : {'rpc': 'https://rpc.ankr.com/eth', 'scan': 'https://etherscan.io/tx', 'token': 'ETH', 'chain_id': 1},
 
@@ -47,7 +47,7 @@ DATA = {
     'scroll'        : {'rpc': 'https://scroll.blockpi.network/v1/rpc/public', 'scan': 'https://scrollscan.com/tx', 'token': 'ETH', 'chain_id': 534352}
 }
 
-# апи ключи от бирж. если биржей не пользуешься, можно не вставлять
+# API keys for exchanges. You can skip this if you don't use exchanges.
 CEX_KEYS = {
     'binance'   : {'api_key': 'your_api_key', 'api_secret': 'your_api_secret'},
     'mexc'      : {'api_key': 'your_api_key', 'api_secret': 'your_api_secret'},
@@ -57,7 +57,7 @@ CEX_KEYS = {
     'bitget'    : {'api_key': 'your_api_key', 'api_secret': 'your_api_secret', 'password': 'your_api_password'},
 }
 
-# можешь записать любое кол-во аккаунтов, сделал таким образом чтобы постоянно данные от новых акков не вводить, а просто вызывать по имени аккаунта
+# You can add any number of OKX accounts in the following format. This allows you to avoid constantly entering data for new accounts and simply reference them by name.
 OKX_KEYS = {
     'account_1' : {
         'api_key'   : 'your_api_key',

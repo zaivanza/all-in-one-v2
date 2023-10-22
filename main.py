@@ -36,7 +36,7 @@ MODULE:
 14. merkly_refuel
 15. nft_checker
 
-Выберите модуль (1 - 15) : '''))
+Choose a module (1 - 15) : '''))
 
         asyncio.run(main(MODULE))
 
