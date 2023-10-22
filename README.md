@@ -1,8 +1,6 @@
 [![Typing SVG](https://readme-typing-svg.herokuapp.com?color=%2336BCF7&lines=All-in-one+V2)](https://git.io/typing-svg)
 
-# Perfect Script-V2 for Farming Management
-
-The perfect script for running a wallet farm.
+Perfect Script-V2 for Farming Management.
 
 ## Modules:
 
