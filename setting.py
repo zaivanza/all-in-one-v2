@@ -427,3 +427,51 @@ class Value_NFT_Checker:
     chain       = 'bsc' # Network to check NFTs
     contract    = '0x6848dbcb498b32675a83e88841facfcd43ef8e32' # NFT contract address
     min_balance = 1 # If the NFT balance is less than this amount, the wallet is flagged
+
+class ValueZerius:
+
+    class ValueMintBridge:
+        '''Combination of minting and bridging operations'''
+
+        from_chain  = ['polygon'] # Preferred source networks due to lower costs; selection is random if list is empty.
+        to_chain    = ['scroll'] # Preferred destination networks due to lower costs; selection is random if list is empty.
+        max_price   = 3 # Maximum acceptable cost for the process in dollars ($).
+        amount      = [1, 2] # Range defining the minimum and maximum number of NFTs to be minted and bridged.
+
+    class ValueMint:
+        '''Minting operation'''
+
+        chain = ['zksync', 'arbitrum', 'bsc'] # The network where NFTs will be minted.
+        amount_mint = [1, 2] # The exact number of NFTs to mint.
+
+    class ValueBridge:
+        '''
+        Bridging operation
+        This function locates NFTs in the source chain and bridges them to a randomly selected destination chain.
+        '''
+
+        from_chain  = ['scroll', 'arbitrum'] # The source network where NFTs will be searched; the final choice is random.
+        to_chain    = ['zksync', 'base'] # Potential destination networks; the final choice is random.
+
+        amount = 1 # The number of NFTs to bridge.
+        bridge_all = True # If True, all available NFTs will be bridged if they exceed the specified 'amount'.
+
+    class ValueUltra:
+        '''
+        Advanced strategy for cost-effective minting and bridging:
+        1. Identifies all eligible networks with a native token valued at least $1.
+        2. Determines the three most cost-effective bridging options for each network listed in 'included_chains'.
+        3. Assesses the cost of minting across all networks.
+        4. Strategically selects from the top three most affordable networks for combined minting and bridging operations. It starts with a random choice or based on 'from_chain' if specified.
+        5. Skips minting if NFTs already exist in the initial network, otherwise initiates minting.
+        6. Limits minting to the first network, while subsequent operations focus solely on bridging.
+        7. Continuously selects from the three most affordable networks for bridging, based on random choice.
+        '''
+
+        max_bridge_price = 2.5 # The maximum price (in $) for bridging; any network exceeding this cost is ignored.
+        bridges_count = [2, 4] # The range indicating the minimum and maximum number of bridges to execute.
+        from_chain = [] # Can remain unspecified; the script autonomously selects the most cost-effective network from 'included_chains'.
+        included_chains = ['optimism', 'scroll', 'arbitrum', 'bsc', 'avalanche', 'base', 'zksync'] # A list of potential networks, must specify at least two.
+
+    max_waiting_nft = 120 # Maximum duration (in seconds) to await the arrival of the NFT in the destination network before timing out.
+

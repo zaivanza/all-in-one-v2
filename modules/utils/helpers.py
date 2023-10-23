@@ -9,6 +9,7 @@ import telebot
 import math
 from tqdm import tqdm
 import asyncio, aiohttp
+from eth_account import Account
 
 list_send = []
 def send_msg():
@@ -137,3 +138,8 @@ async def get_bungee_data():
                 data = await response.json()
                 return data
     
+def is_private_key(key):
+    try:
+        return Account().from_key(key).address
+    except:
+        return False

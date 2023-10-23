@@ -35,8 +35,9 @@ MODULE:
 13. 1inch_swap
 14. merkly_refuel
 15. nft_checker
+16. zerius
 
-Choose a module (1 - 15) : '''))
+Choose a module (1 - 16) : '''))
 
         asyncio.run(main(MODULE))
 

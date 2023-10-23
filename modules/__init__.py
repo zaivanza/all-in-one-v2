@@ -11,3 +11,4 @@ from .tx_checker import TxChecker
 from .inch_swap import InchSwap
 from .merkly_refuel import MerklyRefuel
 from .nft_checker import NFTChecker
+from .zerius import Zerius

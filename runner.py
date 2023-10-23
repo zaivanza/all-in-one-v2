@@ -1,16 +1,13 @@
 from config import WALLETS, STR_DONE, STR_CANCEL
-from setting import RANDOMIZER, CHECK_GWEI, TG_BOT_SEND , IS_SLEEP, DELAY_SLEEP, RETRY, WALLETS_IN_BATCH, TRACK
+from setting import RANDOMIZER, CHECK_GWEI, TG_BOT_SEND, IS_SLEEP, DELAY_SLEEP, RETRY, WALLETS_IN_BATCH, TRACK
 
-from data.data import DATA
-from modules.utils.helpers import list_send, wait_gas, send_msg, async_sleeping
+from modules.utils.helpers import list_send, wait_gas, send_msg, async_sleeping, is_private_key
 from modules.utils.manager_async import Web3ManagerAsync
 from modules import *
 
 from loguru import logger
-from termcolor import cprint
 import random
 import asyncio
-from eth_account import Account
 
 MODULES = {
     1: ("web3_checker", Web3Checker),
@@ -28,6 +25,7 @@ MODULES = {
     13: ("1inch_swap", InchSwap),
     14: ("merkly_refuel", MerklyRefuel), 
     15: ("nft_checker", NFTChecker), 
+    16: ("zerius", Zerius), 
 }
 
 def get_module(module):
@@ -38,13 +36,6 @@ def get_module(module):
         return func, module_name
     else:
         raise ValueError(f"Unsupported module: {module}")
-
-def is_private_key(key):
-    try:
-        return Account().from_key(key).address
-    except:
-        return False
-
 
 async def worker(func, key, number):
     func_instance = func(key, number)
@@ -192,6 +183,8 @@ async def main(module):
 
     if module in [1, 2, 12, 15]:
         await func().start()
+    elif module == 16:
+        await func()
     else:
         if module in [3, 4]:
             await process_exchanges(func, WALLETS)
