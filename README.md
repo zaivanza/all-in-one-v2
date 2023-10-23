@@ -19,6 +19,7 @@ Perfect Script-V2 for Farming Management.
 13. **1inch_swap**: Leverages the 1inch aggregator for token swaps.
 14. **merkly_refuel**: Transfers gas from one network to another via LayerZero.
 15. **nft_checker**: Swiftly (asynchronously) checks the balance of specific NFTs.
+16. **[zerius](https://zerius.io/)**: Mint and bridge nft via layerzero; ideal for warming up networks.
 
 ## Additional Information:
 
@@ -90,6 +91,7 @@ For updates and entertaining content, join our public chat: [hodlmodeth](https:/
 13. 1inch_swap : агрегатор. 
 14. merkly_refuel : отправка газа с одной сети в другую через layerzero.
 15. nft_checker : очень быстро (асинка) смотрит баланс конкретной nft.
+16. [zerius](https://zerius.io/) : минт и бридж нфт через layerzero. более подробно здесь : https://t.me/hodlmodeth/339
 
 Дополнительная информация :
 1. Все результаты прописываются не только в терминал, но и в тг-бота.
