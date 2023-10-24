@@ -118,29 +118,34 @@ async def worker_tracks(key, number):
             attempts = 0
             while attempts <= RETRY:
                 func, module_name = get_module(int(params['module_number']))
-                func_instance = func(key, number, params['params'])
-                await func_instance.setup()
-                logger.debug(f'{number} {func_instance.manager.address} : {module_name}')
-
-                contract_txn = await func_instance.get_txn()
-                if contract_txn:
-                    status, tx_link = await func_instance.manager.send_tx(contract_txn)
-
-                    if status == 1:
-                        logger.success(f'{number} {func_instance.manager.address} | {func_instance.module_str} | {tx_link}')
-                        list_send.append(f'{STR_DONE}{func_instance.module_str}')
-                        break
-
-                    else:
-                        logger.error(f'{number} {func_instance.manager.address} | tx is failed | {tx_link}')
-                        attempts += 1
-                        logger.info('sleep for 10 sec.')
-                        await asyncio.sleep(10)
+                if module_name in ["exchange_withdraw", "okx_withdraw"]:
+                    exchange = func(key, params['params'])
+                    await exchange.start()
+                    break
                 else:
-                    attempts += 1
-                    logger.error(f'{number} {func_instance.manager.address} | error getting contract_txn')
-                    logger.info('sleep for 3 sec.')
-                    await asyncio.sleep(3)
+                    func_instance = func(key, number, params['params'])
+                    await func_instance.setup()
+                    logger.debug(f'{number} {func_instance.manager.address} : {module_name}')
+
+                    contract_txn = await func_instance.get_txn()
+                    if contract_txn:
+                        status, tx_link = await func_instance.manager.send_tx(contract_txn)
+
+                        if status == 1:
+                            logger.success(f'{number} {func_instance.manager.address} | {func_instance.module_str} | {tx_link}')
+                            list_send.append(f'{STR_DONE}{func_instance.module_str}')
+                            break
+
+                        else:
+                            logger.error(f'{number} {func_instance.manager.address} | tx is failed | {tx_link}')
+                            attempts += 1
+                            logger.info('sleep for 10 sec.')
+                            await asyncio.sleep(10)
+                    else:
+                        attempts += 1
+                        logger.error(f'{number} {func_instance.manager.address} | error getting contract_txn')
+                        logger.info('sleep for 3 sec.')
+                        await asyncio.sleep(3)
 
             else:
                 logger.error(f'{number} {func_instance.manager.address} | module is not success, cycle broken')

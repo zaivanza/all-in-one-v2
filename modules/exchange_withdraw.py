@@ -69,22 +69,6 @@ class OkxWithdraw:
             async with session.request(**kwargs) as response:
                 return await response.json()
 
-    async def make_http_request(self, url, method="GET", headers=None, params=None, data=None, timeout=10):
-        async with aiohttp.ClientSession() as session:
-            kwargs = {"url": url, "method": method, "timeout": timeout}
-            
-            if headers:
-                kwargs["headers"] = headers
-            
-            if params:
-                kwargs["params"] = params
-            
-            if data:
-                kwargs["data"] = data
-            
-            async with session.request(**kwargs) as response:
-                return await response.json()
-
     async def get_data(self, request_path="/api/v5/account/balance?ccy=USDT", body='', meth="GET"):
 
         def signature(
