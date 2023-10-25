@@ -116,12 +116,14 @@ class Web3ManagerAsync:
                 await asyncio.sleep(1)
 
     async def send_tx(self, contract_txn):
-
-        tx_hash = await self.sign_tx(contract_txn)
-        status  = await self.get_status_tx(tx_hash)
-        tx_link = f'{DATA[self.chain]["scan"]}/{tx_hash}'
-
-        return status, tx_link
+        try:
+            tx_hash = await self.sign_tx(contract_txn)
+            status  = await self.get_status_tx(tx_hash)
+            tx_link = f'{DATA[self.chain]["scan"]}/{tx_hash}'
+            return status, tx_link
+        except Exception as error:
+            logger.error(error)
+            return False, False
 
     async def get_amount_in(self, keep_from, keep_to, all_balance, token, amount_from, amount_to, multiplier=1):
 

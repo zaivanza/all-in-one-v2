@@ -48,7 +48,10 @@ async def worker(func, key, number):
 
     status, tx_link = await func_instance.manager.send_tx(contract_txn)
 
-    if status == 1:
+    if not status:
+        list_send.append(f'{STR_CANCEL}{func_instance.module_str}')
+        return False
+    elif status == 1:
         logger.success(f'{number} {func_instance.manager.address} | {func_instance.module_str} | {tx_link}')
         list_send.append(f'{STR_DONE}{func_instance.module_str}')
         return True
@@ -131,7 +134,11 @@ async def worker_tracks(key, number):
                     if contract_txn:
                         status, tx_link = await func_instance.manager.send_tx(contract_txn)
 
-                        if status == 1:
+                        if not status:
+                            list_send.append(f'{STR_CANCEL}{func_instance.module_str}')
+                            break
+
+                        elif status == 1:
                             logger.success(f'{number} {func_instance.manager.address} | {func_instance.module_str} | {tx_link}')
                             list_send.append(f'{STR_DONE}{func_instance.module_str}')
                             break
