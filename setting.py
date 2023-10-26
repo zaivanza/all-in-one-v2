@@ -430,6 +430,10 @@ class Value_NFT_Checker:
 
 class ValueZerius:
 
+    '''
+    chains : arbitrum | optimism | bsc | polygon | base | avalanche | ethereum | scroll | zksync | linea | nova
+    '''
+
     class ValueMintBridge:
         '''Combination of minting and bridging operations'''
 

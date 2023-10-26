@@ -53,7 +53,7 @@ class Web3ManagerAsync:
     async def add_gas_price(self, contract_txn):
 
         if self.chain == 'bsc':
-            contract_txn['gasPrice'] = 1000000000 # специально ставим 1 гвей, так транза будет дешевле
+            contract_txn['gasPrice'] = 1000000000 # Intentionally setting 1 Gwei to make the transaction cheaper
         else:
             gas_price = await self.web3.eth.gas_price
             contract_txn['gasPrice'] = int(gas_price * random.uniform(1.01, 1.02))

@@ -32,7 +32,7 @@ ORBITER_AMOUNT_STR = {
     'scroll'        : '9019',
 }
 
-# контракт с X сети в starknet
+# contract with X network to starknet
 CONTRACTS_ORBITER_TO_STARKNET = {
     'ethereum'      : '0xd9d74a29307cc6fc8bf424ee4217f1a587fbc8dc',
     'optimism'      : '',
@@ -75,7 +75,6 @@ LAYERZERO_CHAINS_ID = {
     'scroll'    : 214,
 }
 
-# контракты бриджа
 WOOFI_BRIDGE_CONTRACTS = {
     'avalanche'     : '0x51AF494f1B4d3f77835951FA827D66fc4A18Dae8',
     'polygon'       : '0xAA9c15cd603428cA8ddD45e933F8EfE3Afbcc173',
@@ -86,7 +85,6 @@ WOOFI_BRIDGE_CONTRACTS = {
     'fantom'        : '0x72dc7fa5eeb901a34173C874A7333c8d1b34bca9',
 }
 
-# контракты свапа
 WOOFI_SWAP_CONTRACTS = {
     'avalanche'     : '0xC22FBb3133dF781E6C25ea6acebe2D2Bb8CeA2f9',
     'polygon'       : '0x817Eb46D60762442Da3D931Ff51a30334CA39B74',
@@ -98,7 +96,7 @@ WOOFI_SWAP_CONTRACTS = {
     'zksync'        : '0xfd505702b37Ae9b626952Eb2DD736d9045876417',
 }
 
-# через что бриджим на woofi (usdc / usdt)
+# what to bridge to woofi (usdc / usdt)
 WOOFI_PATH = {
     'avalanche'     : '0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E',
     'polygon'       : '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
@@ -155,13 +153,13 @@ MERKLY_CONTRACTS = {
     'bsc'           : '0xfdc9018af0e37abf89233554c937eb5068127080',
     'arbitrum'      : '0xaa58e77238f0e4a565343a89a79b4addd744d649',
     'polygon'       : '0xa184998ec58dc1da77a1f9f1e361541257a50cf4',
-    # 'polygon_zkevm' : '', пока недоступен
+    # 'polygon_zkevm' : '', unavailable
     'zksync'        : '0x6dd28C2c5B91DD63b4d4E78EcAC7139878371768',
     'avalanche'     : '0xe030543b943bdcd6559711ec8d344389c66e1d56',
     'gnosis'        : '0xb58f5110855fbef7a715d325d60543e7d4c18143',
     'fantom'        : '0x97337a9710beb17b8d77ca9175defba5e9afe62e',
     'nova'          : '0x484c402b0c8254bd555b68827239bace7f491023',
-    # 'harmony'       : '', # надо конвертировать в one-address
+    # 'harmony'       : '', # unavailable : need to convert it to a one-address
     'core'          : '0xCA230856343C300f0cc2Bd77C89F0fCBeDc45B0f',
     'celo'          : '0xe33519c400b8f040e73aeda2f45dfdd4634a7ca0',
     'moonbeam'      : '0x766b7aC73b0B33fc282BdE1929db023da1fe6458',
@@ -219,12 +217,22 @@ MULTICALL_CONTRACTS = {
 }
 
 EXCLUDED_LZ_PAIRS = [
-    (195, 102),
-    (195, 106),
-    (214, 195),
-    (214, 184),
-    (165, 214),
-    (165, 195),
+    (195, 102), # zora => bsc
+    (195, 106), # zora => avalanche
+    (214, 195), # scroll => zora
+    (214, 184), # scroll => base
+    (165, 214), # zksync => scroll
+    (165, 195), # zksync => zora
+    (183, 195), # linea => zora
+    (183, 214), # linea => scroll
+    (175, 158), # nova => polygon_zkevm
+    (175, 195), # nova => zora
+    (175, 214), # nova => scroll
+    (175, 183), # nova => linea
+    (175, 153), # nova => core
+    (175,  125), # nova => celo
+    (175, 116), # nova => harmony
+    (175, 145), # nova => gnosis
 ]
 ZERIUS_SEND_GAS_LIMIT = {
     101: 300000,
@@ -237,6 +245,8 @@ ZERIUS_SEND_GAS_LIMIT = {
     195: 300000,
     214: 300000,
     165: 1800000,
+    175: 300000, # nova
+    183: 300000, # linea
 }
 ZERIUS_MINT_GAS_LIMIT = {
     101: 170000,
@@ -249,6 +259,8 @@ ZERIUS_MINT_GAS_LIMIT = {
     195: 170000,
     214: 170000,
     165: 1000000,
+    175: 170000, # nova
+    183: 170000, # linea
 }
 COINGECKO_URL = "https://api.coingecko.com/api/v3/simple/price?ids={}&vs_currencies=usd"
 
@@ -263,8 +275,9 @@ LZ_CHAIN_TO_TOKEN = {
     195: 'ETH',
     214: 'ETH',
     165: 'ETH',
+    175: 'ETH', # nova
+    183: 'ETH', # linea
 }
-
 ZERIUS_CONTRACTS = {
     'ethereum': '0x178608fFe2Cca5d36f3Fc6e69426c4D3A5A74A41', 
     'optimism': '0x178608fFe2Cca5d36f3Fc6e69426c4D3A5A74A41', 
@@ -276,6 +289,17 @@ ZERIUS_CONTRACTS = {
     # 'zora': '0x178608fFe2Cca5d36f3Fc6e69426c4D3A5A74A41',
     'scroll': '0xEB22C3e221080eAD305CAE5f37F0753970d973Cd',
     'zksync': '0x7dA50bD0fb3C2E868069d9271A2aeb7eD943c2D6',
+    'linea': '0x5188368a92B49F30f4Cf9bEF64635bCf8459c7A7',
+    'nova': '0x5188368a92B49F30f4Cf9bEF64635bCf8459c7A7',
+    'metis': '0x5188368a92B49F30f4Cf9bEF64635bCf8459c7A7',
+    'moonbeam': '0x4c5AeDA35d8F0F7b67d6EB547eAB1df75aA23Eaf',
+    'polygon_zkevm': '0x4c5AeDA35d8F0F7b67d6EB547eAB1df75aA23Eaf',
+    'core': '0x5188368a92B49F30f4Cf9bEF64635bCf8459c7A7',
+    'celo': '0x4c5AeDA35d8F0F7b67d6EB547eAB1df75aA23Eaf',
+    'harmony': '0x5188368a92B49F30f4Cf9bEF64635bCf8459c7A7',
+    'canto': '0x5188368a92B49F30f4Cf9bEF64635bCf8459c7A7',
+    'fantom': '0x5188368a92B49F30f4Cf9bEF64635bCf8459c7A7',
+    'gnosis': '0x5188368a92B49F30f4Cf9bEF64635bCf8459c7A7',
 }
 
 ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
