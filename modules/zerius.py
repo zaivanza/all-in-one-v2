@@ -902,7 +902,7 @@ async def process_batches(func, wallets):
         if (TG_BOT_SEND and len(list_send) > 0):
             send_msg()
             
-        if IS_SLEEP and any(res):
+        if IS_SLEEP:
             await async_sleeping(*DELAY_SLEEP)
 
         list_send.clear()
