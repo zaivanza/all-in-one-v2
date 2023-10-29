@@ -48,16 +48,16 @@ async def worker(func, key, number):
 
     status, tx_link = await func_instance.manager.send_tx(contract_txn)
 
-    if not status:
-        list_send.append(f'{STR_CANCEL}{func_instance.module_str}')
-        return False
-    elif status == 1:
+    if status == 1:
         logger.success(f'{number} {func_instance.manager.address} | {func_instance.module_str} | {tx_link}')
         list_send.append(f'{STR_DONE}{func_instance.module_str}')
         return True
-    else:
+    elif status == 0:
         logger.error(f'{number} {func_instance.manager.address} | tx is failed | {tx_link}')
         return await retry_worker(func_instance, key, number, retry=0)
+    else:
+        list_send.append(f'{STR_CANCEL}{func_instance.module_str}')
+        return False
 
 async def retry_worker(func, key, number, retry):
     if retry < RETRY:
