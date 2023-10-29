@@ -431,7 +431,7 @@ class Value_NFT_Checker:
 class ValueZerius:
 
     '''
-    chains : arbitrum | optimism | bsc | polygon | base | avalanche | ethereum | scroll | zksync | linea | nova
+    chains : arbitrum | optimism | bsc | polygon | base | avalanche | ethereum | scroll | zksync | linea | nova | zora | polygon_zkevm | fantom | core | celo | harmony | canto
     '''
 
     class ValueMintBridge:
@@ -445,8 +445,8 @@ class ValueZerius:
     class ValueMint:
         '''Minting operation'''
 
-        chain = ['zksync', 'arbitrum', 'bsc'] # The network where NFTs will be minted.
-        amount_mint = [1, 2] # The exact number of NFTs to mint.
+        chain = ['nova'] # The network where NFTs will be minted.
+        amount_mint = [1, 1] # The exact number of NFTs to mint.
 
     class ValueBridge:
         '''
