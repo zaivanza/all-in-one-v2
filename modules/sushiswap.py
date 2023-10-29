@@ -23,6 +23,7 @@ class SushiSwap:
             self.min_amount_swap = self.params['min_amount_swap']
             self.keep_value_from = self.params['keep_value_from']
             self.keep_value_to = self.params['keep_value_to']
+            self.slippage = self.params['slippage']
         else:
             self.chain = Value_Sushiswap.chain
             self.from_token_address = Value_Sushiswap.from_token
@@ -33,6 +34,7 @@ class SushiSwap:
             self.min_amount_swap = Value_Sushiswap.min_amount_swap
             self.keep_value_from = Value_Sushiswap.keep_value_from
             self.keep_value_to = Value_Sushiswap.keep_value_to
+            self.slippage = Value_Sushiswap.slippage
         self.key = key
         self.number = number
 
