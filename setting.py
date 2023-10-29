@@ -35,6 +35,10 @@ MAX_GAS_CHARGE = {
     'base'          : 0.5,
     'scroll'        : 0.5,
     'zora'          : 0.5,
+    'moonbeam'      : 0.5,
+    'moonriver'     : 0.5,
+    'canto'         : 0.5,
+    'metis'         : 0.5,
 }
 
 class Value_Web3_Checker:
