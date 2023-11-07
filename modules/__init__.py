@@ -9,6 +9,8 @@ from .web3_checker import Web3Checker
 from .debank import DeBank
 from .tx_checker import TxChecker
 from .inch_swap import InchSwap
-from .merkly_refuel import MerklyRefuel
+from .zerius_refuel import ZeriusRefuel
 from .nft_checker import NFTChecker
 from .zerius import Zerius
+from .base_bridge import BaseBridge
+from .starkgate import Starkgate

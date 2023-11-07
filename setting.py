@@ -20,7 +20,7 @@ MAX_GWEI = 25           # Maximum Gwei (see https://etherscan.io/gastracker)
 MAX_GAS_CHARGE = {
     'avalanche'     : 1,
     'polygon'       : 0.5,
-    'ethereum'      : 3,
+    'ethereum'      : 5,
     'bsc'           : 0.3,
     'arbitrum'      : 1,
     'optimism'      : 1.5,
@@ -253,7 +253,7 @@ class Value_0x_Swap:
 class Value_Orbiter:
 
     '''
-    Bridge native tokens via https://www.orbiter.finance/
+    Bridge ETH via https://www.orbiter.finance/
     Chains: zksync | ethereum | bsc | arbitrum | optimism | polygon_zkevm | nova | starknet | linea | base | scroll
     Minimum bridge amount: 0.005
     '''
@@ -398,21 +398,20 @@ class Value_1inch_Swap:
 
     slippage = 1 # Slippage, default is from 1 to 3
 
-class Value_Merkly_Refuel:
+class Value_Zerius_Refuel:
 
     '''
-    Gas refuel via https://minter.merkly.com/gas
-    Attention! First check the gas limit manually, only then run the script, otherwise you may lose your funds.
+    Gas refuel via https://zerius.io
 
-    from_chains : optimism | bsc | polygon | arbitrum | avalanche | fantom | celo | zksync | polygon_zkevm | nova | harmony | gnosis | core | base 
-    to_chains   : avalanche | ethereum | bsc | arbitrum | optimism | fantom | harmony | celo | moonbeam | fuse | gnosis | klaytn | metis | core | polygon_zkevm | canto | zksync | moonriver | tenet | nova | kava | meter | zora | base | scroll
+    from_chains : optimism | bsc | polygon | arbitrum | avalanche | fantom | linea | celo | zksync (temp disabled) | polygon_zkevm | nova | canto | zora | scroll | harmony | gnosis | core | base | mantle
+    to_chains   : avalanche | bsc | arbitrum | optimism | fantom | harmony | celo | moonbeam | gnosis | metis | core | polygon_zkevm | canto | zksync | nova | zora | base | scroll
     '''
 
-    from_chain = ['scroll'] # Networks from which you want to perform refuel (>= 1 network)
-    to_chain   = ['base'] # Networks to which you want to perform refuel (>= 1 network)
+    from_chain = ['bsc'] # Networks from which you want to perform refuel (>= 1 network)
+    to_chain   = ['core', 'metis', 'nova', 'gnosis', 'celo', 'moonbeam'] # Networks to which you want to perform refuel (>= 1 network)
 
     amount_from         = 0.000001 # Obtain from a certain amount of native token of the to_chain network
-    amount_to           = 0.00001 # Obtain up to a certain amount of native token of the to_chain network
+    amount_to           = 0.00002 # Obtain up to a certain amount of native token of the to_chain network
 
     swap_all_balance    = False # True / False. If True, then refuel the entire balance
     min_amount_swap     = 0 # If the balance is less than this amount, no refuel will be made
@@ -432,10 +431,11 @@ class Value_NFT_Checker:
     contract    = '0x6848dbcb498b32675a83e88841facfcd43ef8e32' # NFT contract address
     min_balance = 1 # If the NFT balance is less than this amount, the wallet is flagged
 
-class ValueZerius:
+class Value_Zerius_ONFT:
 
     '''
-    chains : arbitrum | optimism | bsc | polygon | base | avalanche | ethereum | scroll | zksync | linea | nova | zora | polygon_zkevm | fantom | core | celo | harmony | canto
+    https://zerius.io : Mint and bridge nft via layerzero; ideal for warming up networks.
+    Chains : arbitrum | optimism | bsc | polygon | base | avalanche | ethereum | scroll | zksync | linea | nova | zora | polygon_zkevm | fantom | core | celo | harmony | canto
     '''
 
     class ValueMintBridge:
@@ -458,8 +458,8 @@ class ValueZerius:
         This function locates NFTs in the source chain and bridges them to a randomly selected destination chain.
         '''
 
-        from_chain  = ['scroll', 'arbitrum'] # The source network where NFTs will be searched; the final choice is random.
-        to_chain    = ['zksync', 'base'] # Potential destination networks; the final choice is random.
+        from_chain  = ['bsc'] # The source network where NFTs will be searched; the final choice is random.
+        to_chain    = ['celo', 'nova'] # Potential destination networks; the final choice is random.
 
         amount = 1 # The number of NFTs to bridge.
         bridge_all = True # If True, all available NFTs will be bridged if they exceed the specified 'amount'.
@@ -483,3 +483,31 @@ class ValueZerius:
 
     max_waiting_nft = 120 # Maximum duration (in seconds) to await the arrival of the NFT in the destination network before timing out.
 
+class Value_Starkgate:
+
+    '''
+    Bridge from Ethereum to Starknet via Starkgate (https://starkgate.starknet.io/)
+    Warning! Add starknet addresses to data/starknet_address.txt
+    '''
+
+    amount_from         = 0.005 # Bridge from a certain amount of coins
+    amount_to           = 0.005 # Bridge up to a certain amount of coins
+
+    bridge_all_balance  = True # True / False. If True, then bridge the entire balance
+    min_amount_bridge   = 0 # If the balance is less than this amount, no bridge will be made
+    keep_value_from     = 0 # How many coins to keep on the wallet (only works when: bridge_all_balance = True)
+    keep_value_to       = 0 # Up to how many coins to keep on the wallet (only works when: bridge_all_balance = True)
+
+class Value_BaseBridge:
+
+    '''
+    Bridge from Ethereum to Base via Bridge Base (https://bridge.base.org/deposit)
+    '''
+
+    amount_from         = 0.002 # Bridge from a certain amount of coins
+    amount_to           = 0.002 # Bridge up to a certain amount of coins
+
+    bridge_all_balance  = False # True / False. If True, then bridge the entire balance
+    min_amount_bridge   = 0 # If the balance is less than this amount, no bridge will be made
+    keep_value_from     = 0 # How many coins to keep on the wallet (only works when: bridge_all_balance = True)
+    keep_value_to       = 0 # Up to how many coins to keep on the wallet (only works when: bridge_all_balance = True)

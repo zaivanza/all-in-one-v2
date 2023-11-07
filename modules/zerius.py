@@ -3,7 +3,7 @@ from .utils.contracts.abi import ABI_ZERIUS
 from .utils.contracts.contract import ZERO_ADDRESS, ZERIUS_SEND_GAS_LIMIT, ZERIUS_CONTRACTS, ZERIUS_MINT_GAS_LIMIT, LAYERZERO_CHAINS_ID, EXCLUDED_LZ_PAIRS, COINGECKO_URL, LZ_CHAIN_TO_TOKEN
 
 from config import STR_DONE, STR_CANCEL, WALLETS
-from setting import ValueZerius, RETRY, WALLETS_IN_BATCH, CHECK_GWEI, TG_BOT_SEND, IS_SLEEP, DELAY_SLEEP, RANDOMIZER
+from setting import Value_Zerius_ONFT, RETRY, WALLETS_IN_BATCH, CHECK_GWEI, TG_BOT_SEND, IS_SLEEP, DELAY_SLEEP, RANDOMIZER
 
 from loguru import logger
 from web3 import Web3, AsyncHTTPProvider
@@ -156,8 +156,8 @@ class Bridger:
     def __init__(self, number, key):
         self.number = number
         self.key = key
-        self.from_chain = random.choice(ValueZerius.ValueBridge.from_chain)
-        self.to_chain = random.choice(ValueZerius.ValueBridge.to_chain)
+        self.from_chain = random.choice(Value_Zerius_ONFT.ValueBridge.from_chain)
+        self.to_chain = random.choice(Value_Zerius_ONFT.ValueBridge.to_chain)
         self.manager = Web3ManagerAsync(self.key, self.from_chain)
         self.module_str = f'{self.number} {self.manager.address} | bridge nft {self.from_chain} => {self.to_chain}'
 
@@ -176,10 +176,10 @@ class Bridger:
             list_send.append(f'{STR_CANCEL}{self.module_str}')
             return False
 
-        if ValueZerius.ValueBridge.bridge_all:
+        if Value_Zerius_ONFT.ValueBridge.bridge_all:
             counts = count
         else:
-            counts = ValueZerius.ValueBridge.amount
+            counts = Value_Zerius_ONFT.ValueBridge.amount
 
         for i in range(counts):
             token_id = tokens_id[i]
@@ -214,7 +214,7 @@ class Minter:
         self.key = key
 
     async def main(self, retry=0):
-        function = Mint(self.key, self.number, ValueZerius.ValueMint.chain)
+        function = Mint(self.key, self.number, Value_Zerius_ONFT.ValueMint.chain)
         contract_txn = await function.get_txn()
         if not contract_txn:
             logger.error(f'{function.module_str} | error getting contract_txn')
@@ -236,7 +236,7 @@ class Minter:
                 list_send.append(f'{STR_CANCEL}{function.module_str}')
             
     async def run(self):
-        timer = random.randint(*ValueZerius.ValueMint.amount_mint)
+        timer = random.randint(*Value_Zerius_ONFT.ValueMint.amount_mint)
         for i in range(timer):
             await self.main()
             if i+1 != timer:
@@ -246,10 +246,10 @@ class MintBridge:
     def __init__(self, number, key) -> None:
         self.number = number
         self.key = key
-        self.from_chain = random.choice(ValueZerius.ValueMintBridge.from_chain)
-        self.to_chain = random.choice(ValueZerius.ValueMintBridge.to_chain)
-        self.maxPrice = ValueZerius.ValueMintBridge.max_price
-        self.amount = random.randint(*ValueZerius.ValueMintBridge.amount)
+        self.from_chain = random.choice(Value_Zerius_ONFT.ValueMintBridge.from_chain)
+        self.to_chain = random.choice(Value_Zerius_ONFT.ValueMintBridge.to_chain)
+        self.maxPrice = Value_Zerius_ONFT.ValueMintBridge.max_price
+        self.amount = random.randint(*Value_Zerius_ONFT.ValueMintBridge.amount)
         self.Web3ManagerAsync = Web3ManagerAsync(key, self.from_chain)
         self.module_str = f'{self.number} {self.Web3ManagerAsync.address} | mint&bridge | {self.from_chain} => {self.to_chain}'
 
@@ -357,7 +357,7 @@ class MintBridge:
         balanceOnStart = await self.get_nft_balance_in_chain(address)
         timer = 0
         while balanceOnStart == 0:
-            if (timer >= ValueZerius.max_waiting_nft):
+            if (timer >= Value_Zerius_ONFT.max_waiting_nft):
                 break
             logger.info(f'waiting for nft on {self.from_chain}. try again in 10 sec.')
             timer += 10
@@ -411,14 +411,14 @@ class Ultra:
     def __init__(self, number, key) -> None:
         self.number = number
         self.key = key
-        self.maxBridgePrice = ValueZerius.ValueUltra.max_bridge_price
-        self.bridgesCount = random.randint(*ValueZerius.ValueUltra.bridges_count)
-        fromChain = ValueZerius.ValueUltra.from_chain
+        self.maxBridgePrice = Value_Zerius_ONFT.ValueUltra.max_bridge_price
+        self.bridgesCount = random.randint(*Value_Zerius_ONFT.ValueUltra.bridges_count)
+        fromChain = Value_Zerius_ONFT.ValueUltra.from_chain
         if not fromChain:
             self.fromChain = None
         else:
             self.fromChain = random.choice(fromChain)
-        self.chains = ValueZerius.ValueUltra.included_chains
+        self.chains = Value_Zerius_ONFT.ValueUltra.included_chains
         if self.fromChain != None and self.fromChain not in self.chains:
             self.chains.append(self.fromChain)
         self.manager = Web3ManagerAsync(self.key, "ethereum")
@@ -630,7 +630,7 @@ class Ultra:
         balanceOnStart = await self.get_nft_balance_in_chain(address, contracts[srcLzChain])
         timer = 0
         while balanceOnStart == 0:
-            if (timer >= ValueZerius.max_waiting_nft):
+            if (timer >= Value_Zerius_ONFT.max_waiting_nft):
                 break
             logger.info(f'waiting for nft on {srcChainName}. Try again in 10 sec.')
             timer += 10

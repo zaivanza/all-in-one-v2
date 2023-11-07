@@ -137,6 +137,12 @@ DATA = {
         "scan": "https://cantoscan.com/tx",
         "token": "CANTO",
         "chain_id": 7700
+    },
+    "starknet": {
+        "rpc": "https://starknet-mainnet.public.blastapi.io",
+        "scan": "https://starkscan.co/tx",
+        "token": "ETH",
+        "chain_id": None
     }
 }
 

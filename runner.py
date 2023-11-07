@@ -23,9 +23,11 @@ MODULES = {
     11: ("bungee_refuel", BungeeRefuel),
     12: ("tx_checker", TxChecker),  
     13: ("1inch_swap", InchSwap),
-    14: ("merkly_refuel", MerklyRefuel), 
+    14: ("zerius_refuel", ZeriusRefuel), 
     15: ("nft_checker", NFTChecker), 
-    16: ("zerius", Zerius), 
+    16: ("zerius_onft", Zerius), 
+    17: ("starknet_bridge", Starkgate), 
+    18: ("base_bridge", BaseBridge), 
 }
 
 def get_module(module):
@@ -37,27 +39,27 @@ def get_module(module):
     else:
         raise ValueError(f"Unsupported module: {module}")
 
-async def worker(func, key, number):
+async def worker(func, key, number, retry=0):
     func_instance = func(key, number)
     await func_instance.setup()
 
     contract_txn = await func_instance.get_txn()
     if not contract_txn:
-        logger.error(f'{number} {func_instance.manager.address} | error getting contract_txn')
-        return False
+        logger.error(f'{func_instance.module_str} | error getting contract_txn')
+        return await retry_worker(func_instance, key, number, retry)
 
     status, tx_link = await func_instance.manager.send_tx(contract_txn)
 
     if status == 1:
-        logger.success(f'{number} {func_instance.manager.address} | {func_instance.module_str} | {tx_link}')
+        logger.success(f'{func_instance.module_str} | {tx_link}')
         list_send.append(f'{STR_DONE}{func_instance.module_str}')
         return True
     elif status == 0:
-        logger.error(f'{number} {func_instance.manager.address} | tx is failed | {tx_link}')
-        return await retry_worker(func_instance, key, number, retry=0)
+        logger.error(f'{func_instance.module_str} | tx is failed | {tx_link}')
+        return await retry_worker(func_instance, key, number, retry)
     else:
         list_send.append(f'{STR_CANCEL}{func_instance.module_str}')
-        return False
+        return await retry_worker(func_instance, key, number, retry)
 
 async def retry_worker(func, key, number, retry):
     if retry < RETRY:
@@ -128,7 +130,7 @@ async def worker_tracks(key, number):
                 else:
                     func_instance = func(key, number, params['params'])
                     await func_instance.setup()
-                    logger.debug(f'{number} {func_instance.manager.address} : {module_name}')
+                    logger.debug(f'{func_instance.module_str} : {module_name}')
 
                     contract_txn = await func_instance.get_txn()
                     if contract_txn:
@@ -139,23 +141,23 @@ async def worker_tracks(key, number):
                             break
 
                         elif status == 1:
-                            logger.success(f'{number} {func_instance.manager.address} | {func_instance.module_str} | {tx_link}')
+                            logger.success(f'{func_instance.module_str} | {tx_link}')
                             list_send.append(f'{STR_DONE}{func_instance.module_str}')
                             break
 
                         else:
-                            logger.error(f'{number} {func_instance.manager.address} | tx is failed | {tx_link}')
+                            logger.error(f'{func_instance.module_str} | tx is failed | {tx_link}')
                             attempts += 1
                             logger.info('sleep for 10 sec.')
                             await asyncio.sleep(10)
                     else:
                         attempts += 1
-                        logger.error(f'{number} {func_instance.manager.address} | error getting contract_txn')
+                        logger.error(f'{func_instance.module_str} | error getting contract_txn')
                         logger.info('sleep for 3 sec.')
                         await asyncio.sleep(3)
 
             else:
-                logger.error(f'{number} {func_instance.manager.address} | module is not success, cycle broken')
+                logger.error(f'{func_instance.module_str} | module is not success, cycle broken')
                 list_send.append(f'{STR_CANCEL}{func_instance.module_str}')
                 break
 

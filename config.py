@@ -189,6 +189,7 @@ RECIPIENTS = read_txt("data/recipients.txt")
 STARKNET_ADDRESS = read_txt("data/starknet_address.txt")
 PROXIES = read_txt("data/proxies.txt")
 ORBITER_MAKER = load_json("modules/utils/contracts/orbiter_maker.json")
+ABI_ZERIUS_REFUEL = load_json("modules/utils/contracts/zerius_refuel.json")
 
 RECIPIENTS_WALLETS = dict(zip(WALLETS, RECIPIENTS))
 STARKNET_WALLETS = dict(zip(WALLETS, STARKNET_ADDRESS))

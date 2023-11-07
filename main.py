@@ -33,11 +33,13 @@ MODULE:
 11. bungee_refuel
 12. tx_checker
 13. 1inch_swap
-14. merkly_refuel
+14. zerius_refuel
 15. nft_checker
-16. zerius
+16. zerius_onft
+17. starkgate_bridge (eth => starknet)
+18. base_bridge (eth => base)
 
-Choose a module (1 - 16) : '''))
+Choose a module (1 - 18) : '''))
 
         asyncio.run(main(MODULE))
 

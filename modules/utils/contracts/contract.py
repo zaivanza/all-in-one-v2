@@ -148,25 +148,26 @@ BUNGEE_REFUEL_CONTRACTS = {
     'base'          : '0xe8c5b8488feafb5df316be73ede3bdc26571a773'
 }
 
-MERKLY_CONTRACTS = {
-    'optimism'      : '0xa2c203d7ef78ed80810da8404090f926d67cd892',
-    'bsc'           : '0xfdc9018af0e37abf89233554c937eb5068127080',
-    'arbitrum'      : '0xaa58e77238f0e4a565343a89a79b4addd744d649',
-    'polygon'       : '0xa184998ec58dc1da77a1f9f1e361541257a50cf4',
-    # 'polygon_zkevm' : '', unavailable
-    'zksync'        : '0x6dd28C2c5B91DD63b4d4E78EcAC7139878371768',
-    'avalanche'     : '0xe030543b943bdcd6559711ec8d344389c66e1d56',
-    'gnosis'        : '0xb58f5110855fbef7a715d325d60543e7d4c18143',
-    'fantom'        : '0x97337a9710beb17b8d77ca9175defba5e9afe62e',
-    'nova'          : '0x484c402b0c8254bd555b68827239bace7f491023',
-    # 'harmony'       : '', # unavailable : need to convert it to a one-address
-    'core'          : '0xCA230856343C300f0cc2Bd77C89F0fCBeDc45B0f',
-    'celo'          : '0xe33519c400b8f040e73aeda2f45dfdd4634a7ca0',
-    'moonbeam'      : '0x766b7aC73b0B33fc282BdE1929db023da1fe6458',
-    'moonriver'     : '0x97337A9710BEB17b8D77cA9175dEFBA5e9AFE62e',
-    'base'          : '0x6bf98654205B1AC38645880Ae20fc00B0bB9FFCA',
-    'scroll'        : '0x7dfb5e7808b5eb4fb8b9e7169537575f6ff1a218',
-    'zora'          : '',
+ZERIUS_REFUEL_CONTRACTS = {
+    'optimism'      : '0x2076BDd52Af431ba0E5411b3dd9B5eeDa31BB9Eb',
+    'bsc'           : '0x5B209E7c81DEaad0ffb8b76b696dBb4633A318CD',
+    'arbitrum'      : '0x412aea168aDd34361aFEf6a2e3FC01928Fba1248',
+    'polygon'       : '0x2ef766b59e4603250265EcC468cF38a6a00b84b3',
+    'polygon_zkevm' : '0xBAf5C493a4c364cBD2CA83C355E75F0ff7042945',
+    # 'zksync'        : '' # temp unavailable,
+    'avalanche'     : '0x5B209E7c81DEaad0ffb8b76b696dBb4633A318CD',
+    'gnosis'        : '0x1fe2c567169d39CCc5299727FfAC96362b2Ab90E',
+    'fantom'        : '0xBFd3539e4e0b1B29e8b08d17f30F1291C837a18E',
+    'nova'          : '0x3Fc5913D35105f338cEfcB3a7a0768c48E2Ade8E',
+    'harmony'       : '0x5B209E7c81DEaad0ffb8b76b696dBb4633A318CD', # unavailable : need to convert it to a one-address
+    'core'          : '0xB47D82aA70f839dC27a34573f135eD6dE6CED9A5',
+    'celo'          : '0xFF21d5a3a8e3E8BA2576e967888Deea583ff02f8',
+    'moonbeam'      : '0xb0bea3bB2d6EDDD2014952ABd744660bAeF9747d',
+    'base'          : '0x9415AD63EdF2e0de7D8B9D8FeE4b939dd1e52F2C',
+    'scroll'        : '0xB074f8D92b930D3415DA6bA80F6D38f69ee4B9cf',
+    'zora'          : '0x1fe2c567169d39CCc5299727FfAC96362b2Ab90E',
+    'linea'         : '0x5B209E7c81DEaad0ffb8b76b696dBb4633A318CD',
+    'metis'         : '0x1b07F1f4F860e72c9367e718a30e38130114AD22',
 }
 
 MULTICALL_ETH_CONTRACTS = {
