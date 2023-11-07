@@ -20,8 +20,8 @@ Perfect Script-V2 for Farming Management.
 14. **zerius_refuel**: Transfers gas from one network to another via LayerZero.
 15. **nft_checker**: Swiftly (asynchronously) checks the balance of specific NFTs.
 16. **[zerius_onft](https://zerius.io/)**: Mint and bridge nft via layerzero; ideal for warming up networks.
-17. **starkgate_bridge**: Official bridge from Ethereum to Starknet. 
-18. **base_bridge**: Official bridge from Ethereum to Base.
+17. **[starkgate_bridge](https://starkgate.starknet.io/)**: Official bridge from Ethereum to Starknet. 
+18. **[base_bridge](https://bridge.base.org/deposit)**: Official bridge from Ethereum to Base.
 
 ## Additional Information:
 
@@ -94,8 +94,8 @@ For updates and entertaining content, join our public chat: [hodlmodeth](https:/
 14. merkly_refuel : отправка газа с одной сети в другую через layerzero.
 15. nft_checker : очень быстро (асинка) смотрит баланс конкретной nft.
 16. [zerius](https://zerius.io/) : минт и бридж нфт через layerzero. более подробно здесь : https://t.me/hodlmodeth/339
-17. starkgate_bridge : официальный бридж с ethereum на starknet. 
-18. base_bridge : официальный бридж с ethereum на base.
+17. [starkgate_bridge](https://starkgate.starknet.io/) : официальный бридж с ethereum на starknet. 
+18. [base_bridge](https://bridge.base.org/deposit) : официальный бридж с ethereum на base.
 
 Дополнительная информация :
 1. Все результаты прописываются не только в терминал, но и в тг-бота.
