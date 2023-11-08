@@ -2,6 +2,8 @@
 
 Идеальный софт для ведения фермы.
 
+The README in English can be found here: [README_eng.md](https://github.com/zaivanza/all-in-one-v2/blob/main/README_eng.md).
+
 ## Основные модули
 
 1. **web3_checker**: Асинхронная проверка баланса любых токенов в любой EVM сети.
