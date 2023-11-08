@@ -14,3 +14,4 @@ from .nft_checker import NFTChecker
 from .zerius import Zerius
 from .base_bridge import BaseBridge
 from .starkgate import Starkgate
+from .arbitrum_bridge import ArbitrumBridge

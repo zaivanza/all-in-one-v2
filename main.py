@@ -38,8 +38,9 @@ MODULE:
 16. zerius_onft
 17. starkgate_bridge (eth => starknet)
 18. base_bridge (eth => base)
+19. arbitrum_bridge
 
-Choose a module (1 - 18) : '''))
+Choose a module (1 - 19) : '''))
 
         asyncio.run(main(MODULE))
 

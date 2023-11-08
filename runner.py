@@ -28,6 +28,7 @@ MODULES = {
     16: ("zerius_onft", Zerius), 
     17: ("starknet_bridge", Starkgate), 
     18: ("base_bridge", BaseBridge), 
+    19: ("arbitrum_bridge", ArbitrumBridge), 
 }
 
 def get_module(module):

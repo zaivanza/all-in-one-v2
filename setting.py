@@ -511,3 +511,19 @@ class Value_BaseBridge:
     min_amount_bridge   = 0 # If the balance is less than this amount, no bridge will be made
     keep_value_from     = 0 # How many coins to keep on the wallet (only works when: bridge_all_balance = True)
     keep_value_to       = 0 # Up to how many coins to keep on the wallet (only works when: bridge_all_balance = True)
+
+class Value_ArbitrumBridge:
+
+    '''
+    Bridge from Ethereum to Arbitrum One / Arbitrum Nova via Arbitrum Bridge (https://bridge.arbitrum.io/?l2ChainId=42161)
+    '''
+
+    to_chain            = "nova" # To which network : arbitrum | nova
+
+    amount_from         = 0.001 # Bridge from a certain amount of coins
+    amount_to           = 0.002 # Bridge up to a certain amount of coins
+
+    bridge_all_balance  = False # True / False. If True, then bridge the entire balance
+    min_amount_bridge   = 0 # If the balance is less than this amount, no bridge will be made
+    keep_value_from     = 0 # How many coins to keep on the wallet (only works when: bridge_all_balance = True)
+    keep_value_to       = 0 # Up to how many coins to keep on the wallet (only works when: bridge_all_balance = True)

@@ -22,6 +22,7 @@ Perfect Script-V2 for Farming Management.
 16. **[zerius_onft](https://zerius.io/)**: Mint and bridge nft via layerzero; ideal for warming up networks.
 17. **[starkgate_bridge](https://starkgate.starknet.io/)**: Official bridge from Ethereum to Starknet. 
 18. **[base_bridge](https://bridge.base.org/deposit)**: Official bridge from Ethereum to Base.
+19. **[arbitrum_bridge](https://bridge.arbitrum.io/?l2ChainId=42161)**: Official bridge from Ethereum to Arbitrum One / Arbitrum Nova.
 
 ## Additional Information:
 
@@ -96,6 +97,7 @@ For updates and entertaining content, join our public chat: [hodlmodeth](https:/
 16. [zerius](https://zerius.io/) : минт и бридж нфт через layerzero. более подробно здесь : https://t.me/hodlmodeth/339
 17. [starkgate_bridge](https://starkgate.starknet.io/) : официальный бридж с ethereum на starknet. 
 18. [base_bridge](https://bridge.base.org/deposit) : официальный бридж с ethereum на base.
+19. [arbitrum_bridge](https://bridge.arbitrum.io/?l2ChainId=42161) : официальный бридж с ethereum на arbitrum one / arbitrum nova.
 
 Дополнительная информация :
 1. Все результаты прописываются не только в терминал, но и в тг-бота.
