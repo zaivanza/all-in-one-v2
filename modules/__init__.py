@@ -15,3 +15,5 @@ from .zerius import Zerius
 from .base_bridge import BaseBridge
 from .starkgate import Starkgate
 from .arbitrum_bridge import ArbitrumBridge
+from .zora_bridge import ZoraBridge
+from .zksync_bridge import ZkSyncBridge

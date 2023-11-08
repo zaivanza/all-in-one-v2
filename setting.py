@@ -14,13 +14,13 @@ TG_BOT_SEND = True      # Enable/disable sending results to a Telegram bot
 
 USE_PROXY = False       # Enable/disable proxy usage in web3 requests
 CHECK_GWEI = True       # Enable/disable base Gwei checking
-MAX_GWEI = 25           # Maximum Gwei (see https://etherscan.io/gastracker)
+MAX_GWEI = 30           # Maximum Gwei (see https://etherscan.io/gastracker)
 
 # Maximum transaction fee in USD, at which the script will sleep for 30 seconds and retry
 MAX_GAS_CHARGE = {
     'avalanche'     : 1,
     'polygon'       : 0.5,
-    'ethereum'      : 5,
+    'ethereum'      : 7,
     'bsc'           : 0.3,
     'arbitrum'      : 1,
     'optimism'      : 1.5,
@@ -524,6 +524,34 @@ class Value_ArbitrumBridge:
     amount_to           = 0.002 # Bridge up to a certain amount of coins
 
     bridge_all_balance  = False # True / False. If True, then bridge the entire balance
+    min_amount_bridge   = 0 # If the balance is less than this amount, no bridge will be made
+    keep_value_from     = 0 # How many coins to keep on the wallet (only works when: bridge_all_balance = True)
+    keep_value_to       = 0 # Up to how many coins to keep on the wallet (only works when: bridge_all_balance = True)
+
+class Value_ZoraBridge:
+
+    '''
+    Bridge from Ethereum to Zora via Bridge Zora (https://bridge.zora.energy/)
+    '''
+
+    amount_from         = 0.002 # Bridge from a certain amount of coins
+    amount_to           = 0.002 # Bridge up to a certain amount of coins
+
+    bridge_all_balance  = False # True / False. If True, then bridge the entire balance
+    min_amount_bridge   = 0 # If the balance is less than this amount, no bridge will be made
+    keep_value_from     = 0 # How many coins to keep on the wallet (only works when: bridge_all_balance = True)
+    keep_value_to       = 0 # Up to how many coins to keep on the wallet (only works when: bridge_all_balance = True)
+
+class Value_ZkSyncBridge:
+
+    '''
+    Bridge from Ethereum to ZkSync via txSync Bridge (https://portal.txsync.io/bridge/)
+    '''
+
+    amount_from         = 0.002 # Bridge from a certain amount of coins
+    amount_to           = 0.002 # Bridge up to a certain amount of coins
+
+    bridge_all_balance  = True # True / False. If True, then bridge the entire balance
     min_amount_bridge   = 0 # If the balance is less than this amount, no bridge will be made
     keep_value_from     = 0 # How many coins to keep on the wallet (only works when: bridge_all_balance = True)
     keep_value_to       = 0 # Up to how many coins to keep on the wallet (only works when: bridge_all_balance = True)

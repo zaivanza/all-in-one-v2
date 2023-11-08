@@ -48,7 +48,7 @@ class Starkgate:
         self.token_data = await self.manager.get_token_info('')
         self.value = intToDecimal(self.amount, 18)
         self.contract = self.manager.web3.eth.contract(address=Web3.to_checksum_address("0xae0Ee0A63A2cE6BaeEFFE56e7714FB4EFE48D419"), abi=ABI_STARKGATE)
-        self.module_str = f'{self.number} {self.manager.address} | starkgate_bridge : {self.from_chain} => {self.to_chain}'
+        self.module_str = f'{self.number} {self.manager.address} | starkgate_bridge'
     
     async def get_l2_gas(self, amount: int):
         estimate_fee = await self.client.estimate_message_fee(
@@ -63,7 +63,7 @@ class Starkgate:
         )
         return estimate_fee.overall_fee
     
-    async def get_data(self, gas_l2: int, value: int):
+    async def get_tx_data(self, gas_l2: int, value: int):
         contract_txn = await self.contract.functions.deposit(
                     value,
                     int(self.starknet_address, 16)
@@ -81,17 +81,14 @@ class Starkgate:
 
         try:
             gas_l2 = await self.get_l2_gas(self.value)
-
-            contract_txn = await self.get_data(gas_l2, 1)
-            gasLimit = await self.manager.web3.eth.estimate_gas(contract_txn)
+            contract_txn = await self.get_tx_data(gas_l2, 1)
 
             if self.bridge_all_balance:
-                bridgeValue = int(self.value - contract_txn["gasPrice"]*gasLimit*1.1 - gas_l2)
+                bridgeValue = int(self.value - contract_txn["gasPrice"]*contract_txn["gas"]*1.1 - gas_l2)
             else:
                 bridgeValue = self.value
 
-            contract_txn = await self.get_data(gas_l2, bridgeValue)
-            contract_txn = await self.manager.add_gas_limit_layerzero(contract_txn)
+            contract_txn = await self.get_tx_data(gas_l2, bridgeValue)
 
             if self.manager.get_total_fee(contract_txn) == False: return False
 

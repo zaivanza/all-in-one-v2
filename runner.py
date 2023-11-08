@@ -29,6 +29,8 @@ MODULES = {
     17: ("starknet_bridge", Starkgate), 
     18: ("base_bridge", BaseBridge), 
     19: ("arbitrum_bridge", ArbitrumBridge), 
+    20: ("zora_bridge", ZoraBridge), 
+    21: ("zksync_bridge", ZkSyncBridge)
 }
 
 def get_module(module):
@@ -59,7 +61,6 @@ async def worker(func, key, number, retry=0):
         logger.error(f'{func_instance.module_str} | tx is failed | {tx_link}')
         return await retry_worker(func_instance, key, number, retry)
     else:
-        list_send.append(f'{STR_CANCEL}{func_instance.module_str}')
         return await retry_worker(func_instance, key, number, retry)
 
 async def retry_worker(func, key, number, retry):

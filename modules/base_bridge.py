@@ -37,7 +37,7 @@ class BaseBridge:
         self.amount = await self.manager.get_amount_in(self.keep_value_from, self.keep_value_to, self.bridge_all_balance, '', self.amount_from, self.amount_to)
         self.token_data = await self.manager.get_token_info('')
         self.value = intToDecimal(self.amount, 18)
-        self.module_str = f'{self.number} {self.manager.address} | base_bridge : {self.from_chain} => {self.to_chain}'
+        self.module_str = f'{self.number} {self.manager.address} | base_bridge'
 
     async def get_txn(self):
 

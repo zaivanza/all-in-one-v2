@@ -1,23 +1,20 @@
 from config import STR_CANCEL
-from .utils.contracts.abi import ABI_ARBITRUM_BRIDGE
-from .utils.contracts.contract import arbitrum_bridge_contracts
+from .utils.contracts.abi import ABI_ZORA_BRIDGE
 from .utils.helpers import round_to, list_send, intToDecimal
 from .utils.manager_async import Web3ManagerAsync
-from setting import Value_ArbitrumBridge
+from setting import Value_ZoraBridge
 
 from loguru import logger
 from web3 import Web3
 
-class ArbitrumBridge:
+class ZoraBridge:
     
     def __init__(self, key, number, params=None):
-        self.from_chain = "ethereum"
         self.params = params
-        self.key = key
-        self.number = number
+        self.from_chain = "ethereum"
+        self.to_chain = "zora"
 
         if self.params:
-            self.to_chain = self.params['to_chain']
             self.amount_from = self.params['amount_from']
             self.amount_to = self.params['amount_to']
             self.bridge_all_balance = self.params['bridge_all_balance']
@@ -25,29 +22,37 @@ class ArbitrumBridge:
             self.keep_value_from = self.params['keep_value_from']
             self.keep_value_to = self.params['keep_value_to']
         else:
-            self.to_chain = Value_ArbitrumBridge.to_chain
-            self.amount_from = Value_ArbitrumBridge.amount_from
-            self.amount_to = Value_ArbitrumBridge.amount_to
-            self.bridge_all_balance = Value_ArbitrumBridge.bridge_all_balance
-            self.min_amount_bridge = Value_ArbitrumBridge.min_amount_bridge
-            self.keep_value_from = Value_ArbitrumBridge.keep_value_from
-            self.keep_value_to = Value_ArbitrumBridge.keep_value_to
+            self.amount_from = Value_ZoraBridge.amount_from
+            self.amount_to = Value_ZoraBridge.amount_to
+            self.bridge_all_balance = Value_ZoraBridge.bridge_all_balance
+            self.min_amount_bridge = Value_ZoraBridge.min_amount_bridge
+            self.keep_value_from = Value_ZoraBridge.keep_value_from
+            self.keep_value_to = Value_ZoraBridge.keep_value_to
+
+        self.key = key
+        self.number = number
 
     async def setup(self):
         self.manager = Web3ManagerAsync(self.key, self.from_chain)
         self.amount = await self.manager.get_amount_in(self.keep_value_from, self.keep_value_to, self.bridge_all_balance, '', self.amount_from, self.amount_to)
         self.token_data = await self.manager.get_token_info('')
         self.value = intToDecimal(self.amount, 18)
-        self.module_str = f'{self.number} {self.manager.address} | arbitrum_bridge : to {self.to_chain}'
-        self.contract = self.manager.web3.eth.contract(address=Web3.to_checksum_address(arbitrum_bridge_contracts[self.to_chain]), abi=ABI_ARBITRUM_BRIDGE)
+        self.module_str = f'{self.number} {self.manager.address} | zora_bridge'
+        self.contract = self.manager.web3.eth.contract(address=Web3.to_checksum_address("0x1a0ad011913A150f69f6A19DF447A0CfD9551054"), abi=ABI_ZORA_BRIDGE)
 
     async def get_txn(self):
 
         try:
-            contract_txn = await self.contract.functions.depositEth().build_transaction(
+            contract_txn = await self.contract.functions.depositTransaction(
+                    self.manager.address, # _to
+                    self.value, # _value
+                    100000, # _gasLimit
+                    False, # _isCreation
+                    "0x01" # _data
+                ).build_transaction(
                 {
                     "from": self.manager.address,
-                    "value": self.amount,
+                    "value": self.value,
                     "nonce": await self.manager.web3.eth.get_transaction_count(self.manager.address),
                     'gasPrice': 0,
                     'gas': 0,
@@ -56,6 +61,11 @@ class ArbitrumBridge:
 
             contract_txn = await self.manager.add_gas_price(contract_txn)
             contract_txn = await self.manager.add_gas_limit(contract_txn)
+
+            print(contract_txn)
+
+            import time
+            time.sleep(10)
 
             if self.manager.get_total_fee(contract_txn) == False: return False
 

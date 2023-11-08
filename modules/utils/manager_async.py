@@ -123,7 +123,7 @@ class Web3ManagerAsync:
             return status, tx_link
         except Exception as error:
             logger.error(error)
-            return False, False
+            return False, error
 
     async def get_amount_in(self, keep_from, keep_to, all_balance, token, amount_from, amount_to, multiplier=1):
 
