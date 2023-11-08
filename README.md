@@ -1,8 +1,8 @@
 [![Typing SVG](https://readme-typing-svg.herokuapp.com?color=%2336BCF7&lines=All-in-one+V2)](https://git.io/typing-svg)
 
-Идеальный софт для ведения фермы.
-
 The README in English can be found here: [README_eng.md](https://github.com/zaivanza/all-in-one-v2/blob/main/README_eng.md).
+
+Идеальный софт для ведения фермы.
 
 ## Основные модули
 
