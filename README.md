@@ -23,6 +23,8 @@ Perfect Script-V2 for Farming Management.
 17. **[starkgate_bridge](https://starkgate.starknet.io/)**: Official bridge from Ethereum to Starknet. 
 18. **[base_bridge](https://bridge.base.org/deposit)**: Official bridge from Ethereum to Base.
 19. **[arbitrum_bridge](https://bridge.arbitrum.io/?l2ChainId=42161)**: Official bridge from Ethereum to Arbitrum One / Arbitrum Nova.
+20. **[zora_bridge](https://bridge.zora.energy/)**: Official bridge from Ethereum to Zora.
+21. **[zksync_bridge](https://portal.txsync.io/bridge/)**: Official bridge from Ethereum to ZkSync.
 
 ## Additional Information:
 
@@ -98,6 +100,8 @@ For updates and entertaining content, join our public chat: [hodlmodeth](https:/
 17. [starkgate_bridge](https://starkgate.starknet.io/) : официальный бридж с ethereum на starknet. 
 18. [base_bridge](https://bridge.base.org/deposit) : официальный бридж с ethereum на base.
 19. [arbitrum_bridge](https://bridge.arbitrum.io/?l2ChainId=42161) : официальный бридж с ethereum на arbitrum one / arbitrum nova.
+20. [zora_bridge](https://bridge.zora.energy/) : официальный бридж с ethereum на zora.
+21. [zksync_bridge](https://portal.txsync.io/bridge/) : официальный бридж с ethereum на zksync.
 
 Дополнительная информация :
 1. Все результаты прописываются не только в терминал, но и в тг-бота.
