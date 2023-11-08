@@ -36,8 +36,8 @@ MODULE:
 14. zerius_refuel
 15. nft_checker
 16. zerius_onft
-17. starkgate_bridge (eth => starknet)
-18. base_bridge (eth => base)
+17. starkgate_bridge
+18. base_bridge 
 19. arbitrum_bridge
 20. zora_bridge
 21. zksync_bridge
