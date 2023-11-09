@@ -1,6 +1,6 @@
 from .utils.helpers import func_chunks_generators, round_to
 from .utils.files import call_json
-from data.data import DATA
+from datas.data import DATA
 from config import PROXIES, WALLETS, DEBANK_ACTIVATE_CHAINS
 from setting import Value_DeBank
 

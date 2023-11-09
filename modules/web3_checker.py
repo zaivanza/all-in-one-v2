@@ -1,4 +1,4 @@
-from data.data import DATA
+from datas.data import DATA
 from config import WALLETS, ERC20_ABI
 from setting import Value_Web3_Checker
 from .utils.helpers import round_to

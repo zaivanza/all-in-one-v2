@@ -1,4 +1,4 @@
-from data.data import DATA
+from datas.data import DATA
 from .utils.contracts.abi import ABI_BUNGEE_REFUEL
 from .utils.contracts.contract import BUNGEE_REFUEL_CONTRACTS
 from config import STR_CANCEL, BUNGEE_LIMITS

@@ -1,6 +1,6 @@
-data/data.py
-data/wallets.txt
-data/proxies.txt
+datas/data.py
+datas/wallets.txt
+datas/proxies.txt
 test.py
 test.json
 results/debank.csv

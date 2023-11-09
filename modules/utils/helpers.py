@@ -1,4 +1,4 @@
-from data.data import DATA, TG_TOKEN, TG_ID
+from datas.data import DATA, TG_TOKEN, TG_ID
 from setting import MAX_GWEI
 
 import time, json, requests
@@ -32,7 +32,6 @@ def round_to(num, digits=3):
 
 def get_base_gas():
     try:
-        
         web3 = Web3(Web3.HTTPProvider(DATA['ethereum']['rpc']))
         gas_price = web3.eth.gas_price
         gwei_gas_price = web3.from_wei(gas_price, 'gwei')
@@ -43,12 +42,9 @@ def get_base_gas():
         return get_base_gas()
 
 def wait_gas():
-
     logger.info(f'check gas')
     while True:
-
         current_gas = get_base_gas()
-
         if current_gas > MAX_GWEI:
             logger.info(f'current_gas : {current_gas} > {MAX_GWEI}')
             time.sleep(60)

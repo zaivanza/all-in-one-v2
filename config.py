@@ -184,10 +184,10 @@ STR_CANCEL = '❌ '
 
 ERC20_ABI = load_json("modules/utils/contracts/erc20.json")
 MULTICALL_ABI = load_json("modules/utils/contracts/multicall_abi.json")
-WALLETS = read_txt("data/wallets.txt")
-RECIPIENTS = read_txt("data/recipients.txt")
-STARKNET_ADDRESS = read_txt("data/starknet_address.txt")
-PROXIES = read_txt("data/proxies.txt")
+WALLETS = read_txt("datas/wallets.txt")
+RECIPIENTS = read_txt("datas/recipients.txt")
+STARKNET_ADDRESS = read_txt("datas/starknet_address.txt")
+PROXIES = read_txt("datas/proxies.txt")
 ORBITER_MAKER = load_json("modules/utils/contracts/orbiter_maker.json")
 ABI_ZERIUS_REFUEL = load_json("modules/utils/contracts/zerius_refuel.json")
 

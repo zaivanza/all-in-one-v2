@@ -1,4 +1,4 @@
-from data.data import DATA
+from datas.data import DATA
 from .utils.helpers import func_chunks_generators
 from config import WALLETS
 from setting import Value_Txn_Checker

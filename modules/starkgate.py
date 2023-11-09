@@ -4,7 +4,7 @@ from .utils.helpers import round_to, list_send, intToDecimal
 from .utils.manager_async import Web3ManagerAsync
 from starknet_py.hash.selector import get_selector_from_name
 from starknet_py.net.full_node_client import FullNodeClient
-from data.data import DATA
+from datas.data import DATA
 from setting import Value_Starkgate
 
 from loguru import logger

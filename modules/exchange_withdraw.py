@@ -1,4 +1,4 @@
-from data.data import OKX_KEYS, CEX_KEYS, DATA
+from datas.data import OKX_KEYS, CEX_KEYS, DATA
 from config import STR_DONE, STR_CANCEL
 from setting import Value_Exchange, Value_OKX, RETRY
 from .utils.helpers import list_send, async_sleeping, round_to

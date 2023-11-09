@@ -11,7 +11,7 @@ import asyncio, aiohttp
 
 from .contracts.contract import MULTICALL_ETH_CONTRACTS, MULTICALL_CONTRACTS
 from config import ERC20_ABI, MULTICALL_ABI
-from data.data import DATA
+from datas.data import DATA
 from .helpers import decimalToInt
 import math
 

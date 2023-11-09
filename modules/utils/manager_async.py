@@ -1,4 +1,4 @@
-from data.data import DATA
+from datas.data import DATA
 from config import ERC20_ABI, max_time_check_tx_status, PRICES_NATIVE, WALLET_PROXIES
 from setting import MAX_GAS_CHARGE, USE_PROXY, RETRY
 from .helpers import sleeping, decimalToInt, round_to
