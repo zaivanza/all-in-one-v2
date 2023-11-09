@@ -64,14 +64,12 @@ To enable track mode:
 
 Install the required libraries by running: `pip install -r requirements.txt`
 
-Please exercise caution when using the code, as it may contain errors. We are not responsible for any losses. It is advisable to conduct thorough testing with small amounts before proceeding.
+> Please exercise caution when using the code, as it may contain errors. We are not responsible for any losses. It is advisable to conduct thorough testing with small amounts before proceeding. We kindly request that you read the instructions carefully, perform testing, and conduct online research before reaching out with questions in the code chat. Please refrain from sending code-related queries to admins privately, as they will not respond.
 
-We kindly request that you read the instructions carefully, perform testing, and conduct online research before reaching out with questions in the code chat. Please refrain from sending code-related queries to admins privately, as they will not respond.
-
-Donations (EVM): 
+## Donations (EVM): 
 - `0xb7415DB78c886c67DBfB25D3Eb7fcd496dAf9021`
 - `donates-for-hodlmod.eth`
 
-Links:
+## Links:
 - https://t.me/links_hodlmodeth
 - Code chat: [[ code ]](https://t.me/code_hodlmodeth)
