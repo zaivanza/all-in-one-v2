@@ -79,7 +79,8 @@ class Starknet:
                 #     logger.info(f'Request timed out: {attempt}/{max_attempt}')
 
                 except Exception as e:
-                    logger.error(f"An error occurred: {e}. {attempt}/{max_attempt}")
+                    pass
+                    # logger.info(f"An error occurred: {e}. {attempt}/{max_attempt}")
 
                 if attempt <= max_attempt:
                     await asyncio.sleep(1)  # Sleep for a bit before retrying
