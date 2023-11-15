@@ -10,27 +10,28 @@ import random
 import asyncio
 
 MODULES = {
-    1: ("web3_checker", Web3Checker),
-    2: ("debank_checker", DeBank),
-    3: ("exchange_withdraw", ExchangeWithdraw),
-    4: ("okx_withdraw", OkxWithdraw),
-    5: ("transfer", Transfer),
-    6: ("0x_swap", ZeroXswap),
-    7: ("orbiter_bridge", OrbiterBridge),
-    8: ("woofi_bridge", WoofiBridge), 
-    9: ("woofi_swap", WoofiSwap), 
-    10: ("sushiswap", SushiSwap),  
-    11: ("bungee_refuel", BungeeRefuel),
-    12: ("tx_checker", TxChecker),  
-    13: ("1inch_swap", InchSwap),
-    14: ("zerius_refuel", ZeriusRefuel), 
-    15: ("nft_checker", NFTChecker), 
-    16: ("zerius_onft", Zerius), 
-    17: ("starknet_bridge", Starkgate), 
-    18: ("base_bridge", BaseBridge), 
-    19: ("arbitrum_bridge", ArbitrumBridge), 
-    20: ("zora_bridge", ZoraBridge), 
-    21: ("zksync_bridge", ZkSyncBridge)
+    1: ("balance_checker", EvmBalanceChecker),
+    2: ("starknet_balance_checker", StarknetBalanceChecker),
+    3: ("debank_checker", DeBank),
+    4: ("exchange_withdraw", ExchangeWithdraw),
+    5: ("okx_withdraw", OkxWithdraw),
+    6: ("transfer", Transfer),
+    7: ("0x_swap", ZeroXswap),
+    8: ("orbiter_bridge", OrbiterBridge),
+    9: ("woofi_bridge", WoofiBridge), 
+    10: ("woofi_swap", WoofiSwap), 
+    11: ("sushiswap", SushiSwap),  
+    12: ("bungee_refuel", BungeeRefuel),
+    13: ("tx_checker", TxChecker),  
+    14: ("1inch_swap", InchSwap),
+    15: ("zerius_refuel", ZeriusRefuel), 
+    16: ("nft_checker", NFTChecker), 
+    17: ("zerius_onft", Zerius), 
+    18: ("starknet_bridge", Starkgate), 
+    19: ("base_bridge", BaseBridge), 
+    20: ("arbitrum_bridge", ArbitrumBridge), 
+    21: ("zora_bridge", ZoraBridge), 
+    22: ("zksync_bridge", ZkSyncBridge),
 }
 
 def get_module(module):
@@ -197,9 +198,9 @@ async def main(module):
     if RANDOMIZER:
         random.shuffle(WALLETS)
 
-    if module in [1, 2, 12, 15]:
+    if module in [1, 2, 3, 13, 16]:
         await func().start()
-    elif module == 16:
+    elif module == 17:
         await func()
     else:
         if module in [3, 4]:

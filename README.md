@@ -6,32 +6,33 @@ The README in English can be found here: [README_eng.md](https://github.com/zaiv
 
 ## Основные модули
 
-1. **web3_checker**: Асинхронная проверка баланса любых токенов в любой EVM сети.
-2. **debank_checker**: Асинхронная проверка всех токенов, NFT и протоколов в EVM сетях, доступных на [DeBank](https://debank.com/).
-3. **exchange_withdraw**: Вывод монет с таких бирж, как Binance, MEXC, KuCoin, Bybit, Huobi, Bitget.
-4. **[okx_withdraw](https://www.okx.com/)**: Вывод с биржи OKX, включая вывод с суб-аккаунтов, представлен как отдельный модуль.
-5. **transfer**: Трансфер (перевод) монет с кошельков в EVM сетях.
-6. **0x_swap**: Агрегатор, альтернатива 1inch для обмена токенов.
-7. **[orbiter](https://www.orbiter.finance/)**: Бридж ETH во всех сетях. Для бриджа на StarkNet необходимо добавить адреса в `starknet_address.txt`.
-8. **[woofi_bridge](https://fi.woo.org/)**: Бридж через WooFi (LayerZero), поддерживает все доступные монеты и сети.
-9. **[woofi_swap](https://fi.woo.org/)**: Обмен токенов через WooFi, доступны все монеты и сети.
-10. **[sushiswap](https://www.sushi.com/swap)**: Обмен токенов, поддерживает все основные сети, кроме Optimism.
-11. **[bungee_refuel](https://www.bungee.exchange/refuel)**: Бридж для нативных токенов между сетями.
-12. **tx_checker**: Проверка nonce во всех EVM сетях.
-13. **[1inch_swap](https://app.1inch.io/)**: Агрегатор для обмена токенов.
-14. **[zerkly_refuel](https://zerius.io/)**: Рефуел газа между сетями через LayerZero.
-15. **nft_checker**: Асинхронная проверка баланса NFT.
-16. **[zerius_onft](https://zerius.io/)**: Минт и бридж NFT через LayerZero.
-17. **[starkgate_bridge](https://starkgate.starknet.io/)**: Бридж с Ethereum на StarkNet.
-18. **[base_bridge](https://bridge.base.org/deposit)**: Бридж с Ethereum на Base.
-19. **[arbitrum_bridge](https://bridge.arbitrum.io/?l2ChainId=42161)**: Бридж с Ethereum на Arbitrum One / Arbitrum Nova.
-20. **[zora_bridge](https://bridge.zora.energy/)**: Бридж с Ethereum на Zora.
-21. **[zksync_bridge](https://portal.txsync.io/bridge/)**: Бридж с Ethereum на zkSync.
+1. **evm_balance_checker**: Асинхронная проверка баланса любых токенов в любой EVM сети.
+2. **starknet_balance_checker**: Асинхронная проверка баланса токенов в Starknet.
+3. **debank_checker**: Асинхронная проверка всех токенов, NFT и протоколов в EVM сетях, доступных на [DeBank](https://debank.com/).
+4. **exchange_withdraw**: Вывод монет с таких бирж, как Binance, MEXC, KuCoin, Bybit, Huobi, Bitget.
+5. **[okx_withdraw](https://www.okx.com/)**: Вывод с биржи OKX, включая вывод с суб-аккаунтов, представлен как отдельный модуль.
+6. **transfer**: Трансфер (перевод) монет с кошельков в EVM сетях.
+7. **0x_swap**: Агрегатор, альтернатива 1inch для обмена токенов.
+8. **[orbiter](https://www.orbiter.finance/)**: Бридж ETH во всех сетях. Для бриджа на StarkNet необходимо добавить адреса в `starknet_address.txt`.
+9. **[woofi_bridge](https://fi.woo.org/)**: Бридж через WooFi (LayerZero), поддерживает все доступные монеты и сети.
+10. **[woofi_swap](https://fi.woo.org/)**: Обмен токенов через WooFi, доступны все монеты и сети.
+11. **[sushiswap](https://www.sushi.com/swap)**: Обмен токенов, поддерживает все основные сети, кроме Optimism.
+12. **[bungee_refuel](https://www.bungee.exchange/refuel)**: Бридж для нативных токенов между сетями.
+13. **tx_checker**: Проверка nonce во всех EVM сетях.
+14. **[1inch_swap](https://app.1inch.io/)**: Агрегатор для обмена токенов.
+15. **[zerkly_refuel](https://zerius.io/)**: Рефуел газа между сетями через LayerZero.
+16. **nft_checker**: Асинхронная проверка баланса NFT.
+17. **[zerius_onft](https://zerius.io/)**: Минт и бридж NFT через LayerZero.
+18. **[starkgate_bridge](https://starkgate.starknet.io/)**: Бридж с Ethereum на StarkNet.
+19. **[base_bridge](https://bridge.base.org/deposit)**: Бридж с Ethereum на Base.
+20. **[arbitrum_bridge](https://bridge.arbitrum.io/?l2ChainId=42161)**: Бридж с Ethereum на Arbitrum One / Arbitrum Nova.
+21. **[zora_bridge](https://bridge.zora.energy/)**: Бридж с Ethereum на Zora.
+22. **[zksync_bridge](https://portal.txsync.io/bridge/)**: Бридж с Ethereum на zkSync.
 
 ## Дополнительная Информация
 
 - Все результаты дублируются в терминал и телеграм-бота.
-- **web3_checker** и **nft_checker** используют multicall для ускорения трекинга.
+- **evm_balance_checker** и **nft_checker** используют multicall для ускорения трекинга.
 - Возможность включить прокси в web3. Работает это так : берет все твои кошельки и поочередно берет прокси из файла `proxies.txt`. То есть распределение на прокси будет равным. Кол-во кошельков и прокси может отличаться. Например, если будет 10 кошельков и 3 прокси, то распределение будет такое : прокси_1 = 4 кошелька, прокси_2 = 3 кошелька, прокси_3 = 3 кошелька.
 - Для каждой сети установлена максимальная плата за газ. Если стоимость газа превышает установленный лимит, скрипт ожидает снижения цены (`setting.py => MAX_GAS_CHARGE`).
 - Транзакции, висящие в статусе pending более установленного времени (`config.py => max_time_check_tx_status`), автоматически считаются выполненными чтобы избежать задержек, особенно в сети BSC.

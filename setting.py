@@ -42,26 +42,28 @@ MAX_GAS_CHARGE = {
     'linea'         : 0.5,
 }
 
-class Value_Web3_Checker:
+class Value_EVM_Balance_Checker:
 
     '''
-    Coin checker using web3
+    Coins checker
     Chains : ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | nova | zksync | polygon_zkevm | celo | gnosis | core | harmony | linea | base
     '''
 
-    datas = {
+    # Comment out the chain / token if you do not want to check the balance of that chain / token
+    evm_tokens = {
         'bsc': [
             '', # BNB
             '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d', # USDC
             '0x55d398326f99059ff775485246999027b3197955', # USDT
             '0xe9e7cea3dedca5984780bafc599bd69add087d56', # BUSD
-            '0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B', # SnBNB
+            # '0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B', # SnBNB
             ],
         'arbitrum': [
             '', # ETH
             '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9', # USDT
             '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8', # USDC
-            '0x6694340fc020c5e6b96567843da2df01b2ce1eb6', # STG
+            # '0x6694340fc020c5e6b96567843da2df01b2ce1eb6', # STG
+            '0x912ce59144191c1204e64559fe8253a0e49e6548', # ARB
             ],
         'optimism': [
             '', # ETH
@@ -96,9 +98,9 @@ class Value_Web3_Checker:
         'polygon_zkevm': [
             '', # ETH
             ],
-        'celo': [
-            '', # CELO
-            ],
+        # 'celo': [
+        #     '', # CELO
+        #     ],
         'gnosis': [
             '', # xDAI
             ],
@@ -117,12 +119,33 @@ class Value_Web3_Checker:
     }
 
     min_token_balance = {
-    'chain'     : 'bsc',
-    'coin'      : 'BNB',
-    'amount'    : 0 # If the balance is less than this amount, the wallet will be highlighted
-}
+        'chain'     : 'bsc',
+        'coin'      : 'BNB',
+        'amount'    : 0 # If the balance is less than this amount, the wallet will be highlighted
+    }
 
     min_value_balance = 5 # If the wallet balance in $ is less than this amount, the wallet will be highlighted    
+    
+class Value_Starknet_Balance_Checker:
+    '''
+    Starknet Balance Checker
+    '''
+
+    # Comment out the token if you do not want to check the balance of that token
+    starknet_tokens = [
+        "ETH", 
+        # "USDC",
+        # "USDT",
+        # "DAI",
+        # "WBTC",
+    ]
+    
+    min_token_balance = {
+        'symbol': 'ETH',
+        'amount': 0.005 # If the balance is less than this amount, the wallet will be highlighted
+    }
+
+    min_value_balance = 15 # If the wallet balance in $ is less than this amount, the wallet will be highlighted    
     
 class Value_DeBank:
 

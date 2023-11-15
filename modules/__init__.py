@@ -5,7 +5,7 @@ from .orbiter import OrbiterBridge
 from .sushiswap import SushiSwap
 from .transfer import Transfer
 from .woofi import WoofiBridge, WoofiSwap
-from .web3_checker import Web3Checker
+from .balance_checker import EvmBalanceChecker, StarknetBalanceChecker
 from .debank import DeBank
 from .tx_checker import TxChecker
 from .inch_swap import InchSwap

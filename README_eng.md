@@ -4,32 +4,33 @@ Perfect Script for Farming Management.
 
 ## Modules:
 
-1. **web3_checker**: Quickly (asynchronously) checks the balance of any token on any EVM network.
-2. **debank_checker**: Swiftly (asynchronously) inspects tokens, NFTs, and protocols across multiple EVM networks (available on [DeBank](https://debank.com/)).
-3. **exchange_withdraw**: Withdraws assets from exchanges like Binance, MEXC, KuCoin, Bybit, Huobi, and Bitget.
-4. **[okx_withdraw](https://www.okx.com/)**: Withdraws assets from the OKX exchange, including sub-account withdrawals (handled as a separate module due to sub-account functionality).
-5. **transfer**: Transfers assets from wallets to EVM networks.
-6. **0x_swap**: Utilizes an aggregator as an alternative to 1inch for token swaps.
-7. **[orbiter](https://www.orbiter.finance/)**: Bridges Ethereum assets to various networks, including ZKSync Era and StarkNet. To bridge to StarkNet, add StarkNet wallet addresses to the `starknet_address.txt` file.
-8. **[woofi_bridge](https://fi.woo.org/)**: Bridges assets using the WooFi bridge via Stargate (LayerZero), supporting a wide range of tokens and networks.
-9. **[woofi_swap](https://fi.woo.org/)**: Swaps tokens using the WooFi swap feature, which is versatile and supports numerous tokens and networks.
-10. **[sushiswap](https://www.sushi.com/swap)**: Executes swaps on SushiSwap, accessible on major networks except for Optimism (currently).
-11. **[bungee_refuel](https://www.bungee.exchange/refuel)**: Cost-effective bridge for transferring native tokens between networks.
-12. **tx_checker**: Monitors nonces across nearly all EVM networks.
-13. **[1inch_swap](https://app.1inch.io/)**: Leverages the 1inch aggregator for token swaps.
-14. **[zerius_refuel](https://zerius.io/)**: Transfers gas from one network to another via LayerZero.
-15. **nft_checker**: Swiftly (asynchronously) checks the balance of specific NFTs.
-16. **[zerius_onft](https://zerius.io/)**: Mint and bridge nft via layerzero; ideal for warming up networks.
-17. **[starkgate_bridge](https://starkgate.starknet.io/)**: Bridge from Ethereum to Starknet. 
-18. **[base_bridge](https://bridge.base.org/deposit)**: Bridge from Ethereum to Base.
-19. **[arbitrum_bridge](https://bridge.arbitrum.io/?l2ChainId=42161)**: Bridge from Ethereum to Arbitrum One / Arbitrum Nova.
-20. **[zora_bridge](https://bridge.zora.energy/)**: Bridge from Ethereum to Zora.
-21. **[zksync_bridge](https://portal.txsync.io/bridge/)**: Bridge from Ethereum to ZkSync.
+1. **evm_balance_checker**: Quickly (asynchronously) checks the balance of any token on any EVM network.
+2. **starknet_balance_checker**: Quickly (asynchronously) checks the balance of tokens on Starknet network.
+3. **debank_checker**: Swiftly (asynchronously) inspects tokens, NFTs, and protocols across multiple EVM networks (available on [DeBank](https://debank.com/)).
+4. **exchange_withdraw**: Withdraws assets from exchanges like Binance, MEXC, KuCoin, Bybit, Huobi, and Bitget.
+5. **[okx_withdraw](https://www.okx.com/)**: Withdraws assets from the OKX exchange, including sub-account withdrawals (handled as a separate module due to sub-account functionality).
+6. **transfer**: Transfers assets from wallets to EVM networks.
+7. **0x_swap**: Utilizes an aggregator as an alternative to 1inch for token swaps.
+8. **[orbiter](https://www.orbiter.finance/)**: Bridges Ethereum assets to various networks, including ZKSync Era and StarkNet. To bridge to StarkNet, add StarkNet wallet addresses to the `starknet_address.txt` file.
+9. **[woofi_bridge](https://fi.woo.org/)**: Bridges assets using the WooFi bridge via Stargate (LayerZero), supporting a wide range of tokens and networks.
+10. **[woofi_swap](https://fi.woo.org/)**: Swaps tokens using the WooFi swap feature, which is versatile and supports numerous tokens and networks.
+11. **[sushiswap](https://www.sushi.com/swap)**: Executes swaps on SushiSwap, accessible on major networks except for Optimism (currently).
+12. **[bungee_refuel](https://www.bungee.exchange/refuel)**: Cost-effective bridge for transferring native tokens between networks.
+13. **tx_checker**: Monitors nonces across nearly all EVM networks.
+14. **[1inch_swap](https://app.1inch.io/)**: Leverages the 1inch aggregator for token swaps.
+15. **[zerius_refuel](https://zerius.io/)**: Transfers gas from one network to another via LayerZero.
+16. **nft_checker**: Swiftly (asynchronously) checks the balance of specific NFTs.
+17. **[zerius_onft](https://zerius.io/)**: Mint and bridge nft via layerzero; ideal for warming up networks.
+18. **[starkgate_bridge](https://starkgate.starknet.io/)**: Bridge from Ethereum to Starknet. 
+19. **[base_bridge](https://bridge.base.org/deposit)**: Bridge from Ethereum to Base.
+20. **[arbitrum_bridge](https://bridge.arbitrum.io/?l2ChainId=42161)**: Bridge from Ethereum to Arbitrum One / Arbitrum Nova.
+21. **[zora_bridge](https://bridge.zora.energy/)**: Bridge from Ethereum to Zora.
+22. **[zksync_bridge](https://portal.txsync.io/bridge/)**: Bridge from Ethereum to ZkSync.
 
 ## Additional Information:
 
 - All results are duplicated to the terminal and a Telegram bot.
-- **web3_checker** and **nft_checker** use multicall to speed up tracking.
+- **evm_balance_checker** and **nft_checker** use multicall to speed up tracking.
 - The ability to enable proxies in web3. It works as follows: it takes all your wallets and sequentially uses proxies from the `proxies.txt` file. Thus, the distribution of proxies will be even. The number of wallets and proxies may differ. For example, if there are 10 wallets and 3 proxies, the distribution will be: proxy_1 = 4 wallets, proxy_2 = 3 wallets, proxy_3 = 3 wallets.
 - A maximum gas fee is set for each network. If the gas cost exceeds the set limit, the script will wait for the price to decrease (`setting.py => MAX_GAS_CHARGE`).
 - Transactions that remain in pending status for more than the set time (`config.py => max_time_check_tx_status`) are automatically considered completed to avoid delays, especially in the BSC network.

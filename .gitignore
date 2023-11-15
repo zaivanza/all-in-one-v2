@@ -8,6 +8,8 @@ results/debank.txt
 results/nft_balances.csv
 results/tx_checker.csv
 results/web3_balances.csv
+results/balances.csv
+results/starknet_balances.csv
 results/zerius_refuel.csv
 
 # Byte-compiled / optimized / DLL files
