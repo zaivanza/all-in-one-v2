@@ -188,7 +188,7 @@ WALLETS = read_txt("datas/wallets.txt")
 RECIPIENTS = read_txt("datas/recipients.txt")
 STARKNET_ADDRESS = read_txt("datas/starknet_address.txt")
 PROXIES = read_txt("datas/proxies.txt")
-ORBITER_MAKER = load_json("modules/utils/contracts/orbiter_maker.json")
+ORBITER_MAKER = load_json("modules/utils/contracts/orbiter_maker.json") # https://github.com/Orbiter-Finance/OrbiterFE-V2/tree/main/src/config (maker-1 / maker-2)
 ABI_ZERIUS_REFUEL = load_json("modules/utils/contracts/zerius_refuel.json")
 
 RECIPIENTS_WALLETS = dict(zip(WALLETS, RECIPIENTS))
