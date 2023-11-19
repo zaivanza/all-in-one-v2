@@ -43,8 +43,8 @@ To configure the script:
 
 1. Adjust settings in the `setting.py` file, following the descriptions within.
 2. If you plan to run multiple modules sequentially, configure them in the `tracks.py` file.
-3. In the `data` folder, rename files as follows: `wallets_EXAMPLE.txt` to `wallets.txt`, `proxies_EXAMPLE.txt` to `proxies.txt`, `data_EXAMPLE.py` to `data.py`.
-4. Within the `data` folder, you'll find five files:
+3. In the `datas` folder, rename files as follows: `wallets_EXAMPLE.txt` to `wallets.txt`, `proxies_EXAMPLE.txt` to `proxies.txt`, `data_EXAMPLE.py` to `data.py`.
+4. Within the `datas` folder, you'll find five files:
    - `wallets.txt`: Add wallets (private keys/addresses) here.
    - `recipients.txt`: Add recipient addresses for transfers, used in the transfer module when transferring from a wallet to an address. One wallet corresponds to one address.
    - `proxies.txt`: Add proxies for use in the debank checker. They are also used in web3 if `USE_PROXY = True` (in the config). The format is: `http://login:password@ip:port`.
