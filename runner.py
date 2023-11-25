@@ -32,6 +32,7 @@ MODULES = {
     20: ("arbitrum_bridge", ArbitrumBridge), 
     21: ("zora_bridge", ZoraBridge), 
     22: ("zksync_bridge", ZkSyncBridge),
+    23: ("rocketsam", RocketSam),
 }
 
 def get_module(module):
@@ -85,7 +86,7 @@ async def process_exchanges(func, wallets):
             logger.info(f'sleep for {time_sleep} sec.')
             await asyncio.sleep(time_sleep)
 
-async def process_batches(func, wallets):
+async def process_batches(func, wallets, module):
     batches = [wallets[i:i + WALLETS_IN_BATCH] for i in range(0, len(wallets), WALLETS_IN_BATCH)]
 
     number = 0
@@ -97,7 +98,10 @@ async def process_batches(func, wallets):
         for key in batch:
             number += 1
             if is_private_key(key):
-                tasks.append(asyncio.create_task(worker(func, key, f'[{number}/{len(wallets)}]')))
+                if module == 23: # RocketSam
+                    tasks.append(asyncio.create_task(func(key, f'[{number}/{len(wallets)}]').main()))
+                else:
+                    tasks.append(asyncio.create_task(worker(func, key, f'[{number}/{len(wallets)}]')))
             else:
                 logger.error(f"{key} isn't private key")
         res = await asyncio.gather(*tasks)
@@ -206,5 +210,5 @@ async def main(module):
         if module in [3, 4]:
             await process_exchanges(func, WALLETS)
         else:
-            await process_batches(func, WALLETS)
+            await process_batches(func, WALLETS, module)
 

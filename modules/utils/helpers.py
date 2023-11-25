@@ -1,9 +1,7 @@
-from datas.data import DATA, TG_TOKEN, TG_ID
-from setting import MAX_GWEI
-
-import time, json, requests
+import time
 from loguru import logger
-from web3 import Web3
+from web3 import Web3, AsyncHTTPProvider
+from web3.eth import AsyncEth
 import random
 import telebot
 import math
@@ -11,14 +9,15 @@ from tqdm import tqdm
 import asyncio, aiohttp
 from eth_account import Account
 
+from datas.data import DATA, TG_TOKEN, TG_ID
+from setting import MAX_GWEI
+
 list_send = []
 def send_msg():
-
     try:
         str_send = '\n'.join(list_send)
         bot = telebot.TeleBot(TG_TOKEN)
         bot.send_message(TG_ID, str_send, parse_mode='html')  
-
     except Exception as error: 
         logger.error(error)
 
@@ -30,21 +29,20 @@ def round_to(num, digits=3):
         return round(num, scale)
     except: return num
 
-def get_base_gas():
+async def get_base_gas():
     try:
-        web3 = Web3(Web3.HTTPProvider(DATA['ethereum']['rpc']))
-        gas_price = web3.eth.gas_price
+        web3 = Web3(AsyncHTTPProvider(DATA['ethereum']['rpc']), modules={"eth": (AsyncEth)}, middlewares=[])
+        gas_price = await web3.eth.gas_price
         gwei_gas_price = web3.from_wei(gas_price, 'gwei')
         return gwei_gas_price
-    
     except Exception as error: 
         logger.error(error)
-        return get_base_gas()
+        return await get_base_gas()
 
-def wait_gas():
+async def wait_gas():
     logger.info(f'check gas')
     while True:
-        current_gas = get_base_gas()
+        current_gas = await get_base_gas()
         if current_gas > MAX_GWEI:
             logger.info(f'current_gas : {current_gas} > {MAX_GWEI}')
             time.sleep(60)
@@ -76,7 +74,6 @@ def get_wallet_proxies(wallets, proxies):
 
 async def fetch_price(session, symbol):
     url = f'https://min-api.cryptocompare.com/data/price?fsym={symbol}&tsyms=USDT'
-
     try:
         async with session.get(url, timeout=10) as resp:
             if resp.status == 200:
@@ -114,7 +111,6 @@ async def get_chain_prices():
     }
 
     prices = {chain: 0 for chain in chains.keys()}
-
     async with aiohttp.ClientSession() as session:
         tasks = [fetch_price(session, symbol) for symbol in chains.values()]
         fetched_prices = await asyncio.gather(*tasks)

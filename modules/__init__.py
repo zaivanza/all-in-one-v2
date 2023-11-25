@@ -17,3 +17,4 @@ from .starkgate import Starkgate
 from .arbitrum_bridge import ArbitrumBridge
 from .zora_bridge import ZoraBridge
 from .zksync_bridge import ZkSyncBridge
+from .rocketsam import RocketSam

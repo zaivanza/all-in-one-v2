@@ -42,8 +42,9 @@ MODULE:
 20. arbitrum_bridge
 21. zora_bridge
 22. zksync_bridge
+23. rocketsam
 
-Choose a module (1 - 22) : '''))
+Choose a module (1 - 23) : '''))
 
         asyncio.run(main(MODULE))
 

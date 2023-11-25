@@ -134,8 +134,8 @@ class Value_Starknet_Balance_Checker:
     # Comment out the token if you do not want to check the balance of that token
     starknet_tokens = [
         "ETH", 
-        # "USDC",
-        # "USDT",
+        "USDC",
+        "USDT",
         # "DAI",
         # "WBTC",
     ]
@@ -278,7 +278,7 @@ class Value_Orbiter:
 
     '''
     Bridge ETH via https://www.orbiter.finance/
-    Chains: zksync | ethereum | bsc | arbitrum | optimism | polygon_zkevm | nova | starknet | linea | base | scroll
+    Chains: zksync | ethereum | bsc | arbitrum | optimism | polygon_zkevm | nova | starknet | linea | base | scroll | zora
     Minimum bridge amount: 0.005
     '''
 
@@ -579,3 +579,22 @@ class Value_ZkSyncBridge:
     min_amount_bridge   = 0 # If the balance is less than this amount, no bridge will be made
     keep_value_from     = 0 # How many coins to keep on the wallet (only works when: bridge_all_balance = True)
     keep_value_to       = 0 # Up to how many coins to keep on the wallet (only works when: bridge_all_balance = True)
+
+class Value_RocketSam:
+    """
+    Module Options:
+    1. Deposit.
+    2. Deposit + Withdraw.
+    3. Withdraw from all pools.
+
+    Available chains: arbitrum | base | nova | linea | scroll | zora
+    """
+
+    module = 2 # Option selection for the module's behavior (valid options: 1, 2, or 3)
+
+    chain = ["arbitrum"] # List of blockchain networks to interact with
+    
+    amount_interactions = [1, 1] # Range of the number of times to interact with contracts, range should be >= 1 for both values
+    deposit_all_balance = False # Flag to deposit the entire wallet balance (set to True to activate)
+    keep_values = [0, 0] # Range of native tokens to retain in the wallet balance (effective only when deposit_all_balance = True). Specify the minimum and maximum amount to keep
+    deposit_value = [0.001, 0.005] # Range for deposit value in native tokens (effective only when deposit_all_balance = False). Specify the minimum and maximum deposit amount
