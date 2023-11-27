@@ -92,7 +92,7 @@ async def process_batches(func, wallets, module):
     number = 0
     for batch in batches:
         if CHECK_GWEI:
-            wait_gas()
+            await wait_gas()
 
         tasks = []
         for key in batch:
@@ -178,7 +178,7 @@ async def main_tracks():
     number = 0
     for batch in batches:
         if CHECK_GWEI:
-            wait_gas()
+            await wait_gas()
 
         tasks = []
         for key in batch:
