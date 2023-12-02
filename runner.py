@@ -207,7 +207,7 @@ async def main(module):
     elif module == 17:
         await func()
     else:
-        if module in [3, 4]:
+        if module in [4, 5]:
             await process_exchanges(func, WALLETS)
         else:
             await process_batches(func, WALLETS, module)
