@@ -13,7 +13,7 @@ RETRY = 0               # Number of retries on errors/failures
 TG_BOT_SEND = True      # Enable/disable sending results to a Telegram bot
 
 USE_PROXY = False       # Enable/disable proxy usage in web3 requests
-CHECK_GWEI = True       # Enable/disable base Gwei checking
+CHECK_GWEI = False       # Enable/disable base Gwei checking
 MAX_GWEI = 30           # Maximum Gwei (see https://etherscan.io/gastracker)
 
 # Maximum transaction fee in USD, at which the script will sleep for 30 seconds and retry
@@ -183,7 +183,7 @@ class Value_Exchange:
 
     '''
     Withdraw coins from an exchange.
-    Exchanges: binance | bybit | kucoin | mexc | huobi | bitget
+    Exchanges: binance | bybit | kucoin | mexc | huobi | bitget | coinex
 
     Chains:
     - binance: ETH | BEP20 | AVAXC | MATIC | ARBITRUM | OPTIMISM | APT
@@ -192,15 +192,16 @@ class Value_Exchange:
     - mexc
     - huobi
     - bitget: zkSyncEra | ArbitrumNova | ArbitrumOne | ETH / ERC20 | Optimism | BEP20 | TRC20 | Polygon | Aptos | CELO | CoreDAO | Harmony
+    - coinex
     '''
 
-    exchange    = 'binance' # Specify the exchange here
+    exchange    = 'coinex' # Specify the exchange here
 
-    chain       = 'BEP20' # In which network to withdraw
-    symbol      = 'USDT' # Which token to withdraw
+    chain       = 'Mantle' # In which network to withdraw
+    symbol      = 'MNT' # Which token to withdraw
 
-    amount_from = 175 # Withdrawal from a certain amount of coins
-    amount_to   = 176 # Withdrawal up to a certain amount of coins
+    amount_from = 0.9 # Withdrawal from a certain amount of coins
+    amount_to   = 0.9 # Withdrawal up to a certain amount of coins
 
     is_private_key = False # Set to True if you have inserted EVM private keys in wallets.txt. Set to False if you have addresses (EVM / non-EVM).
 
