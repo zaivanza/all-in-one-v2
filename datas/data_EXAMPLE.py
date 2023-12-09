@@ -143,6 +143,12 @@ DATA = {
         "scan": "https://starkscan.co/tx",
         "token": "ETH",
         "chain_id": None
+    },
+    "mantle": {
+        "rpc": "https://1rpc.io/mantle",
+        "scan": "https://explorer.mantle.xyz/tx",
+        "token": "MNT",
+        "chain_id": 5000
     }
 }
 

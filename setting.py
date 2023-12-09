@@ -124,8 +124,8 @@ class Value_EVM_Balance_Checker:
         'amount'    : 0 # If the balance is less than this amount, the wallet will be highlighted
     }
 
-    min_value_balance = 5 # If the wallet balance in $ is less than this amount, the wallet will be highlighted    
-    
+    min_value_balance = 5 # If the wallet balance in $ is less than this amount, the wallet will be highlighted
+
 class Value_Starknet_Balance_Checker:
     '''
     Starknet Balance Checker
@@ -145,7 +145,7 @@ class Value_Starknet_Balance_Checker:
         'amount': 0.005 # If the balance is less than this amount, the wallet will be highlighted
     }
 
-    min_value_balance = 15 # If the wallet balance in $ is less than this amount, the wallet will be highlighted    
+    min_value_balance = 0 # If the wallet balance in $ is less than this amount, the wallet will be highlighted    
     
 class Value_DeBank:
 
@@ -196,11 +196,11 @@ class Value_Exchange:
 
     exchange    = 'binance' # Specify the exchange here
 
-    chain       = 'APT' # In which network to withdraw
-    symbol      = 'APT' # Which token to withdraw
+    chain       = 'BEP20' # In which network to withdraw
+    symbol      = 'USDT' # Which token to withdraw
 
-    amount_from = 0.05 # Withdrawal from a certain amount of coins
-    amount_to   = 0.05 # Withdrawal up to a certain amount of coins
+    amount_from = 175 # Withdrawal from a certain amount of coins
+    amount_to   = 176 # Withdrawal up to a certain amount of coins
 
     is_private_key = False # Set to True if you have inserted EVM private keys in wallets.txt. Set to False if you have addresses (EVM / non-EVM).
 
@@ -238,7 +238,7 @@ class Value_Transfer:
 
     '''
     Withdraw (transfer) coins from wallets
-    Chains: ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | nova | zksync | celo | gnosis | core | harmony | base | linea | polygon_zkevm
+    Chains: ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | nova | zksync | celo | gnosis | core | harmony | base | linea | polygon_zkevm | mantle
     '''
 
     chain                = 'polygon_zkevm' # Network to withdraw to
@@ -282,16 +282,16 @@ class Value_Orbiter:
     Minimum bridge amount: 0.005
     '''
 
-    from_chain          = ['arbitrum'] # From which network
-    to_chain            = ['base'] # To which network
+    from_chain          = ['optimism'] # From which network
+    to_chain            = ['zksync'] # To which network
 
     amount_from         = 0.006 # Bridge from a certain amount of coins
     amount_to           = 0.008 # Bridge up to a certain amount of coins
 
-    bridge_all_balance  = False # True / False. If True, then bridge the entire balance
-    min_amount_bridge   = 0 # If the balance is less than this amount, no bridge will be made
-    keep_value_from     = 0 # How many coins to keep on the wallet (only works when: bridge_all_balance = True)
-    keep_value_to       = 0 # Up to how many coins to keep on the wallet (only works when: bridge_all_balance = True)
+    bridge_all_balance  = True # True / False. If True, then bridge the entire balance
+    min_amount_bridge   = 0.005 # If the balance is less than this amount, no bridge will be made
+    keep_value_from     = 0.0001 # How many coins to keep on the wallet (only works when: bridge_all_balance = True)
+    keep_value_to       = 0.0002 # Up to how many coins to keep on the wallet (only works when: bridge_all_balance = True)
 
 class Value_Woofi_Bridge:
 
@@ -365,16 +365,16 @@ class Value_Bungee:
     Chains: zksync | polygon | ethereum | bsc | arbitrum | optimism | fantom | polygon_zkevm | avalanche | gnosis | base
     '''
 
-    from_chain          = ['base'] # From which network
+    from_chain          = ['optimism'] # From which network
     to_chain            = ['zksync'] # To which network
 
     amount_from         = 0.0013 # Refuel from a certain amount of coins
     amount_to           = 0.002 # Refuel up to a certain amount of coins
 
-    bridge_all_balance  = False # True / False. If True, then refuel the entire balance
-    min_amount_bridge   = 0 # If the balance is less than this amount, no refuel will be made
-    keep_value_from     = 0 # How many coins to keep on the wallet (only works when: bridge_all_balance = True)
-    keep_value_to       = 0 # Up to how many coins to keep on the wallet (only works when: bridge_all_balance = True)
+    bridge_all_balance  = True # True / False. If True, then refuel the entire balance
+    min_amount_bridge   = 0.002 # If the balance is less than this amount, no refuel will be made
+    keep_value_from     = 0.0001 # How many coins to keep on the wallet (only works when: bridge_all_balance = True)
+    keep_value_to       = 0.0002 # Up to how many coins to keep on the wallet (only works when: bridge_all_balance = True)
 
 class Value_Txn_Checker:
 
@@ -428,10 +428,10 @@ class Value_Zerius_Refuel:
     Gas refuel via https://zerius.io
 
     from_chains : optimism | bsc | polygon | arbitrum | avalanche | fantom | linea | celo | zksync (temp disabled) | polygon_zkevm | nova | canto | zora | scroll | harmony | gnosis | core | base | mantle
-    to_chains   : avalanche | bsc | arbitrum | optimism | fantom | harmony | celo | moonbeam | gnosis | metis | core | polygon_zkevm | canto | zksync | nova | zora | base | scroll
+    to_chains   : avalanche | bsc | arbitrum | optimism | fantom | harmony | celo | moonbeam | gnosis | metis | core | polygon_zkevm | canto | zksync | nova | zora | base | scroll | mantle
     '''
 
-    from_chain = ['bsc'] # Networks from which you want to perform refuel (>= 1 network)
+    from_chain = ['bsc', 'polygon'] # Networks from which you want to perform refuel (>= 1 network)
     to_chain   = ['core', 'metis', 'nova', 'gnosis', 'celo', 'moonbeam'] # Networks to which you want to perform refuel (>= 1 network)
 
     amount_from         = 0.000001 # Obtain from a certain amount of native token of the to_chain network
@@ -442,7 +442,7 @@ class Value_Zerius_Refuel:
     keep_value_from     = 0 # How many coins to keep on the wallet (only works when: swap_all_balance = True)
     keep_value_to       = 0 # Up to how many coins to keep on the wallet (only works when: swap_all_balance = True)
 
-    get_layerzero_fee   = False # True if you want to check the gas. False if you want to perform refuel
+    get_layerzero_fee   = True # True if you want to check the gas. False if you want to perform refuel
 
 class Value_NFT_Checker:
     
@@ -459,7 +459,7 @@ class Value_Zerius_ONFT:
 
     '''
     https://zerius.io : Mint and bridge nft via layerzero; ideal for warming up networks.
-    Chains : arbitrum | optimism | bsc | polygon | base | avalanche | ethereum | scroll | zksync | linea | nova | zora | polygon_zkevm | fantom | core | celo | harmony | canto
+    Chains : arbitrum | optimism | bsc | polygon | base | avalanche | ethereum | scroll | zksync | linea | nova | zora | polygon_zkevm | fantom | core | celo | harmony | canto | starknet | mantle
     '''
 
     class ValueMintBridge:
