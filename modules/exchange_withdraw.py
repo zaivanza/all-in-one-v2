@@ -152,7 +152,7 @@ class OkxWithdraw:
 
             if result['code'] == '0':
                 logger.success(f"withdraw success => {self.address} | {self.amount} {self.symbol}")
-                list_send.append(f'{STR_DONE}okx_withdraw | {self.amount} {self.symbol}')
+                list_send.append(f'{STR_DONE}{self.module_str} ')
                 return True
             else:
                 error = result['msg']
@@ -160,7 +160,7 @@ class OkxWithdraw:
                 if retry < RETRY:
                     return await retry_attempt()
                 else:
-                    list_send.append(f"{STR_CANCEL}okx_withdraw :  {result['msg']}")
+                    list_send.append(f"{STR_CANCEL}{self.module_str} :  {result['msg']}")
                     return False
 
         except Exception as error:
@@ -239,7 +239,7 @@ class ExchangeWithdraw:
                 params = params
             )
             logger.success(f"{self.exchange}_withdraw success => {self.address} | {self.amount} {self.symbol}")
-            list_send.append(f'{STR_DONE}{self.exchange}_withdraw | {self.amount} {self.symbol}')
+            list_send.append(f'{STR_DONE}{self.module_str}')
             await account.close()
 
             return True

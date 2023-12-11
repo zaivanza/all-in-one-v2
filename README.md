@@ -9,7 +9,7 @@ The README in English can be found here: [README_eng.md](https://github.com/zaiv
 1. **evm_balance_checker**: Асинхронная проверка баланса любых токенов в любой EVM сети.
 2. **starknet_balance_checker**: Асинхронная проверка баланса токенов в Starknet.
 3. **debank_checker**: Асинхронная проверка всех токенов, NFT и протоколов в EVM сетях, доступных на [DeBank](https://debank.com/).
-4. **exchange_withdraw**: Вывод монет с таких бирж, как Binance, MEXC, KuCoin, Bybit, Huobi, Bitget.
+4. **exchange_withdraw**: Вывод монет с таких бирж, как Binance, MEXC, KuCoin, Bybit, Huobi, Bitget, CoinEx.
 5. **[okx_withdraw](https://www.okx.com/)**: Вывод с биржи OKX, включая вывод с суб-аккаунтов, представлен как отдельный модуль.
 6. **transfer**: Трансфер (перевод) монет с кошельков в EVM сетях.
 7. **0x_swap**: Агрегатор, альтернатива 1inch для обмена токенов.

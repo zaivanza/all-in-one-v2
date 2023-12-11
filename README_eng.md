@@ -7,7 +7,7 @@ Perfect Script for Farming Management.
 1. **evm_balance_checker**: Quickly (asynchronously) checks the balance of any token on any EVM network.
 2. **starknet_balance_checker**: Quickly (asynchronously) checks the balance of tokens on Starknet network.
 3. **debank_checker**: Swiftly (asynchronously) inspects tokens, NFTs, and protocols across multiple EVM networks (available on [DeBank](https://debank.com/)).
-4. **exchange_withdraw**: Withdraws assets from exchanges like Binance, MEXC, KuCoin, Bybit, Huobi, and Bitget.
+4. **exchange_withdraw**: Withdraws assets from exchanges like Binance, MEXC, KuCoin, Bybit, Huobi, Bitget, CoinEx.
 5. **[okx_withdraw](https://www.okx.com/)**: Withdraws assets from the OKX exchange, including sub-account withdrawals (handled as a separate module due to sub-account functionality).
 6. **transfer**: Transfers assets from wallets to EVM networks.
 7. **0x_swap**: Utilizes an aggregator as an alternative to 1inch for token swaps.
