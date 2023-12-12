@@ -160,6 +160,7 @@ CEX_KEYS = {
     'huobi'     : {'api_key': 'your_api_key', 'api_secret': 'your_api_secret'},
     'bybit'     : {'api_key': 'your_api_key', 'api_secret': 'your_api_secret'},
     'bitget'    : {'api_key': 'your_api_key', 'api_secret': 'your_api_secret', 'password': 'your_api_password'},
+    'coinex'    : {'api_key': 'your_api_key', 'api_secret': 'your_api_secret'},
 }
 
 # You can add any number of OKX accounts in the following format. This allows you to avoid constantly entering data for new accounts and simply reference them by name.
