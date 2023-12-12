@@ -885,7 +885,7 @@ async def process_batches(func, wallets):
         res = []
         try:
             if CHECK_GWEI:
-                wait_gas()
+                await wait_gas()
 
             tasks = []
             for key in batch:
