@@ -87,7 +87,7 @@ class RocketSam:
             if self.deposit_all_balance:
                 if module   == 1: multiplier = 1
                 elif module == 2: multiplier = self.GAS_MULTIPLIER 
-                amount = int(self.value - fee - (contract_txn["gas"] * contract_txn["gasPrice"] * multiplier) * 0.9999) - self.keep_values
+                amount = int(self.value - fee - (contract_txn["gas"] * contract_txn["gasPrice"] * multiplier) * 0.9999) - round(random.uniform(*self.keep_values), 8)
                 value = int(amount + fee)
             else:
                 amount = self.value
