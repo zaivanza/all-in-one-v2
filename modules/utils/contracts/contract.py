@@ -171,7 +171,7 @@ ZERIUS_REFUEL_CONTRACTS = {
     'zora'          : '0x1fe2c567169d39CCc5299727FfAC96362b2Ab90E',
     'linea'         : '0x5B209E7c81DEaad0ffb8b76b696dBb4633A318CD',
     'metis'         : '0x1b07F1f4F860e72c9367e718a30e38130114AD22',
-    'mantle'        : ''
+    'mantle'        : '0x4F1C698e5cA32b28030E9d9F17C164F27aB5D866'
 }
 
 MULTICALL_ETH_CONTRACTS = {
