@@ -189,6 +189,7 @@ class ExchangeWithdraw:
             self.amount_to = self.params['amount_to']
             self.exchange = self.params['exchange']
             self.is_private_key = self.params['is_private_key']
+            self.account = self.params['account']
         else:
             self.chain = Value_Exchange.chain
             self.symbol = Value_Exchange.symbol
@@ -196,6 +197,7 @@ class ExchangeWithdraw:
             self.amount_to = Value_Exchange.amount_to
             self.exchange = Value_Exchange.exchange
             self.is_private_key = Value_Exchange.is_private_key
+            self.account = Value_Exchange.account
 
         self.address = get_address(key, self.is_private_key)
         self.amount = round(random.uniform(self.amount_from, self.amount_to), 7)
@@ -218,6 +220,9 @@ class ExchangeWithdraw:
                 'defaultType': 'spot'
             }
         }
+
+        if self.account == "funding":
+            dict_["options"]["defaultType"] = self.account
 
         if self.exchange in ['kucoin', 'bitget']:
             dict_['password'] = CEX_KEYS[self.exchange]['password']

@@ -30,6 +30,7 @@ all_modules = [
             'amount_from': 10,
             'amount_to': 15.5,
             'is_private_key': False,
+            'account': 'spot'
         },
     },
     {
