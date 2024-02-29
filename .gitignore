@@ -11,6 +11,7 @@ results/web3_balances.csv
 results/balances.csv
 results/starknet_balances.csv
 results/zerius_refuel.csv
+setting.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
