@@ -41,7 +41,7 @@ Perfect Script for Farming Management.
 
 To configure the script:
 
-1. Adjust settings in the `setting.py` file, following the descriptions within.
+1. Adjust settings in the `setting.py` file, following the descriptions within. You need to rename `setting_EXAMPLE.py` to `setting.py`
 2. If you plan to run multiple modules sequentially, configure them in the `tracks.py` file.
 3. In the `datas` folder, rename files as follows: `wallets_EXAMPLE.txt` to `wallets.txt`, `proxies_EXAMPLE.txt` to `proxies.txt`, `data_EXAMPLE.py` to `data.py`.
 4. Within the `datas` folder, you'll find five files:
