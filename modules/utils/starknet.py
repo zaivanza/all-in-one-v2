@@ -18,6 +18,10 @@ def split_dict(input_dict, chunk_size):
 
 class Starknet:
 
+    def __init__(self) -> None:
+        self.rpc_url = "https://starknet-mainnet.reddio.com/rk-6098aacd-4e54-4a68-a8c7-c3922de4c790"
+        self.timeout = 5 # Set your desired maximum wait time in seconds
+
     def get_token_decimals(self, token_contract: str) -> int:
         decimals = {
             '0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8' : 6,   # USDC
@@ -25,6 +29,8 @@ class Starknet:
             '0x00da114221cb83fa859dbdb4c44beeaa0bb37c7537ad5ae66fe5e0efd20e6eb3' : 18,  # DAI
             '0x03fe2b97c1fd336e750087d68b9b867997fd64a2661ff3ca5a7c771641e8e7ac' : 8,   # WBTC
             '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7' : 18,  # ETH
+            '0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d' : 18,  # STRK
+            '0x07c2e1e733f28daa23e78be3a4f6c724c0ab06af65f6a95b5e0545215f1abc1b' : 18,  # iSTRK-c
         }
         return decimals[token_contract.lower()]
 
@@ -34,35 +40,44 @@ class Starknet:
             'USDT' : '0x068f5c6a61780768455de69077e07e89787839bf8166decfbf92b645209c0fb8',
             'DAI'  : '0x00da114221cb83fa859dbdb4c44beeaa0bb37c7537ad5ae66fe5e0efd20e6eb3',
             'WBTC' : '0x03fe2b97c1fd336e750087d68b9b867997fd64a2661ff3ca5a7c771641e8e7ac',
-            'ETH'  : '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7'
+            'ETH'  : '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
+            'STRK' : '0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d',
+            'iSTRK-c': '0x07c2e1e733f28daa23e78be3a4f6c724c0ab06af65f6a95b5e0545215f1abc1b',
         }
         return contracts[token_symbol]
 
     async def get_balance(self, token_symbol: str, wallet: str) -> dict:
         token_contract = self.get_token_address(token_symbol)
         token_decimals = self.get_token_decimals(token_contract)
-        json_data = {
-            'signature': [],
-            'contract_address': token_contract.lower(),
-            'entry_point_selector': '0x2e4263afad30923c891518314c3c95dbe830a16874e8abc5777a9a20b54c76e',
-            'calldata': [wallet],
-        }
+
         async with aiohttp.ClientSession() as session:
             attempt = 1
             max_attempt = 5
-            timeout = 5 # Set your desired maximum wait time in seconds
+            
             while attempt <= max_attempt:  
                 try:
-                    request_kwargs = {
-                        'url': 'https://alpha-mainnet.starknet.io/feeder_gateway/call_contract',
-                        'params': {'blockNumber': 'pending'},
-                        'json': json_data,
-                        'timeout': timeout
+                    payload = {
+                        "id": 1,
+                        "jsonrpc": "2.0",
+                        "method": "starknet_call",
+                        "params": [
+                            {
+                                "contract_address": token_contract,
+                                "calldata": [wallet],
+                                "entry_point_selector": "0x2e4263afad30923c891518314c3c95dbe830a16874e8abc5777a9a20b54c76e",
+                            },
+                            "latest",
+                        ]
                     }
+
+                    request_kwargs = {
+                        "timeout": self.timeout
+                    }
+
                     if PROXIES:
                         request_kwargs['proxy'] = random.choice(PROXIES)
                         
-                    async with session.post(**request_kwargs) as response:
+                    async with session.post(url=self.rpc_url, json=payload, **request_kwargs) as response:
                         if response.status == 200: 
                             response_json = await response.json()
                             balance = int(response_json['result'][0], 0)

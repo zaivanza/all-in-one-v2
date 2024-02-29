@@ -296,7 +296,7 @@ class StarknetBalanceChecker:
         for token, balance in self.total_balance.items():
             cprint(f'{token}: {round_to(balance)}', 'white')
         cprint(f'\nTOTAL VALUE : {total_value} $', 'blue')
-        cprint(f'\nResults written to file: {self.file_name}.csv\n', 'white')
+        cprint(f'\nResults written to file: results/{self.file_name}.csv\n', 'white')
 
     def generate_csv(self, send_table, small_wallets, small_wallets_value):
         with open(f'results/{self.file_name}.csv', 'w', newline='') as csvfile:
