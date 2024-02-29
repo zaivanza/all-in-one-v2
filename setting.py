@@ -7,13 +7,13 @@ USE_TRACKS = False      # Enable/disable tracks
 TRACK = track_1         # Change to the track variable from routes.py
 
 IS_SLEEP = True         # Enable/disable delay between wallets
-DELAY_SLEEP = [10, 35]  # Delay range between wallets (seconds)
+DELAY_SLEEP = [30, 60]  # Delay range between wallets (seconds)
 RANDOMIZER = True       # Enable/disable random wallet shuffling
 RETRY = 0               # Number of retries on errors/failures
-TG_BOT_SEND = True      # Enable/disable sending results to a Telegram bot
+TG_BOT_SEND = False      # Enable/disable sending results to a Telegram bot
 
 USE_PROXY = False       # Enable/disable proxy usage in web3 requests
-CHECK_GWEI = True       # Enable/disable base Gwei checking
+CHECK_GWEI = False       # Enable/disable base Gwei checking
 MAX_GWEI = 30           # Maximum Gwei (see https://etherscan.io/gastracker)
 
 # Maximum transaction fee in USD, at which the script will sleep for 30 seconds and retry
@@ -41,6 +41,7 @@ MAX_GAS_CHARGE = {
     'metis'         : 0.5,
     'linea'         : 0.5,
     'mantle'        : 0.5,
+    'zeta'          : 0.5
 }
 
 class Value_EVM_Balance_Checker:
@@ -52,50 +53,51 @@ class Value_EVM_Balance_Checker:
 
     # Comment out the chain / token if you do not want to check the balance of that chain / token
     evm_tokens = {
-        'bsc': [
-            '', # BNB
-            '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d', # USDC
-            '0x55d398326f99059ff775485246999027b3197955', # USDT
-            '0xe9e7cea3dedca5984780bafc599bd69add087d56', # BUSD
-            # '0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B', # SnBNB
-            ],
-        'arbitrum': [
-            '', # ETH
-            '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9', # USDT
-            '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8', # USDC
-            # '0x6694340fc020c5e6b96567843da2df01b2ce1eb6', # STG
-            '0x912ce59144191c1204e64559fe8253a0e49e6548', # ARB
-            ],
-        'optimism': [
-            '', # ETH
-            '0x7f5c764cbc14f9669b88837ca1490cca17c31607', # USDC
-            '0x4200000000000000000000000000000000000042', # OP
-            '0x94b008aa00579c1307b0ef2c499ad98a8ce58e58', # USDT
-            ],
-        'polygon': [
-            '', # MATIC
-            '0xc2132d05d31c914a87c6611c10748aeb04b58e8f', # USDT
-            '0x2791bca1f2de4661ed88a30c99a7a9449aa84174', # USDC
-            ],
+        # 'bsc': [
+        #     '', # BNB
+        #     '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d', # USDC
+        #     '0x55d398326f99059ff775485246999027b3197955', # USDT
+        #     # '0xe9e7cea3dedca5984780bafc599bd69add087d56', # BUSD
+        #     # '0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B', # SnBNB
+        #     ],
+        # 'arbitrum': [
+        #     '', # ETH
+        #     '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9', # USDT
+        #     '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8', # USDC
+        #     # '0x6694340fc020c5e6b96567843da2df01b2ce1eb6', # STG
+        #     # '0x912ce59144191c1204e64559fe8253a0e49e6548', # ARB
+        #     ],
+        # # 'optimism': [
+        # #     '', # ETH
+        # #     '0x7f5c764cbc14f9669b88837ca1490cca17c31607', # USDC
+        # #     '0x4200000000000000000000000000000000000042', # OP
+        # #     '0x94b008aa00579c1307b0ef2c499ad98a8ce58e58', # USDT
+        # #     ],
+        # 'polygon': [
+        #     '', # MATIC
+        #     '0xc2132d05d31c914a87c6611c10748aeb04b58e8f', # USDT
+        #     '0x2791bca1f2de4661ed88a30c99a7a9449aa84174', # USDC
+        #     ],
         'avalanche': [
             '', # AVAX
-            '0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7', # USDT
+            # '0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7', # USDT
             ],
-        'ethereum': [
-            '', # ETH
-            '0xdac17f958d2ee523a2206206994597c13d831ec7', # USDT
-            '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', # USDC
-            '0xaf5191b0de278c7286d6c7cc6ab6bb8a73ba2cd6', # STG
-            ],
-        'zksync': [
-            '', # ETH
-            ],
-        'nova': [
-            '', # ETH
-            ],
-        'fantom': [
-            '', # FTM
-            ],
+        # 'ethereum': [
+        #     '', # ETH
+        #     '0xdac17f958d2ee523a2206206994597c13d831ec7', # USDT
+        #     '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', # USDC
+        #     # '0xaf5191b0de278c7286d6c7cc6ab6bb8a73ba2cd6', # STG
+        #     # '0xb131f4a55907b10d1f0a50d8ab8fa09ec342cd74', # MEME
+        #     ],
+        # 'zksync': [
+        #     '', # ETH
+        #     ],
+        # 'nova': [
+        #     '', # ETH
+        #     ],
+        # 'fantom': [
+        #     '', # FTM
+        #     ],
         # 'polygon_zkevm': [
         #     '', # ETH
         #     ],
@@ -126,9 +128,9 @@ class Value_EVM_Balance_Checker:
     }
 
     min_token_balance = {
-        'chain'     : 'mantle',
-        'coin'      : 'MNT',
-        'amount'    : 0.5 # If the balance is less than this amount, the wallet will be highlighted
+        'chain'     : 'avalanche',
+        'coin'      : 'AVAX',
+        'amount'    : 0.02 # If the balance is less than this amount, the wallet will be highlighted
     }
 
     min_value_balance = 0 # If the wallet balance in $ is less than this amount, the wallet will be highlighted
@@ -140,11 +142,13 @@ class Value_Starknet_Balance_Checker:
 
     # Comment out the token if you do not want to check the balance of that token
     starknet_tokens = [
-        "ETH", 
+        # "ETH", 
         # "USDC",
         # "USDT",
         # "DAI",
         # "WBTC",
+        "STRK",
+        "iSTRK-c" # Nostra
     ]
     
     min_token_balance = {
@@ -190,7 +194,7 @@ class Value_Exchange:
 
     '''
     Withdraw coins from an exchange.
-    Exchanges: binance | bybit | kucoin | mexc | huobi | bitget | coinex
+    Exchanges: binance | bybit | kucoin | mexc | huobi | bitget | coinex | bingx
 
     Chains:
     - binance: ETH | BEP20 | AVAXC | MATIC | ARBITRUM | OPTIMISM | APT
@@ -200,15 +204,17 @@ class Value_Exchange:
     - huobi
     - bitget: zkSyncEra | ArbitrumNova | ArbitrumOne | ETH / ERC20 | Optimism | BEP20 | TRC20 | Polygon | Aptos | CELO | CoreDAO | Harmony
     - coinex
+    - bingx
+    - ascendex
     '''
 
-    exchange    = 'bybit' # Specify the exchange here
+    exchange    = 'bitget' # Specify the exchange here
 
-    chain       = 'Mantle' # In which network to withdraw
-    symbol      = 'MNT' # Which token to withdraw
+    chain       = 'BEP20' # In which network to withdraw
+    symbol      = 'USDT' # Which token to withdraw
 
-    amount_from = 10.1 # Withdrawal from a certain amount of coins
-    amount_to   = 12.3 # Withdrawal up to a certain amount of coins
+    amount_from = 1.5 # Withdrawal from a certain amount of coins
+    amount_to   = 2.2 # Withdrawal up to a certain amount of coins
 
     is_private_key = False # Set to True if you have inserted EVM private keys in wallets.txt. Set to False if you have addresses (EVM / non-EVM).
 
@@ -231,15 +237,15 @@ class Value_OKX:
     StarkNet
     '''
 
-    chain   = 'Polygon'
-    symbol  = 'MATIC'
+    chain   = 'CORE'
+    symbol  = 'CORE'
 
-    amount_from = 1
-    amount_to   = 2
+    amount_from = 0.7
+    amount_to   = 1
 
-    account = 'account_1'
+    account = 'Leonfed0000'
 
-    fee     = 0.1 # Withdrawal fee
+    fee     = 0.001 # Withdrawal fee
     sub_acc = False # True / False. True if you want to check sub-accounts and first transfer from them to the main account
 
     is_private_key = False # Set to True if you have inserted EVM private keys in wallets.txt. Set to False if you have addresses (EVM / non-EVM).
@@ -248,17 +254,17 @@ class Value_Transfer:
 
     '''
     Withdraw (transfer) coins from wallets
-    Chains: ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | nova | zksync | celo | gnosis | core | harmony | base | linea | polygon_zkevm | mantle
+    Chains: ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | nova | zksync | celo | gnosis | core | harmony | base | linea | polygon_zkevm | mantle | zeta
     '''
 
-    chain                = 'polygon' # Network to withdraw to
-    token_address        = '0x2791bca1f2de4661ed88a30c99a7a9449aa84174' # Leave empty if it's the native token of the network
+    chain                = 'zeta' # Network to withdraw to
+    token_address        = '' # Leave empty if it's the native token of the network
 
-    amount_from          = 0 # Transfer from a certain amount of coins
-    amount_to            = 0 # Transfer up to a certain amount of coins
+    amount_from          = 0.15 # Transfer from a certain amount of coins
+    amount_to            = 0.16 # Transfer up to a certain amount of coins
 
-    transfer_all_balance = True # True / False. If True, then transfer the entire balance
-    min_amount_transfer  = 0.1 # If the balance is less than this amount, no transfer will be made
+    transfer_all_balance = False # True / False. If True, then transfer the entire balance
+    min_amount_transfer  = 0 # If the balance is less than this amount, no transfer will be made
     keep_value_from      = 0 # How many coins to keep on the wallet (only works when: transfer_all_balance = True)
     keep_value_to        = 0 # Up to how many coins to keep on the wallet (only works when: transfer_all_balance = True)
 
@@ -270,12 +276,12 @@ class Value_0x_Swap:
     Chains: ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | celo
     '''
 
-    chain               = 'arbitrum' # Network to perform swaps on
+    chain               = 'polygon' # Network to perform swaps on
     from_token_address  = [''] # Leave empty if it's the native token of the network
-    to_token_address    = ['0xF9CA0EC182a94f6231Df9b14BD147eF7Fb9FA17C'] # Leave empty if it's the native token of the network
+    to_token_address    = ['0x2791bca1f2de4661ed88a30c99a7a9449aa84174'] # Leave empty if it's the native token of the network
 
-    amount_from         = 0.14 # Swap from a certain amount of coins
-    amount_to           = 0.14 # Swap up to a certain amount of coins
+    amount_from         = 0.0001 # Swap from a certain amount of coins
+    amount_to           = 0.00011 # Swap up to a certain amount of coins
 
     swap_all_balance    = False # True / False. If True, then swap the entire balance
     min_amount_swap     = 0 # If the balance is less than this amount, no swap will be made
@@ -353,13 +359,13 @@ class Value_Sushiswap:
     Chains: arbitrum | nova | bsc | polygon | fantom
     '''
     
-    chain = 'nova'
+    chain = 'polygon'
 
     from_token          = [''] # Leave empty if it's the native token of the chain
-    to_token            = ['0x750ba8b76187092B0D1E87E28daaf484d1b5273b'] # Leave empty if it's the native token of the chain
+    to_token            = ['0x2791bca1f2de4661ed88a30c99a7a9449aa84174'] # Leave empty if it's the native token of the chain
 
-    amount_from         = 1 # Swap from a certain amount of from_token
-    amount_to           = 1 # Swap up to a certain amount of from_token
+    amount_from         = 0.0001 # Swap from a certain amount of from_token
+    amount_to           = 0.00015 # Swap up to a certain amount of from_token
 
     swap_all_balance    = False # True / False. If True, then swap the entire balance
     min_amount_swap     = 0 # If the balance is less than this amount, no swap will be made
@@ -441,18 +447,18 @@ class Value_Zerius_Refuel:
     to_chains   : avalanche | bsc | arbitrum | optimism | fantom | harmony | celo | moonbeam | gnosis | metis | core | polygon_zkevm | canto | zksync | nova | zora | base | scroll | mantle
     '''
 
-    from_chain = ['bsc', 'polygon'] # Networks from which you want to perform refuel (>= 1 network)
+    from_chain = ['zksync'] # Networks from which you want to perform refuel (>= 1 network)
     to_chain   = ['core', 'metis', 'nova', 'gnosis', 'celo', 'moonbeam'] # Networks to which you want to perform refuel (>= 1 network)
 
-    amount_from         = 0.000001 # Obtain from a certain amount of native token of the to_chain network
-    amount_to           = 0.00002 # Obtain up to a certain amount of native token of the to_chain network
+    amount_from         = 0.0000001 # Obtain from a certain amount of native token of the to_chain network
+    amount_to           = 0.000002 # Obtain up to a certain amount of native token of the to_chain network
 
     swap_all_balance    = False # True / False. If True, then refuel the entire balance
     min_amount_swap     = 0 # If the balance is less than this amount, no refuel will be made
     keep_value_from     = 0 # How many coins to keep on the wallet (only works when: swap_all_balance = True)
     keep_value_to       = 0 # Up to how many coins to keep on the wallet (only works when: swap_all_balance = True)
 
-    get_layerzero_fee   = True # True if you want to check the gas. False if you want to perform refuel
+    get_layerzero_fee   = False # True if you want to check the gas. False if you want to perform refuel
 
 class Value_NFT_Checker:
     
@@ -597,14 +603,14 @@ class Value_RocketSam:
     2. Deposit + Withdraw.
     3. Withdraw from all pools.
 
-    Available chains: arbitrum | base | nova | linea | scroll | zora | mantle
+    Available chains: arbitrum | base | nova | linea | scroll | zora | mantle | zksync
     """
 
     module = 2 # Option selection for the module's behavior (valid options: 1, 2, or 3)
 
-    chain = ["mantle"] # List of blockchain networks to interact with
+    chain = ["zksync"] # List of blockchain networks to interact with
     
-    amount_interactions = [2, 5] # Range of the number of times to interact with contracts, range should be >= 1 for both values
+    amount_interactions = [1, 2] # Range of the number of times to interact with contracts, range should be >= 1 for both values
     deposit_all_balance = False # Flag to deposit the entire wallet balance (set to True to activate)
-    keep_values = [0, 0] # Range of native tokens to retain in the wallet balance (effective only when deposit_all_balance = True). Specify the minimum and maximum amount to keep
+    keep_values = [0.0003, 0.0005] # Range of native tokens to retain in the wallet balance (effective only when deposit_all_balance = True). Specify the minimum and maximum amount to keep
     deposit_value = [0.00001, 0.001] # Range for deposit value in native tokens (effective only when deposit_all_balance = False). Specify the minimum and maximum deposit amount
