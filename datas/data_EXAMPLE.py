@@ -115,7 +115,7 @@ DATA = {
         "chain_id": 8453
     },
     "zora": {
-        "rpc": "https://rpc.zora.energy",
+        "rpc": "https://zora.rpc.thirdweb.com",
         "scan": "https://zora.superscan.network/tx",
         "token": "ETH",
         "chain_id": 7777777
