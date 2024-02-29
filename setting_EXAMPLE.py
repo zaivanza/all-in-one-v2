@@ -10,11 +10,11 @@ IS_SLEEP = True         # Enable/disable delay between wallets
 DELAY_SLEEP = [30, 60]  # Delay range between wallets (seconds)
 RANDOMIZER = True       # Enable/disable random wallet shuffling
 RETRY = 0               # Number of retries on errors/failures
-TG_BOT_SEND = False      # Enable/disable sending results to a Telegram bot
+TG_BOT_SEND = True      # Enable/disable sending results to a Telegram bot
 
 USE_PROXY = False       # Enable/disable proxy usage in web3 requests
-CHECK_GWEI = False       # Enable/disable base Gwei checking
-MAX_GWEI = 30           # Maximum Gwei (see https://etherscan.io/gastracker)
+CHECK_GWEI = True       # Enable/disable base Gwei checking
+MAX_GWEI = 50           # Maximum Gwei (see https://etherscan.io/gastracker)
 
 # Maximum transaction fee in USD, at which the script will sleep for 30 seconds and retry
 MAX_GAS_CHARGE = {
@@ -53,26 +53,26 @@ class Value_EVM_Balance_Checker:
 
     # Comment out the chain / token if you do not want to check the balance of that chain / token
     evm_tokens = {
-        # 'bsc': [
-        #     '', # BNB
-        #     '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d', # USDC
-        #     '0x55d398326f99059ff775485246999027b3197955', # USDT
-        #     # '0xe9e7cea3dedca5984780bafc599bd69add087d56', # BUSD
-        #     # '0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B', # SnBNB
-        #     ],
-        # 'arbitrum': [
+        'bsc': [
+            '', # BNB
+            '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d', # USDC
+            '0x55d398326f99059ff775485246999027b3197955', # USDT
+            # '0xe9e7cea3dedca5984780bafc599bd69add087d56', # BUSD
+            # '0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B', # SnBNB
+            ],
+        'arbitrum': [
+            '', # ETH
+            '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9', # USDT
+            '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8', # USDC
+            # '0x6694340fc020c5e6b96567843da2df01b2ce1eb6', # STG
+            # '0x912ce59144191c1204e64559fe8253a0e49e6548', # ARB
+            ],
+        # 'optimism': [
         #     '', # ETH
-        #     '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9', # USDT
-        #     '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8', # USDC
-        #     # '0x6694340fc020c5e6b96567843da2df01b2ce1eb6', # STG
-        #     # '0x912ce59144191c1204e64559fe8253a0e49e6548', # ARB
+        #     '0x7f5c764cbc14f9669b88837ca1490cca17c31607', # USDC
+        #     '0x4200000000000000000000000000000000000042', # OP
+        #     '0x94b008aa00579c1307b0ef2c499ad98a8ce58e58', # USDT
         #     ],
-        # # 'optimism': [
-        # #     '', # ETH
-        # #     '0x7f5c764cbc14f9669b88837ca1490cca17c31607', # USDC
-        # #     '0x4200000000000000000000000000000000000042', # OP
-        # #     '0x94b008aa00579c1307b0ef2c499ad98a8ce58e58', # USDT
-        # #     ],
         # 'polygon': [
         #     '', # MATIC
         #     '0xc2132d05d31c914a87c6611c10748aeb04b58e8f', # USDT
@@ -82,13 +82,13 @@ class Value_EVM_Balance_Checker:
             '', # AVAX
             # '0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7', # USDT
             ],
-        # 'ethereum': [
-        #     '', # ETH
-        #     '0xdac17f958d2ee523a2206206994597c13d831ec7', # USDT
-        #     '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', # USDC
-        #     # '0xaf5191b0de278c7286d6c7cc6ab6bb8a73ba2cd6', # STG
-        #     # '0xb131f4a55907b10d1f0a50d8ab8fa09ec342cd74', # MEME
-        #     ],
+        'ethereum': [
+            '', # ETH
+            '0xdac17f958d2ee523a2206206994597c13d831ec7', # USDT
+            '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', # USDC
+            # '0xaf5191b0de278c7286d6c7cc6ab6bb8a73ba2cd6', # STG
+            # '0xb131f4a55907b10d1f0a50d8ab8fa09ec342cd74', # MEME
+            ],
         # 'zksync': [
         #     '', # ETH
         #     ],
@@ -116,15 +116,15 @@ class Value_EVM_Balance_Checker:
         # 'linea': [
         #     '', # ETH
         #     ],
-        # 'base': [
-        #     '', # ETH
-        #     ],
-        # 'scroll': [
-        #     '', # ETH
-        #     ],
-        # 'mantle': [
-        # '', # MNT
-        # ],
+        'base': [
+            '', # ETH
+            ],
+        'scroll': [
+            '', # ETH
+            ],
+        'mantle': [
+        '', # MNT
+        ],
     }
 
     min_token_balance = {
@@ -147,15 +147,16 @@ class Value_Starknet_Balance_Checker:
         # "USDT",
         # "DAI",
         # "WBTC",
-        "STRK"
+        "STRK",
+        "iSTRK-c", # Nostra
     ]
     
     min_token_balance = {
         'symbol': 'ETH',
-        'amount': 0 # If the balance is less than this amount, the wallet will be highlighted
+        'amount': 0.01 # If the balance is less than this amount, the wallet will be highlighted
     }
 
-    min_value_balance = 0 # If the wallet balance in $ is less than this amount, the wallet will be highlighted    
+    min_value_balance = 10 # If the wallet balance in $ is less than this amount, the wallet will be highlighted    
     
 class Value_DeBank:
 
@@ -242,7 +243,7 @@ class Value_OKX:
     amount_from = 0.7
     amount_to   = 1
 
-    account = 'Leonfed0000'
+    account = 'account_1'
 
     fee     = 0.001 # Withdrawal fee
     sub_acc = False # True / False. True if you want to check sub-accounts and first transfer from them to the main account
@@ -253,7 +254,9 @@ class Value_Transfer:
 
     '''
     Withdraw (transfer) coins from wallets
-    Chains: ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | nova | zksync | celo | gnosis | core | harmony | base | linea | polygon_zkevm | mantle | zeta
+    Chains: 
+            ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | nova
+            zksync | celo | gnosis | core | harmony | base | linea | polygon_zkevm | mantle | zeta
     '''
 
     chain                = 'zeta' # Network to withdraw to
@@ -427,7 +430,7 @@ class Value_1inch_Swap:
     from_token_address  = [''] # Leave empty if it's the native token of the network
     to_token_address    = ['0xF9CA0EC182a94f6231Df9b14BD147eF7Fb9FA17C'] # Leave empty if it's the native token of the network
 
-    amount_from         = 0.15 # Swap from a certain amount of coins
+    amount_from         = 0.1 # Swap from a certain amount of coins
     amount_to           = 0.15 # Swap up to a certain amount of coins
 
     swap_all_balance    = False # True / False. If True, then swap the entire balance
@@ -435,7 +438,7 @@ class Value_1inch_Swap:
     keep_value_from     = 0 # How many coins to keep on the wallet (only works when: swap_all_balance = True)
     keep_value_to       = 0 # Up to how many coins to keep on the wallet (only works when: swap_all_balance = True)
 
-    slippage = 20 # Slippage, default is from 1 to 3
+    slippage = 3 # Slippage, default is from 1 to 3
 
 class Value_Zerius_Refuel:
 
@@ -529,8 +532,8 @@ class Value_Starkgate:
     Warning! Add starknet addresses to data/starknet_address.txt
     '''
 
-    amount_from         = 0.005 # Bridge from a certain amount of coins
-    amount_to           = 0.005 # Bridge up to a certain amount of coins
+    amount_from         = 0 # Bridge from a certain amount of coins
+    amount_to           = 0 # Bridge up to a certain amount of coins
 
     bridge_all_balance  = True # True / False. If True, then bridge the entire balance
     min_amount_bridge   = 0 # If the balance is less than this amount, no bridge will be made
@@ -543,8 +546,8 @@ class Value_BaseBridge:
     Bridge from Ethereum to Base via Bridge Base (https://bridge.base.org/deposit)
     '''
 
-    amount_from         = 0.002 # Bridge from a certain amount of coins
-    amount_to           = 0.002 # Bridge up to a certain amount of coins
+    amount_from         = 0.01 # Bridge from a certain amount of coins
+    amount_to           = 0.05 # Bridge up to a certain amount of coins
 
     bridge_all_balance  = False # True / False. If True, then bridge the entire balance
     min_amount_bridge   = 0 # If the balance is less than this amount, no bridge will be made
@@ -573,8 +576,8 @@ class Value_ZoraBridge:
     Bridge from Ethereum to Zora via Bridge Zora (https://bridge.zora.energy/)
     '''
 
-    amount_from         = 0.002 # Bridge from a certain amount of coins
-    amount_to           = 0.002 # Bridge up to a certain amount of coins
+    amount_from         = 0.01 # Bridge from a certain amount of coins
+    amount_to           = 0.02 # Bridge up to a certain amount of coins
 
     bridge_all_balance  = False # True / False. If True, then bridge the entire balance
     min_amount_bridge   = 0 # If the balance is less than this amount, no bridge will be made
