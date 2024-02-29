@@ -43,7 +43,7 @@ The README in English can be found here: [README_eng.md](https://github.com/zaiv
 
 1. Вся настройка делается в файле `setting.py`, описание там же. Нужно переименовать `setting_EXAMPLE.py` на `setting.py`
 2. Если хочешь запускать несколько модулей в одной цепочке, их нужно настраивать в `tracks.py`.
-3. В папке `datas` переименуй файлы `wallets_EXAMPLE.txt` => `wallets.txt`, `proxies_EXAMPLE.txt` => `proxies.txt`,  `data_EXAMPLE.py` => `data.py`
+3. Переименуй папку `datas_EXAMPLE` на `datas`.
 4. В папке `datas` есть 5 файлов :
 - `wallets.txt` - сюда записываем кошельки (приватники / адреса).
 - `recipients.txt` - сюда записываем адреса для трансфера, используется только в модуле transfer когда выводим с кошелька на адрес. 1 кошелек = 1 адрес.
