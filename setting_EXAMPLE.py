@@ -41,7 +41,8 @@ MAX_GAS_CHARGE = {
     'metis'         : 0.5,
     'linea'         : 0.5,
     'mantle'        : 0.5,
-    'zeta'          : 0.5
+    'zeta'          : 0.5,
+    'blast'         : 0.5,
 }
 
 class Value_EVM_Balance_Checker:
@@ -296,18 +297,17 @@ class Value_Orbiter:
 
     '''
     Bridge ETH via https://www.orbiter.finance/
-    Chains: zksync | ethereum | bsc | arbitrum | optimism | polygon_zkevm | nova | starknet | linea | base | scroll | zora
-    Minimum bridge amount: 0.005
+    Chains: zksync | ethereum | bsc | arbitrum | optimism | polygon_zkevm | nova | starknet | linea | base | scroll | zora | blast
     '''
 
-    from_chain          = ['optimism'] # From which network
-    to_chain            = ['zksync'] # To which network
+    from_chain          = ['zksync'] # From which network
+    to_chain            = ['blast'] # To which network
 
-    amount_from         = 0.006 # Bridge from a certain amount of coins
-    amount_to           = 0.008 # Bridge up to a certain amount of coins
+    amount_from         = 0.00045 # Bridge from a certain amount of coins
+    amount_to           = 0.00046 # Bridge up to a certain amount of coins
 
-    bridge_all_balance  = True # True / False. If True, then bridge the entire balance
-    min_amount_bridge   = 0.005 # If the balance is less than this amount, no bridge will be made
+    bridge_all_balance  = False # True / False. If True, then bridge the entire balance
+    min_amount_bridge   = 0.00045 # If the balance is less than this amount, no bridge will be made
     keep_value_from     = 0.0001 # How many coins to keep on the wallet (only works when: bridge_all_balance = True)
     keep_value_to       = 0.0002 # Up to how many coins to keep on the wallet (only works when: bridge_all_balance = True)
 

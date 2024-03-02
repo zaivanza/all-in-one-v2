@@ -14,6 +14,7 @@ ORBITER_AMOUNT = {
     'mantle'        : 0.000000000000009024,
     'scroll'        : 0.000000000000009019,
     'zora'          : 0.000000000000009030,
+    'blast'         : 0.000000000000009040,
 }
 
 ORBITER_AMOUNT_STR = {
@@ -32,6 +33,7 @@ ORBITER_AMOUNT_STR = {
     'mantle'        : '9024',
     'scroll'        : '9019',
     'zora'          : '9030',
+    'blast'         : '9040'
 }
 
 
