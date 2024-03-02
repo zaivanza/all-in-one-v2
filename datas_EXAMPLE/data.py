@@ -155,7 +155,13 @@ DATA = {
         "scan": "https://blastscan.io/tx",
         "token": "ETH",
         "chain_id": 81457
-    }
+    },
+    "zeta": {
+        "rpc": "https://zetachain-evm.blockpi.network/v1/rpc/public",
+        "scan": "https://explorer.zetachain.com",
+        "token": "ZETA",
+        "chain_id": 7000 
+    },
 }
 
 # API keys for exchanges. You can skip this if you don't use exchanges.
