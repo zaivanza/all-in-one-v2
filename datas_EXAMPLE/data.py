@@ -149,6 +149,12 @@ DATA = {
         "scan": "https://explorer.mantle.xyz/tx",
         "token": "MNT",
         "chain_id": 5000
+    },
+    "blast": {
+        "rpc": "https://blast.blockpi.network/v1/rpc/public",
+        "scan": "https://blastscan.io/tx",
+        "token": "ETH",
+        "chain_id": 81457
     }
 }
 
