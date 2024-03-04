@@ -47,31 +47,32 @@ def get_module(module):
 async def worker(func, key, number, retry=0):
     func_instance = func(key, number)
     await func_instance.setup()
+    module_info = func_instance.module_str
 
     contract_txn = await func_instance.get_txn()
     if not contract_txn:
-        logger.error(f'{func_instance.module_str} | error getting contract_txn')
-        return await retry_worker(func_instance, key, number, retry)
+        logger.error(f'{module_info} | error getting contract_txn')
+        return await retry_worker(func, key, number, retry, module_info)
 
     status, tx_link = await func_instance.manager.send_tx(contract_txn)
 
     if status == 1:
-        logger.success(f'{func_instance.module_str} | {tx_link}')
-        list_send.append(f'{STR_DONE}{func_instance.module_str}')
+        logger.success(f'{module_info} | {tx_link}')
+        list_send.append(f'{STR_DONE}{module_info}')
         return True
     elif status == 0:
-        logger.error(f'{func_instance.module_str} | tx is failed | {tx_link}')
-        return await retry_worker(func_instance, key, number, retry)
+        logger.error(f'{module_info} | tx is failed | {tx_link}')
+        return await retry_worker(func, key, number, retry, module_info)
     else:
-        return await retry_worker(func_instance, key, number, retry)
+        return await retry_worker(func, key, number, retry, module_info)
 
-async def retry_worker(func, key, number, retry):
+async def retry_worker(func, key, number, retry, info):
     if retry < RETRY:
         logger.info(f'try again in 10 sec.')
         await asyncio.sleep(10)
         return await worker(func, key, number, retry+1)
     else:
-        list_send.append(f'{STR_CANCEL}{func.module_str}')
+        list_send.append(f'{STR_CANCEL}{info}')
         return False
 
 async def process_exchanges(func, wallets):
