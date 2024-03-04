@@ -109,7 +109,8 @@ async def get_chain_prices():
         'scroll': 'ETH',
         'zora': 'ETH',
         'mantle': 'MNT',
-        'zeta': 'ZETA'
+        'zeta': 'ZETA',
+        'blast': 'ETH',
     }
 
     prices = {chain: 0 for chain in chains.keys()}

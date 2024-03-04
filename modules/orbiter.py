@@ -71,6 +71,7 @@ class OrbiterBridge:
             'mantle'        : '24',
             'scroll'        : '19',
             'zora'          : '30',
+            'blast'         : '40',
         }
 
         from_maker  = orbiter_ids[self.from_chain]
