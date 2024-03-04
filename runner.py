@@ -1,5 +1,5 @@
 from config import WALLETS, STR_DONE, STR_CANCEL
-from setting_EXAMPLE import RANDOMIZER, CHECK_GWEI, TG_BOT_SEND, IS_SLEEP, DELAY_SLEEP, RETRY, WALLETS_IN_BATCH, TRACK
+from setting import RANDOMIZER, CHECK_GWEI, TG_BOT_SEND, IS_SLEEP, DELAY_SLEEP, RETRY, WALLETS_IN_BATCH, TRACK
 
 from modules.utils.helpers import list_send, wait_gas, send_msg, async_sleeping, is_private_key
 from modules.utils.manager_async import Web3ManagerAsync
