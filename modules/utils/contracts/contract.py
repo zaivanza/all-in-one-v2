@@ -17,7 +17,7 @@ ORBITER_AMOUNT = {
     'blast'         : 0.000000000000009040,
 }
 
-ORBITER_AMOUNT_STR = {
+ORBITER_IDENTIFICATION_CODE = {
     'ethereum'      : '9001',
     'optimism'      : '9007',
     'bsc'           : '9015',
