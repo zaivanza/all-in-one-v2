@@ -1,6 +1,6 @@
 from .utils.contracts.abi import ABI_ORBITER_TO_STARKNET
 from config import ORBITER_MAKER, STR_CANCEL, STARKNET_WALLETS
-from .utils.contracts.contract import ORBITER_AMOUNT, ORBITER_AMOUNT_STR, CONTRACTS_ORBITER_TO_STARKNET
+from .utils.contracts.contract import ORBITER_AMOUNT, ORBITER_IDENTIFICATION_CODE, CONTRACTS_ORBITER_TO_STARKNET
 from setting import Value_Orbiter
 from .utils.helpers import list_send, intToDecimal, round_to
 from .utils.manager_async import Web3ManagerAsync
@@ -40,19 +40,8 @@ class OrbiterBridge:
         self.manager = Web3ManagerAsync(self.key, self.from_chain)
         self.from_token_data = await self.manager.get_token_info('')
         self.amount = await self.manager.get_amount_in(self.keep_value_from, self.keep_value_to, self.bridge_all_balance, '', self.amount_from, self.amount_to)
-        self.value = intToDecimal(self.get_orbiter_value(), 18) 
+        self.value = float(str(self.amount))
         self.module_str = f'{self.number} {self.manager.address} | orbiter_bridge : {round_to(self.amount)} {self.from_token_data["symbol"]} | {self.from_chain} => {self.to_chain}'
-
-    def get_orbiter_value(self):
-        base_num_dec = decimal.Decimal(str(self.amount))
-        orbiter_amount_dec = decimal.Decimal(str(ORBITER_AMOUNT[self.to_chain]))
-        difference = base_num_dec - orbiter_amount_dec
-        random_offset = decimal.Decimal(str(random.uniform(-0.000000000000001, 0.000000000000001)))
-        result_dec = difference + random_offset
-        orbiter_str = ORBITER_AMOUNT_STR[self.to_chain][-4:]
-        result_str = '{:.18f}'.format(result_dec.quantize(decimal.Decimal('0.000000000000000001')))
-        result_str = result_str[:-4] + orbiter_str
-        return decimal.Decimal(result_str)
 
     def get_orbiter_limits(self):
         orbiter_ids = {
@@ -102,12 +91,13 @@ class OrbiterBridge:
     async def get_txn(self):
 
         try:
-
             min_bridge, max_bridge, fees = self.get_orbiter_limits()
             min_bridge = min_bridge + fees
+            bridge_amount = self.value + fees if not self.bridge_all_balance else self.value - fees
+            self.value = Web3.to_wei(bridge_amount, 'ether')
 
             if self.limit_test(min_bridge, max_bridge) is False: return False
-
+            
             if self.to_chain == 'starknet':
 
                 starknet_address = STARKNET_WALLETS[self.key]
@@ -132,7 +122,7 @@ class OrbiterBridge:
                 )
 
             else:
-
+                
                 contract_txn = {
                     'chainId': self.manager.chain_id,
                     'nonce': await self.manager.web3.eth.get_transaction_count(self.manager.address),
@@ -145,8 +135,14 @@ class OrbiterBridge:
 
             contract_txn = await self.manager.add_gas_price(contract_txn)
             contract_txn = await self.manager.add_gas_limit(contract_txn)
+            
+            if self.manager.get_total_fee(contract_txn) == False: return False      
+            gas = int(contract_txn['gas'] * contract_txn['gasPrice'] * 1.2)    
 
-            if self.manager.get_total_fee(contract_txn) == False: return False
+            self.value = self.value + gas if not self.bridge_all_balance else self.value - gas
+
+            orbiter_id_amount = float(str(ORBITER_AMOUNT[self.to_chain]))
+            contract_txn['value'] = round(self.value, -4) +  Web3.to_wei(orbiter_id_amount, 'ether')
 
             if self.amount >= self.min_amount_bridge:
                 return contract_txn
