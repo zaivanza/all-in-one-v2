@@ -20,7 +20,7 @@ The README in English can be found here: [README_eng.md](https://github.com/zaiv
 12. **[bungee_refuel](https://www.bungee.exchange/refuel)**: Бридж для нативных токенов между сетями.
 13. **tx_checker**: Проверка nonce во всех EVM сетях.
 14. **[1inch_swap](https://app.1inch.io/)**: Агрегатор для обмена токенов.
-15. **[zerkly_refuel](https://zerius.io/)**: Рефуел газа между сетями через LayerZero.
+15. **[zerius_refuel](https://zerius.io/)**: Рефуел газа между сетями через LayerZero.
 16. **nft_checker**: Асинхронная проверка баланса NFT.
 17. **[zerius_onft](https://zerius.io/)**: Минт и бридж NFT через LayerZero.
 18. **[starkgate_bridge](https://starkgate.starknet.io/)**: Бридж с Ethereum на StarkNet.
