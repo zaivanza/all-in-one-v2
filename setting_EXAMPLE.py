@@ -126,6 +126,12 @@ class Value_EVM_Balance_Checker:
         'mantle': [
         '', # MNT
         ],
+        'blast': [
+            '', # ETH
+            ],
+        # 'mode': [
+        #     '', # ETH
+        #     ],
     }
 
     min_token_balance = {

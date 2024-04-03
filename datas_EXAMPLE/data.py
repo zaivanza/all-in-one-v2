@@ -162,6 +162,12 @@ DATA = {
         "token": "ZETA",
         "chain_id": 7000 
     },
+    "mode": {
+        "rpc": "https://mainnet.mode.network",
+        "scan": "https://explorer.mode.network/tx",
+        "token": "ETH",
+        "chain_id": 34443
+    }
 }
 
 # API keys for exchanges. You can skip this if you don't use exchanges.
