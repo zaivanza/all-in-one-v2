@@ -1,5 +1,5 @@
 from datas.data import DATA
-from config import ERC20_ABI, STARKNET_ADDRESS
+from config import ERC20_ABI
 from setting import Value_EVM_Balance_Checker, Value_Starknet_Balance_Checker
 from .utils.helpers import round_to
 from .utils.multicall import Multicall
@@ -232,6 +232,7 @@ class StarknetBalanceChecker:
     def __init__(self) -> None:
         self.file_name = 'starknet_balances'
         self.total_balance = {token:0 for token in Value_Starknet_Balance_Checker.starknet_tokens}
+        self.starknet_address = read_txt("datas/starknet_address.txt")
 
     async def fetch_price(self, session, symbol, url):
         try:
@@ -331,9 +332,9 @@ class StarknetBalanceChecker:
                 spamwriter.writerow([number, wallet])
 
     async def start(self):
-        if STARKNET_ADDRESS:
+        if self.starknet_address:
             await self.get_prices()
-            starknet_balances = await Starknet().main_balances(STARKNET_ADDRESS, Value_Starknet_Balance_Checker.starknet_tokens)
+            starknet_balances = await Starknet().main_balances(self.starknet_address, Value_Starknet_Balance_Checker.starknet_tokens)
             self.send_result(starknet_balances)
         else:
             logger.error('Put starknet addresses in datas/starknet_address.txt')
