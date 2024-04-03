@@ -43,6 +43,7 @@ MAX_GAS_CHARGE = {
     'mantle'        : 0.5,
     'zeta'          : 0.5,
     'blast'         : 0.5,
+    'mode'          : 0.5,
 }
 
 class Value_EVM_Balance_Checker:
@@ -265,8 +266,9 @@ class Value_Transfer:
     '''
     Withdraw (transfer) coins from wallets
     Chains: 
-            ethereum | optimism | bsc | polygon | arbitrum | avalanche | fantom | nova
-            zksync | celo | gnosis | core | harmony | base | linea | polygon_zkevm | mantle | zeta
+            ethereum | optimism | bsc | polygon | polygon_zkevm | arbitrum | avalanche | fantom | 
+            nova | zksync | celo | gnosis | core | harmony | moonbeam | moonriver | linea | base | 
+            zora | scroll | metis | canto | starknet | mantle | blast | zeta | mode
     '''
 
     chain                = 'zeta' # Network to withdraw to
