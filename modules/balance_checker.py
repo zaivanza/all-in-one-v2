@@ -1,9 +1,10 @@
 from datas.data import DATA
-from config import WALLETS, ERC20_ABI, STARKNET_ADDRESS
+from config import ERC20_ABI, STARKNET_ADDRESS
 from setting import Value_EVM_Balance_Checker, Value_Starknet_Balance_Checker
 from .utils.helpers import round_to
 from .utils.multicall import Multicall
 from .utils.starknet import Starknet
+from .utils.files import read_txt
 
 from loguru import logger
 from web3 import Web3, AsyncHTTPProvider
@@ -17,6 +18,7 @@ class EvmBalanceChecker:
 
     def __init__(self) -> None:
         self.file_name = 'balances'
+        self.wallets = read_txt("datas/wallets.txt")
 
     def get_web3(self, chain):
         return Web3(AsyncHTTPProvider(DATA[chain]['rpc']), modules={"eth": (AsyncEth)}, middlewares=[])
@@ -120,7 +122,7 @@ class EvmBalanceChecker:
     async def evm_balances(self):
         erc20_coins = {chain: [] for chain in Value_EVM_Balance_Checker.evm_tokens}
         decimals_list, symbols_list = await self.get_tokens_data()
-        tasks = [Multicall(chain).get_balances(WALLETS, tokens, symbols_list, decimals_list) for chain, tokens in Value_EVM_Balance_Checker.evm_tokens.items() if tokens]
+        tasks = [Multicall(chain).get_balances(self.wallets, tokens, symbols_list, decimals_list) for chain, tokens in Value_EVM_Balance_Checker.evm_tokens.items() if tokens]
         results = await asyncio.gather(*tasks)
         result = {chain: result for chain, result in zip(erc20_coins.keys(), results)}
         result = self.transform_dict(result)
