@@ -132,6 +132,9 @@ class Value_EVM_Balance_Checker:
         # 'mode': [
         #     '', # ETH
         #     ],
+        # 'zora': [
+        #     '', # ETH
+        #     ],
     }
 
     min_token_balance = {
