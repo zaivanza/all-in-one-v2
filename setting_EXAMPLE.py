@@ -44,6 +44,7 @@ MAX_GAS_CHARGE = {
     'zeta'          : 0.5,
     'blast'         : 0.5,
     'mode'          : 0.5,
+    'opbnb'        : 0.5,
 }
 
 class Value_EVM_Balance_Checker:
@@ -268,7 +269,7 @@ class Value_Transfer:
     Chains: 
             ethereum | optimism | bsc | polygon | polygon_zkevm | arbitrum | avalanche | fantom | 
             nova | zksync | celo | gnosis | core | harmony | moonbeam | moonriver | linea | base | 
-            zora | scroll | metis | canto | starknet | mantle | blast | zeta | mode
+            zora | scroll | metis | canto | starknet | mantle | blast | zeta | mode | opbnb
     '''
 
     chain                = 'zeta' # Network to withdraw to

@@ -167,7 +167,13 @@ DATA = {
         "scan": "https://explorer.mode.network/tx",
         "token": "ETH",
         "chain_id": 34443
-    }
+    },
+    "opbnb": {
+        "rpc": "https://opbnb-rpc.publicnode.com",
+        "scan": "https://opbnb.bscscan.com/tx",
+        "token": "BNB",
+        "chain_id": 204 
+    },
 }
 
 # API keys for exchanges. You can skip this if you don't use exchanges.
