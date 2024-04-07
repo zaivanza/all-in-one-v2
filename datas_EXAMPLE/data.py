@@ -163,7 +163,7 @@ DATA = {
         "chain_id": 7000 
     },
     "mode": {
-        "rpc": "https://mainnet.mode.network",
+        "rpc": "https://1rpc.io/mode",
         "scan": "https://explorer.mode.network/tx",
         "token": "ETH",
         "chain_id": 34443
