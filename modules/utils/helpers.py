@@ -78,7 +78,11 @@ async def fetch_price(session, symbol):
         async with session.get(url, timeout=10) as resp:
             if resp.status == 200:
                 resp_json = await resp.json(content_type=None)
-                return float(resp_json.get('USDT', 0))
+                if "USDT" in resp_json:
+                    return float(resp_json["USDT"])
+                else:
+                    await asyncio.sleep(1)
+                    return await fetch_price(session, symbol)
             else:
                 await asyncio.sleep(1)
                 return await fetch_price(session, symbol)
@@ -87,6 +91,7 @@ async def fetch_price(session, symbol):
         return await fetch_price(session, symbol)
 
 async def get_chain_prices():
+    logger.info("Parsing native coin prices...")
     chains = {
         'avalanche': 'AVAX',
         'polygon': 'MATIC',
@@ -111,6 +116,8 @@ async def get_chain_prices():
         'mantle': 'MNT',
         'zeta': 'ZETA',
         'blast': 'ETH',
+        'mode': 'ETH',
+        'opBNB': 'BNB',
     }
 
     prices = {chain: 0 for chain in chains.keys()}
@@ -123,6 +130,7 @@ async def get_chain_prices():
             if price == 0:
                 logger.info(f'Failed to fetch price for {chain}. Setting price to 0.')
 
+    logger.success("Got native coin prices")
     return prices
 
 async def get_bungee_data():
