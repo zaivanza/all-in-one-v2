@@ -178,13 +178,43 @@ DATA = {
 
 # API keys for exchanges. You can skip this if you don't use exchanges.
 CEX_KEYS = {
-    'binance'   : {'api_key': 'your_api_key', 'api_secret': 'your_api_secret'},
-    'mexc'      : {'api_key': 'your_api_key', 'api_secret': 'your_api_secret'},
-    'kucoin'    : {'api_key': 'your_api_key', 'api_secret': 'your_api_secret', 'password': 'your_api_password'},
-    'huobi'     : {'api_key': 'your_api_key', 'api_secret': 'your_api_secret'},
-    'bybit'     : {'api_key': 'your_api_key', 'api_secret': 'your_api_secret'},
-    'bitget'    : {'api_key': 'your_api_key', 'api_secret': 'your_api_secret', 'password': 'your_api_password'},
-    'coinex'    : {'api_key': 'your_api_key', 'api_secret': 'your_api_secret'},
+    'binance'   : {
+        'api_key': 'your_api_key', 
+        'api_secret': 'your_api_secret',
+        'proxy': '' # Add a proxy if you need one. If not, leave the line blank. Format: http://login:password@ip:port
+        },
+    'mexc'      : {
+        'api_key': 'your_api_key', 
+        'api_secret': 'your_api_secret',
+        'proxy': '' # Add a proxy if you need one. If not, leave the line blank. Format: http://login:password@ip:port
+        },
+    'kucoin'    : {
+        'api_key': 'your_api_key', 
+        'api_secret': 'your_api_secret', 
+        'password': 'your_api_password',
+        'proxy': '' # Add a proxy if you need one. If not, leave the line blank. Format: http://login:password@ip:port
+        },
+    'huobi'     : {
+        'api_key': 'your_api_key', 
+        'api_secret': 'your_api_secret',
+        'proxy': '' # Add a proxy if you need one. If not, leave the line blank. Format: http://login:password@ip:port
+        },
+    'bybit'     : {
+        'api_key': 'your_api_key', 
+        'api_secret': 'your_api_secret',
+        'proxy': '' # Add a proxy if you need one. If not, leave the line blank. Format: http://login:password@ip:port
+        },
+    'bitget'    : {
+        'api_key': 'your_api_key', 
+        'api_secret': 'your_api_secret', 
+        'password': 'your_api_password',
+        'proxy': '' # Add a proxy if you need one. If not, leave the line blank. Format: http://login:password@ip:port
+        },
+    'coinex'    : {
+        'api_key': 'your_api_key', 
+        'api_secret': 'your_api_secret',
+        'proxy': '' # Add a proxy if you need one. If not, leave the line blank. Format: http://login:password@ip:port
+        },
 }
 
 # You can add any number of OKX accounts in the following format. This allows you to avoid constantly entering data for new accounts and simply reference them by name.

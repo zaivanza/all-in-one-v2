@@ -102,7 +102,6 @@ class OkxWithdraw:
         return headers
 
     async def transfer_from_subaccounts(self):
-
         try:
             headers = await self.get_data(request_path="/api/v5/users/subaccount/list", meth="GET")
             list_sub = await self.make_http_request("https://www.okx.cab/api/v5/users/subaccount/list", headers=headers)
@@ -203,6 +202,7 @@ class ExchangeWithdraw:
         self.amount = round(random.uniform(self.amount_from, self.amount_to), 7)
         self.api_key = CEX_KEYS[self.exchange]['api_key']
         self.api_secret = CEX_KEYS[self.exchange]['api_secret']
+        self.proxy = CEX_KEYS[self.exchange]['proxy'] if 'proxy' in CEX_KEYS[self.exchange] else ""
         self.module_str = f"{self.exchange}_withdraw : {round_to(self.amount)} {self.symbol} ({self.chain}) => {self.address}"
 
     async def withdraw(self, retry=0):
@@ -221,6 +221,9 @@ class ExchangeWithdraw:
             }
         }
 
+        if self.proxy:
+            dict_["aiohttp_proxy"] = self.proxy
+
         if self.account == "funding":
             dict_["options"]["defaultType"] = self.account
 
@@ -235,7 +238,6 @@ class ExchangeWithdraw:
         account = ccxt.__dict__[self.exchange](dict_)
 
         try:
-
             await account.withdraw(
                 code = self.symbol,
                 amount = self.amount,
@@ -246,7 +248,6 @@ class ExchangeWithdraw:
             logger.success(f"{self.exchange}_withdraw success => {self.address} | {self.amount} {self.symbol}")
             list_send.append(f'{STR_DONE}{self.module_str}')
             await account.close()
-
             return True
     
         except Exception as error:
