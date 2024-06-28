@@ -137,6 +137,9 @@ class Value_EVM_Balance_Checker:
         # 'zora': [
         #     '', # ETH
         #     ],
+        # 'opbnb': [
+        #     '', # BNB
+        #     ],
     }
 
     min_token_balance = {
