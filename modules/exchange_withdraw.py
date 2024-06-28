@@ -47,7 +47,7 @@ class OkxWithdraw:
             self.is_private_key = Value_OKX.is_private_key
 
         self.address = get_address(key, self.is_private_key)
-        self.amount = round(random.uniform(self.amount_from, self.amount_to), 7)
+        self.amount = round(random.uniform(self.amount_from, self.amount_to), random.randint(6, 8))
         self.api_key = OKX_KEYS[self.account]['api_key']
         self.api_secret = OKX_KEYS[self.account]['api_secret']
         self.passphras = OKX_KEYS[self.account]['password']
@@ -199,7 +199,7 @@ class ExchangeWithdraw:
             self.account = Value_Exchange.account
 
         self.address = get_address(key, self.is_private_key)
-        self.amount = round(random.uniform(self.amount_from, self.amount_to), 7)
+        self.amount = round(random.uniform(self.amount_from, self.amount_to), random.randint(6, 8))
         self.api_key = CEX_KEYS[self.exchange]['api_key']
         self.api_secret = CEX_KEYS[self.exchange]['api_secret']
         self.proxy = CEX_KEYS[self.exchange]['proxy'] if 'proxy' in CEX_KEYS[self.exchange] else ""
