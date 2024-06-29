@@ -62,11 +62,6 @@ class ZoraBridge:
             contract_txn = await self.manager.add_gas_price(contract_txn)
             contract_txn = await self.manager.add_gas_limit(contract_txn)
 
-            print(contract_txn)
-
-            import time
-            time.sleep(10)
-
             if self.manager.get_total_fee(contract_txn) == False: return False
 
             if self.bridge_all_balance:
