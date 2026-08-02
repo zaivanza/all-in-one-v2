@@ -74,21 +74,26 @@ def get_wallet_proxies(wallets, proxies):
 
 async def fetch_price(session, symbol):
     url = f'https://min-api.cryptocompare.com/data/price?fsym={symbol}&tsyms=USDT'
-    try:
-        async with session.get(url, timeout=10) as resp:
-            if resp.status == 200:
-                resp_json = await resp.json(content_type=None)
-                if "USDT" in resp_json:
-                    return float(resp_json["USDT"])
-                else:
-                    await asyncio.sleep(1)
-                    return await fetch_price(session, symbol)
-            else:
+
+    retries = 5
+    for attempt in range(retries):
+        try:
+            async with session.get(url, timeout=10) as resp:
+                # normal state
+                if resp.status == 200:
+                    data = await resp.json(content_type=None)
+                    price = data.get("USDT")
+                    if price is not None:
+                        return float(price)
+
+                # rate-limit, temporary errors
                 await asyncio.sleep(1)
-                return await fetch_price(session, symbol)
-    except Exception as error:
-        await asyncio.sleep(1)
-        return await fetch_price(session, symbol)
+
+        except Exception:
+            await asyncio.sleep(1)
+
+    # if after 5 retries not success then return 0
+    return 0
 
 async def get_chain_prices():
     logger.info("Parsing native coin prices...")
